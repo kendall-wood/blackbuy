@@ -1,0 +1,67 @@
+{
+  "shampoo": "Shampoo",
+  "cleanser": "Shampoo",
+  "clarifying shampoo": "Shampoo",
+  "sulfate-free shampoo": "Shampoo",
+  
+  "conditioner": "Conditioner",
+  "rinse out conditioner": "Conditioner",
+  "regular conditioner": "Conditioner",
+  
+  "leave-in conditioner": "Leave-In Conditioner",
+  "leave in conditioner": "Leave-In Conditioner",
+  "leave-in": "Leave-In Conditioner",
+  "leave in": "Leave-In Conditioner",
+  
+  "co-wash": "Co-Wash",
+  "cowash": "Co-Wash",
+  "cleansing conditioner": "Co-Wash",
+  "conditioning cleanser": "Co-Wash",
+  
+  "deep conditioner": "Mask/Deep Conditioner",
+  "hair mask": "Mask/Deep Conditioner",
+  "deep conditioning treatment": "Mask/Deep Conditioner",
+  "protein treatment": "Mask/Deep Conditioner",
+  "treatment": "Mask/Deep Conditioner",
+  
+  "gel": "Gel/Gelly",
+  "styling gel": "Gel/Gelly",
+  "hair gel": "Gel/Gelly",
+  "gelly": "Gel/Gelly",
+  "curl gel": "Gel/Gelly",
+  
+  "curl cream": "Curl Cream",
+  "curling cream": "Curl Cream",
+  "curl defining cream": "Curl Cream",
+  "styling cream": "Curl Cream",
+  
+  "mousse": "Mousse/Foam",
+  "foam": "Mousse/Foam",
+  "styling mousse": "Mousse/Foam",
+  "curl mousse": "Mousse/Foam",
+  
+  "edge control": "Edge Control",
+  "edge gel": "Edge Control",
+  "edge cream": "Edge Control",
+  "edges": "Edge Control",
+  
+  "heat protectant": "Heat Protectant",
+  "thermal protector": "Heat Protectant",
+  "heat protection": "Heat Protectant",
+  "blow dry cream": "Heat Protectant",
+  
+  "scalp treatment": "Scalp Treatment",
+  "scalp oil": "Scalp Treatment",
+  "scalp serum": "Scalp Treatment",
+  "scalp care": "Scalp Treatment",
+  
+  "hair oil": "Hair Oil",
+  "oil": "Hair Oil",
+  "hair serum": "Hair Oil",
+  "treatment oil": "Hair Oil",
+  
+  "gift card": "Gift Card",
+  "e-gift card": "Gift Card",
+  "digital gift card": "Gift Card",
+  "gift certificate": "Gift Card"
+}

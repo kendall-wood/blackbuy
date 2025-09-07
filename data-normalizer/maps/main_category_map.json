@@ -1,0 +1,66 @@
+{
+  "hair care": "Hair Care",
+  "hair": "Hair Care",
+  "haircare": "Hair Care",
+  "shampoo": "Hair Care",
+  "conditioner": "Hair Care",
+  "hair styling": "Hair Care",
+  "hair treatment": "Hair Care",
+  
+  "skin care": "Skin Care",
+  "skincare": "Skin Care",
+  "facial": "Skin Care",
+  "moisturizer": "Skin Care",
+  "cleanser": "Skin Care",
+  "serum": "Skin Care",
+  "sunscreen": "Skin Care",
+  
+  "beauty": "Beauty & Personal Care",
+  "makeup": "Beauty & Personal Care",
+  "cosmetics": "Beauty & Personal Care",
+  "nail": "Beauty & Personal Care",
+  "nail care": "Beauty & Personal Care",
+  "lip": "Beauty & Personal Care",
+  "eye": "Beauty & Personal Care",
+  
+  "fragrance": "Fragrance",
+  "perfume": "Fragrance",
+  "cologne": "Fragrance",
+  "body spray": "Fragrance",
+  "scent": "Fragrance",
+  
+  "body care": "Body Care",
+  "body": "Body Care",
+  "lotion": "Body Care",
+  "body wash": "Body Care",
+  "soap": "Body Care",
+  "deodorant": "Body Care",
+  
+  "cleaning": "Cleaning",
+  "cleaner": "Cleaning",
+  "detergent": "Cleaning",
+  "dish soap": "Cleaning",
+  "household": "Cleaning",
+  
+  "home": "Home Care",
+  "home care": "Home Care",
+  "candles": "Home Care",
+  "diffuser": "Home Care",
+  "home fragrance": "Home Care",
+  
+  "gifts": "Gifts/Cards",
+  "gift card": "Gifts/Cards",
+  "gift": "Gifts/Cards",
+  "card": "Gifts/Cards",
+  
+  "baby": "Baby Care",
+  "baby care": "Baby Care",
+  "infant": "Baby Care",
+  "kids": "Baby Care",
+  
+  "men": "Men's Care",
+  "mens": "Men's Care",
+  "men's care": "Men's Care",
+  "beard": "Men's Care",
+  "shaving": "Men's Care"
+}
