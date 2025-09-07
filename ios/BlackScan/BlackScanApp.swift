@@ -47,6 +47,23 @@ struct ContentView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 
+                Button("Test Classifier") {
+                    // Test classification with sample OCR text
+                    let sampleTexts = [
+                        "SheaMoisture Coconut Curl Shampoo",
+                        "Leave-in Conditioner for Natural Hair",
+                        "Edge Control Gel",
+                        "$25 Gift Card"
+                    ]
+                    
+                    print("🧪 Testing Classifier:")
+                    for text in sampleTexts {
+                        let result = Classifier.classify(text)
+                        print("'\(text)' → \(result.productType) (confidence: \(result.confidence))")
+                    }
+                }
+                .buttonStyle(.bordered)
+                
                 Spacer()
             }
             .padding()
