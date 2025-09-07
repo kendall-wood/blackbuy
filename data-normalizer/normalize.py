@@ -163,7 +163,6 @@ def normalize_product(product, main_category_map, product_type_synonyms):
         "form": form,
         "set_bundle": set_bundle,
         "tags": tags,
-        "is_black_owned": True,  # All products in this dataset are Black-owned
         "_raw": product  # Keep original for debugging
     }
 

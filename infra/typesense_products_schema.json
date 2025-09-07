@@ -1,0 +1,68 @@
+{
+  "name": "products",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "index": false
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "index": true
+    },
+    {
+      "name": "company",
+      "type": "string",
+      "facet": true,
+      "index": true
+    },
+    {
+      "name": "price",
+      "type": "float",
+      "sort": true,
+      "index": false
+    },
+    {
+      "name": "image_url",
+      "type": "string",
+      "index": false
+    },
+    {
+      "name": "product_url",
+      "type": "string",
+      "index": false
+    },
+    {
+      "name": "main_category",
+      "type": "string",
+      "facet": true,
+      "index": true
+    },
+    {
+      "name": "product_type",
+      "type": "string",
+      "facet": true,
+      "index": true
+    },
+    {
+      "name": "form",
+      "type": "string",
+      "facet": true,
+      "index": true
+    },
+    {
+      "name": "set_bundle",
+      "type": "string",
+      "facet": true,
+      "index": true
+    },
+    {
+      "name": "tags",
+      "type": "string[]",
+      "facet": true,
+      "index": true
+    }
+  ],
+  "default_sorting_field": "price"
+}

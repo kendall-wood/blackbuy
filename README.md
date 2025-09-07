@@ -27,23 +27,31 @@ This creates `normalized_products.json` with clean taxonomy.
 ### 3. Create Typesense Collection
 ```bash
 # Set your environment variables
-export TYPESENSE_HOST="your-cluster.a1.typesense.net"
+export TYPESENSE_HOST="https://your-cluster.a1.typesense.net"
 export TYPESENSE_API_KEY="your-admin-api-key"
 
-# Create collection
+# Create collection with schema
 curl -X POST "${TYPESENSE_HOST}/collections" \
   -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}" \
   -H "Content-Type: application/json" \
   -d @infra/typesense_products_schema.json
+
+# Verify collection was created
+curl -X GET "${TYPESENSE_HOST}/collections/products" \
+  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}"
 ```
 
 ### 4. Import Normalized Products
 ```bash
-# Import products to Typesense
+# Import products to Typesense (upsert mode)
 curl -X POST "${TYPESENSE_HOST}/collections/products/documents/import?action=upsert" \
   -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}" \
   -H "Content-Type: application/jsonl" \
   --data-binary @data-normalizer/normalized_products.json
+
+# Check import status
+curl -X GET "${TYPESENSE_HOST}/collections/products/documents/search?q=*" \
+  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}"
 ```
 
 ### 5. Configure Xcode Environment
@@ -124,3 +132,51 @@ TYPESENSE_API_KEY=your-search-api-key
 ```
 
 **Note**: Use search-only API key in the iOS app, not admin key.
+
+## Typesense API Examples
+
+### Collection Management
+```bash
+# List all collections
+curl -X GET "${TYPESENSE_HOST}/collections" \
+  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}"
+
+# Delete collection (if needed)
+curl -X DELETE "${TYPESENSE_HOST}/collections/products" \
+  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}"
+
+# Get collection stats
+curl -X GET "${TYPESENSE_HOST}/stats.json" \
+  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}"
+```
+
+### Search Examples
+```bash
+# Search for "shampoo" products
+curl -X GET "${TYPESENSE_HOST}/collections/products/documents/search" \
+  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}" \
+  -G \
+  -d "q=shampoo" \
+  -d "query_by=name,product_type,company,tags" \
+ \
+  -d "facet_by=main_category,product_type,form,company" \
+  -d "sort_by=price:asc"
+
+# Filter by Hair Care category
+curl -X GET "${TYPESENSE_HOST}/collections/products/documents/search" \
+  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}" \
+  -G \
+  -d "q=*" \
+  -d "query_by=name,product_type,company,tags" \
+  -d "filter_by=main_category:=Hair Care" \
+  -d "per_page=20"
+
+# Search with price range
+curl -X GET "${TYPESENSE_HOST}/collections/products/documents/search" \
+  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}" \
+  -G \
+  -d "q=curl cream" \
+  -d "query_by=name,product_type,tags" \
+  -d "filter_by=price:[10..50]" \
+  -d "sort_by=price:desc"
+```
