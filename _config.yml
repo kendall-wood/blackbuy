@@ -1,0 +1,29 @@
+# GitHub Pages configuration for BlackScan Privacy Policy
+title: BlackScan Privacy Policy
+description: Privacy policy for BlackScan iOS app - discover Black-owned alternatives
+theme: minima
+markdown: kramdown
+highlighter: rouge
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Site settings
+url: "https://yourusername.github.io"
+baseurl: "/blackscan"
+
+# Build settings
+exclude:
+  - BlackScan/
+  - backend/
+  - data-normalizer/
+  - scraper-web/
+  - node_modules/
+  - "*.md"
+  - "*.sh"
+  - "*.json"
+  - "*.py"
+  - "*.txt"
+  - ".git*"
+  - "Gemfile*"
+  - "README*"

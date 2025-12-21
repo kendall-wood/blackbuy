@@ -1,0 +1,17 @@
+{
+  "": {
+    "swift-dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/master.swiftdeps"
+  },
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/Classifier.swift": {
+    "dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier.d",
+    "object": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier.swift.o",
+    "swiftmodule": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier~partial.swiftmodule",
+    "swift-dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier.swiftdeps"
+  },
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/main.swift": {
+    "dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main.d",
+    "object": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main.swift.o",
+    "swiftmodule": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main~partial.swiftmodule",
+    "swift-dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main.swiftdeps"
+  }
+}

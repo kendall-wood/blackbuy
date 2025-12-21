@@ -1,0 +1,35 @@
+{
+  "": {
+    "swift-dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/master.swiftdeps"
+  },
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/BlackScanApp.swift": {
+    "dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/BlackScanApp.d",
+    "object": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/BlackScanApp.swift.o",
+    "swiftmodule": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/BlackScanApp~partial.swiftmodule",
+    "swift-dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/BlackScanApp.swiftdeps"
+  },
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/Env.swift": {
+    "dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/Env.d",
+    "object": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/Env.swift.o",
+    "swiftmodule": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/Env~partial.swiftmodule",
+    "swift-dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/Env.swiftdeps"
+  },
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/Models.swift": {
+    "dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/Models.d",
+    "object": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/Models.swift.o",
+    "swiftmodule": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/Models~partial.swiftmodule",
+    "swift-dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/Models.swiftdeps"
+  },
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/TypesenseClient.swift": {
+    "dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/TypesenseClient.d",
+    "object": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/TypesenseClient.swift.o",
+    "swiftmodule": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/TypesenseClient~partial.swiftmodule",
+    "swift-dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/TypesenseClient.swiftdeps"
+  },
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/main.swift": {
+    "dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/main.d",
+    "object": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/main.swift.o",
+    "swiftmodule": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/main~partial.swiftmodule",
+    "swift-dependencies": "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/BlackScan.build/main.swiftdeps"
+  }
+}

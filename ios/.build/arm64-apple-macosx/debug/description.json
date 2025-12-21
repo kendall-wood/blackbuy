@@ -1,0 +1,257 @@
+{
+  "builtTestProducts" : [
+
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.ClassifierTest-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/sources",
+      "importPath" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/Classifier.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/main.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/sources"
+        }
+      ],
+      "isLibrary" : false,
+      "moduleName" : "ClassifierTest",
+      "moduleOutputPath" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.swiftmodule",
+      "objects" : [
+        "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier.swift.o",
+        "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx10.13",
+        "-swift-version",
+        "5",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-Xfrontend",
+        "-entry-point-function-name",
+        "-Xfrontend",
+        "ClassifierTest_main",
+        "-color-diagnostics",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "ios"
+      ],
+      "outputFileMapPath" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.swiftmodule"
+        }
+      ],
+      "sources" : [
+        "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/Classifier.swift",
+        "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/main.swift"
+      ],
+      "tempsPath" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "ClassifierTest" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "ClassifierTest",
+      "-package-name",
+      "ios",
+      "-incremental",
+      "-c",
+      "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/Classifier.swift",
+      "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/main.swift",
+      "-I",
+      "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug",
+      "-target",
+      "arm64-apple-macosx10.13",
+      "-swift-version",
+      "5",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-Xfrontend",
+      "-entry-point-function-name",
+      "-Xfrontend",
+      "ClassifierTest_main",
+      "-color-diagnostics",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "ios",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "ClassifierTest" : [
+
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+
+  },
+  "writeCommands" : {
+    "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest-entitlement.plist" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<entitlement-plist>"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<com.apple.security.get-task-allow>"
+        }
+      ],
+      "outputFilePath" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest-entitlement.plist"
+    },
+    "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/Classifier.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/main.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/sources"
+    },
+    "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.product/Objects.LinkFileList"
+    },
+    "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    }
+  }
+}

@@ -1,0 +1,81 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "ClassifierTest-debug.exe": ["<ClassifierTest-debug.exe>"]
+  "ClassifierTest-debug.module": ["<ClassifierTest-debug.module>"]
+  "PackageStructure": ["<PackageStructure>"]
+  "main": ["<ClassifierTest-debug.exe>","<ClassifierTest-debug.module>"]
+  "test": ["<ClassifierTest-debug.exe>","<ClassifierTest-debug.module>"]
+default: "main"
+nodes:
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest":
+    is-mutated: true
+commands:
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest-entitlement.plist"]
+    description: "Write auxiliary file /Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest-entitlement.plist"
+
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/Classifier.swift","/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/main.swift"]
+    outputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/sources"]
+    description: "Write auxiliary file /Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/sources"
+
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier.swift.o","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main.swift.o"]
+    outputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.product/Objects.LinkFileList"
+
+  "/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"]
+    outputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+
+  "<ClassifierTest-debug.exe>":
+    tool: phony
+    inputs: ["<ClassifierTest-debug.exe-CodeSigning>"]
+    outputs: ["<ClassifierTest-debug.exe>"]
+
+  "<ClassifierTest-debug.module>":
+    tool: phony
+    inputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier.swift.o","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main.swift.o","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.swiftmodule"]
+    outputs: ["<ClassifierTest-debug.module>"]
+
+  "C.ClassifierTest-debug.exe":
+    tool: shell
+    inputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier.swift.o","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main.swift.o","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.product/Objects.LinkFileList"]
+    outputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/ClassifierTest"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-L","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug","-o","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest","-module-name","ClassifierTest","-emit-executable","-Xlinker","-alias","-Xlinker","_ClassifierTest_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.product/Objects.LinkFileList","-Xlinker","-rpath","-Xlinker","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.5/macosx","-target","arm64-apple-macosx10.13","-Xlinker","-add_ast_path","-Xlinker","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.swiftmodule","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g"]
+
+  "C.ClassifierTest-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest-entitlement.plist"]
+    outputs: ["<ClassifierTest-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/ClassifierTest"
+    args: ["codesign","--force","--sign","-","--entitlements","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest-entitlement.plist","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest"]
+
+  "C.ClassifierTest-debug.module":
+    tool: shell
+    inputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/Classifier.swift","/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/main.swift","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/sources"]
+    outputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/Classifier.swift.o","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/main.swift.o","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.swiftmodule"]
+    description: "Compiling Swift Module 'ClassifierTest' (2 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","ClassifierTest","-emit-dependencies","-emit-module","-emit-module-path","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.swiftmodule","-output-file-map","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/output-file-map.json","-incremental","-c","@/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ClassifierTest.build/sources","-I","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug","-target","arm64-apple-macosx10.13","-swift-version","5","-enable-batch-mode","-index-store-path","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j12","-DSWIFT_PACKAGE","-DDEBUG","-module-cache-path","/Users/kendallwood/Desktop/byme/blackscan/ios/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","ClassifierTest_main","-color-diagnostics","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","ios"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/kendallwood/Desktop/byme/blackscan/ios/Sources/","/Users/kendallwood/Desktop/byme/blackscan/ios/Package.swift","/Users/kendallwood/Desktop/byme/blackscan/ios/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+
