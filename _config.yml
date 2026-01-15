@@ -9,7 +9,7 @@ plugins:
   - jekyll-sitemap
 
 # Site settings
-url: "https://yourusername.github.io"
+url: "https://kendall-wood.github.io"
 baseurl: "/blackscan"
 
 # Build settings
