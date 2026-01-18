@@ -339,55 +339,163 @@ struct ScanHistoryView: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationView {
-            VStack {
-                if scanHistoryManager.scanHistory.isEmpty {
-                    VStack(spacing: 20) {
-                        Image(systemName: "clock")
-                            .font(.system(size: 64))
-                            .foregroundColor(.secondary)
-                        
-                        Text("No Scan History")
-                            .font(.system(size: 20, weight: .semibold))
-                        
-                        Text("Your scanned products will appear here")
-                            .font(.system(size: 16, weight: .regular))
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                } else {
-                    List {
-                        ForEach(scanHistoryManager.scanHistory) { entry in
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(entry.classifiedProduct ?? entry.recognizedText)
-                                        .font(.system(size: 16, weight: .semibold))
-                                    
-                                    Text("\(entry.resultCount) products found")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                Text(entry.timestamp, style: .relative)
-                                    .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
+        VStack(spacing: 0) {
+            // Custom Header
+            header
+            
+            // Content
+            ScrollView {
+                VStack(spacing: 0) {
+                    if scanHistoryManager.scanHistory.isEmpty {
+                        emptyStateView
+                    } else {
+                        historyList
                     }
                 }
             }
             .background(Color.white)
-            .navigationTitle("Scan History")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        dismiss()
-                    }
+        }
+        .background(Color.white)
+    }
+    
+    // MARK: - Header
+    
+    private var header: some View {
+        HStack {
+            // Back Button
+            Button(action: {
+                dismiss()
+            }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundColor(Color(.systemGray3))
+            }
+            .buttonStyle(.plain)
+            
+            Spacer()
+            
+            // BlackBuy Logo
+            Image("shop_logo")
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 28)
+                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+            
+            Spacer()
+            
+            // Spacer for symmetry
+            Color.clear
+                .frame(width: 22)
+        }
+        .frame(height: 44)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .background(Color.white)
+    }
+    
+    // MARK: - Empty State
+    
+    private var emptyStateView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "clock")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary)
+            
+            Text("No Scan History")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundColor(.black)
+            
+            Text("Your scanned products will appear here")
+                .font(.system(size: 15, weight: .regular))
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 40)
+        .padding(.vertical, 80)
+    }
+    
+    // MARK: - History List
+    
+    private var historyList: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Scan History")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(.black)
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+            
+            VStack(spacing: 12) {
+                ForEach(scanHistoryManager.scanHistory.reversed()) { entry in
+                    ScanHistoryCard(entry: entry)
                 }
             }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 40)
+        }
+    }
+}
+
+// MARK: - Scan History Card
+
+struct ScanHistoryCard: View {
+    let entry: ScanHistoryEntry
+    @Environment(\.dismiss) var dismiss
+    @State private var showingSearch = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Timestamp at top
+            Text(entry.timestamp, style: .date)
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(Color(.systemGray))
+            + Text(" at ")
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(Color(.systemGray))
+            + Text(entry.timestamp, style: .time)
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(Color(.systemGray))
+            
+            HStack(spacing: 12) {
+                // Info
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(entry.classifiedProduct ?? entry.recognizedText)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.black)
+                        .lineLimit(2)
+                    
+                    Text("\(entry.resultCount) products found")
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(Color(.systemGray2))
+                }
+                
+                Spacer()
+                
+                // Shop button
+                Button(action: {
+                    showingSearch = true
+                }) {
+                    HStack(spacing: 4) {
+                        Text("Shop")
+                            .font(.system(size: 13, weight: .medium))
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .medium))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color(red: 0, green: 0.48, blue: 1))
+                    .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+        .fullScreenCover(isPresented: $showingSearch) {
+            SearchView(initialSearchText: entry.classifiedProduct ?? entry.recognizedText)
         }
     }
 }
