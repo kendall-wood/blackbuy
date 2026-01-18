@@ -88,11 +88,11 @@ struct ProfileView: View {
             // Welcome Text
             VStack(spacing: 12) {
                 Text("Welcome")
-                    .font(.system(size: 32, weight: .medium))
+                    .font(.system(size: 28, weight: .medium))
                     .foregroundColor(.black)
                 
                 Text("Sign in to save products")
-                    .font(.system(size: 18, weight: .regular))
+                    .font(.system(size: 16, weight: .regular))
                     .foregroundColor(Color(.systemGray))
             }
         }
@@ -104,11 +104,11 @@ struct ProfileView: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 26))
+                    .font(.system(size: 22))
                     .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
                 
                 Text("Get Started")
-                    .font(.system(size: 24, weight: .medium))
+                    .font(.system(size: 20, weight: .medium))
                     .foregroundColor(.black)
             }
             .padding(.horizontal, 24)
@@ -117,11 +117,11 @@ struct ProfileView: View {
             VStack(spacing: 24) {
                 VStack(spacing: 16) {
                     Text("Save Your Favorites")
-                        .font(.system(size: 22, weight: .medium))
+                        .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.black)
                     
                     Text("Sign in with Apple ID to save products and sync across all your devices")
-                        .font(.system(size: 16, weight: .regular))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundColor(Color(.systemGray))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
@@ -160,11 +160,11 @@ struct ProfileView: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack(spacing: 12) {
                 Image(systemName: "heart.fill")
-                    .font(.system(size: 26))
+                    .font(.system(size: 22))
                     .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
                 
                 Text("Saved Products")
-                    .font(.system(size: 24, weight: .medium))
+                    .font(.system(size: 20, weight: .medium))
                     .foregroundColor(.black)
             }
             .padding(.horizontal, 24)
@@ -173,18 +173,18 @@ struct ProfileView: View {
                 // Saved Items Row
                 HStack {
                     Image(systemName: "heart")
-                        .font(.system(size: 22))
+                        .font(.system(size: 18))
                         .foregroundColor(Color(.systemGray))
                         .frame(width: 40)
                     
                     Text("Saved Items")
-                        .font(.system(size: 18, weight: .regular))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.black)
                     
                     Spacer()
                     
                     Text("\(savedProductsManager.savedProducts.count)")
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(Color(.systemGray))
                 }
                 .padding(.horizontal, 24)
@@ -199,12 +199,12 @@ struct ProfileView: View {
                 }) {
                     HStack {
                         Image(systemName: "trash")
-                            .font(.system(size: 22))
+                            .font(.system(size: 18))
                             .foregroundColor(.red)
                             .frame(width: 40)
                         
                         Text("Clear All Saved")
-                            .font(.system(size: 18, weight: .regular))
+                            .font(.system(size: 16, weight: .regular))
                             .foregroundColor(.red)
                         
                         Spacer()
