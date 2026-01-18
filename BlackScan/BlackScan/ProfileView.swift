@@ -105,16 +105,10 @@ struct ProfileView: View {
     
     private var getStartedSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 22))
-                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
-                
-                Text("Get Started")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.black)
-            }
-            .padding(.horizontal, 24)
+            Text("Get Started")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(.black)
+                .padding(.horizontal, 24)
             
             // Save Your Favorites Card
             VStack(spacing: 20) {
@@ -161,16 +155,10 @@ struct ProfileView: View {
     
     private var savedProductsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
-                Image(systemName: "heart.fill")
-                    .font(.system(size: 22))
-                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
-                
-                Text("Saved Products")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.black)
-            }
-            .padding(.horizontal, 24)
+            Text("Saved Products")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(.black)
+                .padding(.horizontal, 24)
             
             VStack(spacing: 0) {
                 // Saved Items Row
