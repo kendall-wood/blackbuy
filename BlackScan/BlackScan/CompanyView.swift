@@ -13,8 +13,38 @@ struct CompanyView: View {
     @State private var isLoading = false
     @State private var searchError: String?
     @State private var selectedProduct: Product?
+    @State private var sortOrder: SortOrder = .recentlyAdded
     
     @Environment(\.dismiss) var dismiss
+    
+    enum SortOrder {
+        case recentlyAdded
+        case alphabetical
+        case priceHighToLow
+        case priceLowToHigh
+    }
+    
+    private var sortOrderLabel: String {
+        switch sortOrder {
+        case .recentlyAdded: return "Recent"
+        case .alphabetical: return "A-Z"
+        case .priceHighToLow: return "Price ↓"
+        case .priceLowToHigh: return "Price ↑"
+        }
+    }
+    
+    private var sortedProducts: [Product] {
+        switch sortOrder {
+        case .recentlyAdded:
+            return searchResults
+        case .alphabetical:
+            return searchResults.sorted { $0.name < $1.name }
+        case .priceHighToLow:
+            return searchResults.sorted { $0.price > $1.price }
+        case .priceLowToHigh:
+            return searchResults.sorted { $0.price < $1.price }
+        }
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -28,34 +58,73 @@ struct CompanyView: View {
                 } else if searchResults.isEmpty && !isLoading {
                     emptyStateView
                 } else {
-                    // Products grid
-                    let columns = [
-                        GridItem(.flexible(), spacing: 16),
-                        GridItem(.flexible(), spacing: 16)
-                    ]
-                    
-                    LazyVGrid(columns: columns, spacing: 24) {
-                        ForEach(searchResults) { product in
-                            ShortFeatureCard(
-                                product: product,
-                                isSaved: savedProductsManager.isProductSaved(product),
-                                isInCart: cartManager.isInCart(product),
-                                onSaveTapped: {
-                                    savedProductsManager.toggleSaveProduct(product)
-                                },
-                                onAddToCart: {
-                                    cartManager.addToCart(product)
-                                },
-                                onCardTapped: {
-                                    selectedProduct = product
-                                },
-                                onCompanyTapped: nil
-                            )
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Shop Section Header with Sort Button
+                        HStack(alignment: .center) {
+                            Text("Shop")
+                                .font(.system(size: 20, weight: .medium))
+                                .foregroundColor(.black)
+                            
+                            Spacer()
+                            
+                            // Sort Menu
+                            Menu {
+                                Button("Recently Added") { sortOrder = .recentlyAdded }
+                                Button("Alphabetical") { sortOrder = .alphabetical }
+                                Button("Price: High to Low") { sortOrder = .priceHighToLow }
+                                Button("Price: Low to High") { sortOrder = .priceLowToHigh }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "arrow.up.arrow.down")
+                                        .font(.system(size: 13, weight: .medium))
+                                    Text(sortOrderLabel)
+                                        .font(.system(size: 14, weight: .medium))
+                                }
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.white)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
+                                        )
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        
+                        // Products grid
+                        let columns = [
+                            GridItem(.flexible(), spacing: 16),
+                            GridItem(.flexible(), spacing: 16)
+                        ]
+                        
+                        LazyVGrid(columns: columns, spacing: 24) {
+                            ForEach(sortedProducts) { product in
+                                ShortFeatureCard(
+                                    product: product,
+                                    isSaved: savedProductsManager.isProductSaved(product),
+                                    isInCart: cartManager.isInCart(product),
+                                    onSaveTapped: {
+                                        savedProductsManager.toggleSaveProduct(product)
+                                    },
+                                    onAddToCart: {
+                                        cartManager.addToCart(product)
+                                    },
+                                    onCardTapped: {
+                                        selectedProduct = product
+                                    },
+                                    onCompanyTapped: nil
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 40)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 40)
                 }
             }
         }
