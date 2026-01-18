@@ -1,0 +1,199 @@
+import SwiftUI
+import AuthenticationServices
+
+/// Profile modal - matches screenshot 4 exactly
+struct ProfileView: View {
+    
+    @EnvironmentObject var authManager: AppleAuthManager
+    @EnvironmentObject var savedProductsManager: SavedProductsManager
+    @EnvironmentObject var cartManager: CartManager
+    
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 32) {
+                    // Avatar and Welcome
+                    welcomeSection
+                    
+                    // Get Started Section
+                    if !authManager.isSignedIn {
+                        getStartedSection
+                    }
+                    
+                    // Saved Products Section
+                    savedProductsSection
+                }
+                .padding(.top, 24)
+                .padding(.bottom, 40)
+            }
+            .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .font(.system(size: 17, weight: .regular))
+                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                }
+            }
+        }
+    }
+    
+    // MARK: - Welcome Section
+    
+    private var welcomeSection: some View {
+        VStack(spacing: 20) {
+            // Avatar Circle
+            ZStack {
+                Circle()
+                    .fill(Color(red: 0, green: 0.48, blue: 1))
+                    .frame(width: 100, height: 100)
+                
+                Image(systemName: "person.fill")
+                    .font(.system(size: 48))
+                    .foregroundColor(.white)
+            }
+            
+            // Welcome Text
+            VStack(spacing: 8) {
+                Text("Welcome")
+                    .font(.system(size: 28, weight: .bold))
+                
+                Text("Sign in to save products")
+                    .font(.system(size: 17, weight: .regular))
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+    
+    // MARK: - Get Started Section
+    
+    private var getStartedSection: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                
+                Text("Get Started")
+                    .font(.system(size: 22, weight: .semibold))
+            }
+            .padding(.horizontal, 20)
+            
+            // Save Your Favorites Card
+            VStack(spacing: 20) {
+                VStack(spacing: 12) {
+                    Text("Save Your Favorites")
+                        .font(.system(size: 20, weight: .semibold))
+                    
+                    Text("Sign in with Apple ID to save products and sync across all your devices")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
+                }
+                .padding(.top, 24)
+                
+                // Sign In Button
+                SignInWithAppleButton(
+                    .signIn,
+                    onRequest: { request in
+                        request.requestedScopes = [.fullName, .email]
+                    },
+                    onCompletion: { result in
+                        // Handled by AuthManager
+                    }
+                )
+                .frame(height: 56)
+                .cornerRadius(12)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 24)
+                .onTapGesture {
+                    authManager.signIn()
+                }
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemGray6))
+            )
+            .padding(.horizontal, 20)
+        }
+    }
+    
+    // MARK: - Saved Products Section
+    
+    private var savedProductsSection: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 12) {
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                
+                Text("Saved Products")
+                    .font(.system(size: 22, weight: .semibold))
+            }
+            .padding(.horizontal, 20)
+            
+            VStack(spacing: 0) {
+                // Saved Items Row
+                HStack {
+                    Image(systemName: "heart")
+                        .font(.system(size: 20))
+                        .foregroundColor(.secondary)
+                        .frame(width: 32)
+                    
+                    Text("Saved Items")
+                        .font(.system(size: 17, weight: .regular))
+                    
+                    Spacer()
+                    
+                    Text("\(savedProductsManager.savedProducts.count)")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                
+                Divider()
+                    .padding(.leading, 52)
+                
+                // Clear All Saved Row
+                Button(action: {
+                    savedProductsManager.clearAllSavedProducts()
+                }) {
+                    HStack {
+                        Image(systemName: "trash")
+                            .font(.system(size: 20))
+                            .foregroundColor(.red)
+                            .frame(width: 32)
+                        
+                        Text("Clear All Saved")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(.red)
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                }
+                .buttonStyle(.plain)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+            )
+            .padding(.horizontal, 20)
+        }
+    }
+}
+
+#Preview("Profile - Signed Out") {
+    ProfileView()
+        .environmentObject(AppleAuthManager())
+        .environmentObject(SavedProductsManager())
+        .environmentObject(CartManager())
+}
