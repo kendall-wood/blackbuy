@@ -148,7 +148,7 @@ struct ProfileView: View {
             }
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(Color(.systemGray6))
+                    .fill(Color(red: 0.96, green: 0.96, blue: 0.96))
             )
             .padding(.horizontal, 24)
         }
