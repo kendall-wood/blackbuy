@@ -17,7 +17,7 @@ struct ProfileView: View {
             
             // Content
             ScrollView {
-                VStack(spacing: 32) {
+                VStack(spacing: 48) {
                     // Avatar and Welcome
                     welcomeSection
                     
@@ -29,8 +29,8 @@ struct ProfileView: View {
                     // Saved Products Section
                     savedProductsSection
                 }
-                .padding(.top, 24)
-                .padding(.bottom, 40)
+                .padding(.top, 40)
+                .padding(.bottom, 60)
             }
             .background(Color.white)
         }
@@ -73,26 +73,26 @@ struct ProfileView: View {
     // MARK: - Welcome Section
     
     private var welcomeSection: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
             // Avatar Circle
             ZStack {
                 Circle()
                     .fill(Color(red: 0, green: 0.48, blue: 1))
-                    .frame(width: 100, height: 100)
+                    .frame(width: 120, height: 120)
                 
                 Image(systemName: "person.fill")
-                    .font(.system(size: 48))
+                    .font(.system(size: 56))
                     .foregroundColor(.white)
             }
             
             // Welcome Text
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 Text("Welcome")
-                    .font(.system(size: 28, weight: .medium))
+                    .font(.system(size: 32, weight: .medium))
                     .foregroundColor(.black)
                 
                 Text("Sign in to save products")
-                    .font(.system(size: 17, weight: .regular))
+                    .font(.system(size: 18, weight: .regular))
                     .foregroundColor(Color(.systemGray))
             }
         }
@@ -101,32 +101,32 @@ struct ProfileView: View {
     // MARK: - Get Started Section
     
     private var getStartedSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 24) {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 24))
+                    .font(.system(size: 26))
                     .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
                 
                 Text("Get Started")
-                    .font(.system(size: 22, weight: .medium))
+                    .font(.system(size: 24, weight: .medium))
                     .foregroundColor(.black)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             
             // Save Your Favorites Card
-            VStack(spacing: 20) {
-                VStack(spacing: 12) {
+            VStack(spacing: 24) {
+                VStack(spacing: 16) {
                     Text("Save Your Favorites")
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.system(size: 22, weight: .medium))
                         .foregroundColor(.black)
                     
                     Text("Sign in with Apple ID to save products and sync across all your devices")
-                        .font(.system(size: 15, weight: .regular))
+                        .font(.system(size: 16, weight: .regular))
                         .foregroundColor(Color(.systemGray))
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 24)
                 }
-                .padding(.top, 24)
+                .padding(.top, 32)
                 
                 // Sign In Button
                 SignInWithAppleButton(
@@ -140,58 +140,58 @@ struct ProfileView: View {
                 )
                 .frame(height: 56)
                 .cornerRadius(12)
-                .padding(.horizontal, 32)
-                .padding(.bottom, 24)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 32)
                 .onTapGesture {
                     authManager.signIn()
                 }
             }
             .background(
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: 20)
                     .fill(Color(.systemGray6))
             )
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
         }
     }
     
     // MARK: - Saved Products Section
     
     private var savedProductsSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 24) {
             HStack(spacing: 12) {
                 Image(systemName: "heart.fill")
-                    .font(.system(size: 24))
+                    .font(.system(size: 26))
                     .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
                 
                 Text("Saved Products")
-                    .font(.system(size: 22, weight: .medium))
+                    .font(.system(size: 24, weight: .medium))
                     .foregroundColor(.black)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             
             VStack(spacing: 0) {
                 // Saved Items Row
                 HStack {
                     Image(systemName: "heart")
-                        .font(.system(size: 20))
+                        .font(.system(size: 22))
                         .foregroundColor(Color(.systemGray))
-                        .frame(width: 32)
+                        .frame(width: 40)
                     
                     Text("Saved Items")
-                        .font(.system(size: 17, weight: .regular))
+                        .font(.system(size: 18, weight: .regular))
                         .foregroundColor(.black)
                     
                     Spacer()
                     
                     Text("\(savedProductsManager.savedProducts.count)")
-                        .font(.system(size: 17, weight: .medium))
+                        .font(.system(size: 18, weight: .medium))
                         .foregroundColor(Color(.systemGray))
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 20)
                 
                 Divider()
-                    .padding(.leading, 52)
+                    .padding(.leading, 64)
                 
                 // Clear All Saved Row
                 Button(action: {
@@ -199,27 +199,27 @@ struct ProfileView: View {
                 }) {
                     HStack {
                         Image(systemName: "trash")
-                            .font(.system(size: 20))
+                            .font(.system(size: 22))
                             .foregroundColor(.red)
-                            .frame(width: 32)
+                            .frame(width: 40)
                         
                         Text("Clear All Saved")
-                            .font(.system(size: 17, weight: .regular))
+                            .font(.system(size: 18, weight: .regular))
                             .foregroundColor(.red)
                         
                         Spacer()
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 20)
                 }
                 .buttonStyle(.plain)
             }
             .background(
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: 20)
                     .fill(Color.white)
                     .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
             )
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
         }
     }
 }
