@@ -223,11 +223,11 @@ struct ProductDetailView: View {
                     Button(action: {
                         cartManager.addToCart(product)
                     }) {
-                        Image(systemName: "plus")
+                        Image(systemName: cartManager.isInCart(product) ? "checkmark" : "plus")
                             .font(.system(size: 24, weight: .medium))
                             .foregroundColor(.white)
                             .frame(width: 56, height: 56)
-                            .background(Color(red: 0, green: 0.48, blue: 1))
+                            .background(cartManager.isInCart(product) ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0, green: 0.48, blue: 1))
                             .clipShape(Circle())
                             .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
                     }

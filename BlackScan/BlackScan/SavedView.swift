@@ -179,6 +179,7 @@ struct SavedView: View {
             ForEach(sortedProducts) { product in
                 SavedProductCard(
                     product: product,
+                    isInCart: cartManager.isInCart(product),
                     onUnsave: {
                         savedProductsManager.removeSavedProduct(product)
                     },
@@ -274,6 +275,7 @@ struct CompanyCircleCard: View {
 /// Saved product card (matches ShopView style)
 struct SavedProductCard: View {
     let product: Product
+    let isInCart: Bool
     let onUnsave: () -> Void
     let onAddToCart: () -> Void
     let onCardTapped: () -> Void
@@ -339,11 +341,11 @@ struct SavedProductCard: View {
                     Spacer()
                     
                     Button(action: onAddToCart) {
-                        Image(systemName: "plus")
+                        Image(systemName: isInCart ? "checkmark" : "plus")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.white)
                             .frame(width: 32, height: 32)
-                            .background(Color(red: 0, green: 0.48, blue: 1))
+                            .background(isInCart ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0, green: 0.48, blue: 1))
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)

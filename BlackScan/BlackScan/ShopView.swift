@@ -365,6 +365,7 @@ struct ShopView: View {
                             ShortFeatureCard(
                                 product: product,
                                 isSaved: savedProductsManager.isProductSaved(product),
+                                isInCart: cartManager.isInCart(product),
                                 onSaveTapped: {
                                     savedProductsManager.toggleSaveProduct(product)
                                 },
@@ -575,6 +576,7 @@ struct CompanyFeatureCard: View {
 struct ShortFeatureCard: View {
     let product: Product
     let isSaved: Bool
+    let isInCart: Bool
     let onSaveTapped: () -> Void
     let onAddToCart: () -> Void
     let onCardTapped: () -> Void
@@ -640,11 +642,11 @@ struct ShortFeatureCard: View {
                     Spacer()
                     
                     Button(action: onAddToCart) {
-                        Image(systemName: "plus")
+                        Image(systemName: isInCart ? "checkmark" : "plus")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.white)
                             .frame(width: 32, height: 32)
-                            .background(Color(red: 0, green: 0.48, blue: 1))
+                            .background(isInCart ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0, green: 0.48, blue: 1))
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)

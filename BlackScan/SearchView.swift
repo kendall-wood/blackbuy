@@ -126,6 +126,7 @@ struct SearchView: View {
                                 ShortFeatureCard(
                                     product: product,
                                     isSaved: savedProductsManager.isProductSaved(product),
+                                    isInCart: cartManager.isInCart(product),
                                     onSaveTapped: {
                                         savedProductsManager.toggleSaveProduct(product)
                                     },
