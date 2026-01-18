@@ -108,36 +108,63 @@ struct CameraScanView: View {
                 VStack {
                     Spacer()
                     
-                    Button(action: {
-                        isShowingResults = true
-                    }) {
-                        HStack(spacing: 16) {
-                            Image(systemName: "list.bullet")
-                                .font(.system(size: 24, weight: .medium))
-                                .foregroundColor(.white)
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("View \(searchResults.count)+ Products")
+                    VStack(spacing: 12) {
+                        // Scan Again Button
+                        Button(action: {
+                            searchResults = []
+                            lastClassificationResult = nil
+                        }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "camera.fill")
                                     .font(.system(size: 18, weight: .medium))
+                                Text("Scan Again")
+                                    .font(.system(size: 18, weight: .medium))
+                            }
+                            .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                            .frame(width: 200, height: 50)
+                            .background(
+                                RoundedRectangle(cornerRadius: 25)
+                                    .fill(Color.white)
+                            )
+                        }
+                        
+                        // Shake to report text
+                        Text("Shake to report issue")
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(.white.opacity(0.7))
+                        
+                        // View Products Button
+                        Button(action: {
+                            isShowingResults = true
+                        }) {
+                            HStack(spacing: 16) {
+                                Image(systemName: "list.bullet")
+                                    .font(.system(size: 24, weight: .medium))
                                     .foregroundColor(.white)
                                 
-                                if let result = lastClassificationResult {
-                                    Text("Black-owned \(result.productType)")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.white.opacity(0.9))
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("View \(searchResults.count)+ Products")
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.white)
+                                    
+                                    if let result = lastClassificationResult {
+                                        Text("Black-owned \(result.productType)")
+                                            .font(.system(size: 14, weight: .regular))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
                                 }
+                                
+                                Spacer()
                             }
-                            
-                            Spacer()
+                            .padding(.horizontal, 24)
+                            .frame(height: 70)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color(red: 0, given: 0.48, blue: 1))
+                            )
                         }
-                        .padding(.horizontal, 24)
-                        .frame(height: 70)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(Color(red: 0, green: 0.48, blue: 1))
-                        )
+                        .padding(.horizontal, 40)
                     }
-                    .padding(.horizontal, 40)
                     .padding(.bottom, 140)
                 }
             }
