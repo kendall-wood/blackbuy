@@ -31,13 +31,13 @@ struct CompanyView: View {
                     } else {
                         // Products grid
                         let columns = [
-                            GridItem(.flexible(), spacing: 12),
-                            GridItem(.flexible(), spacing: 12)
+                            GridItem(.flexible(), spacing: 24),
+                            GridItem(.flexible(), spacing: 24)
                         ]
                         
-                        LazyVGrid(columns: columns, spacing: 16) {
+                        LazyVGrid(columns: columns, spacing: 24) {
                             ForEach(searchResults) { product in
-                                ShopProductCard(
+                                ShortFeatureCard(
                                     product: product,
                                     isSaved: savedProductsManager.isProductSaved(product),
                                     onSaveTapped: {
@@ -52,7 +52,7 @@ struct CompanyView: View {
                                 )
                             }
                         }
-                        .padding(16)
+                        .padding(20)
                         .padding(.bottom, 20)
                     }
                 }

@@ -1,22 +1,22 @@
 import SwiftUI
 
-/// Shop view with blackbuy branding, category chips, and product grid
-/// Matches screenshot 1 exactly
+/// Shop view with featured carousel, categories, and product grid
 struct ShopView: View {
     
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var cartManager: CartManager
     
-    @State private var searchText = ""
-    @State private var searchResults: [Product] = []
-    @State private var featuredProducts: [Product] = []
-    @State private var isSearching = false
+    // State for different product sections
+    @State private var carouselProducts: [Product] = []
+    @State private var gridProducts: [Product] = []
+    @State private var isLoading = false
     @State private var searchError: String?
     @State private var selectedCategory: String? = nil
-    @State private var showingCart = false
     @State private var selectedProduct: Product?
-    @State private var searchTask: Task<Void, Never>?
+    @State private var currentCarouselIndex = 0
+    @State private var showingSearch = false
+    @State private var showingAllFeatured = false
     
     @Environment(\.dismiss) var dismiss
     
@@ -35,99 +35,20 @@ struct ShopView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Top Bar
+                // Header
                 header
                 
-                // Search Bar
-                searchBar
-                
-                // Category Chips (horizontal scroll)
-                categoryChips
-                
-                // Suggested Filter
-                HStack {
-                    sortButton
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-                
-                // Content
+                // Main Content
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Error Message
-                        if let error = searchError {
-                            VStack(spacing: 12) {
-                                Image(systemName: "exclamationmark.triangle")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(.orange)
-                                
-                                Text("Connection Error")
-                                    .font(.system(size: 20, weight: .bold))
-                                
-                                Text(error)
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal, 40)
-                                
-                                Button("Retry") {
-                                    loadFeaturedProducts()
-                                }
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 32)
-                                .padding(.vertical, 12)
-                                .background(Color(red: 0, green: 0.48, blue: 1))
-                                .cornerRadius(10)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 60)
-                        }
+                    VStack(spacing: 24) {
+                        // Large Featured Carousel
+                        featuredCarousel
                         
-                        // Loading State
-                        if isSearching && featuredProducts.isEmpty {
-                            VStack(spacing: 12) {
-                                ProgressView()
-                                    .scaleEffect(1.5)
-                                Text("Loading products...")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.secondary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 60)
-                        }
+                        // Categories Section
+                        categoriesSection
                         
-                        // Featured Brand Section
-                        if !displayedProducts.isEmpty {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Featured Brand")
-                                    .font(.system(size: 20, weight: .bold))
-                                    .foregroundColor(.primary)
-                                    .padding(.horizontal, 20)
-                                
-                                // Product Grid
-                                productGrid
-                            }
-                        }
-                        
-                        // Empty State
-                        if !isSearching && displayedProducts.isEmpty && searchError == nil {
-                            VStack(spacing: 12) {
-                                Image(systemName: "bag")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(.gray)
-                                
-                                Text("No Products Found")
-                                    .font(.system(size: 20, weight: .bold))
-                                
-                                Text("Check your connection and try again")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.secondary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 60)
-                        }
+                        // Featured Products Grid
+                        featuredProductsSection
                     }
                     .padding(.bottom, 40)
                 }
@@ -136,10 +57,16 @@ struct ShopView: View {
             .navigationBarHidden(true)
         }
         .onAppear {
-            loadFeaturedProducts()
+            loadAllProducts()
         }
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
+        }
+        .fullScreenCover(isPresented: $showingSearch) {
+            SearchView()
+        }
+        .fullScreenCover(isPresented: $showingAllFeatured) {
+            AllFeaturedProductsView(excludedProductIds: Set(carouselProducts.map { $0.id } + gridProducts.map { $0.id }))
         }
     }
     
@@ -147,61 +74,37 @@ struct ShopView: View {
     
     private var header: some View {
         HStack {
-            // Back Button
+            // Back Button - light grey
             Button(action: {
                 dismiss()
             }) {
-                ZStack {
-                    Circle()
-                        .fill(Color(.systemGray5))
-                        .frame(width: 50, height: 50)
-                    
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
-                }
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(Color(.systemGray3))
             }
+            .buttonStyle(.plain)
             
             Spacer()
             
-            // BlackBuy Logo - use SVG asset (will be blue)
+            // BlackBuy Logo - smaller, blue
             Image("shop_logo")
                 .renderingMode(.template)
                 .resizable()
                 .scaledToFit()
-                .frame(height: 32)
+                .frame(height: 24)
                 .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
             
             Spacer()
             
-            // Cart Button
+            // Search Button - blue
             Button(action: {
-                showingCart = true
+                showingSearch = true
             }) {
-                ZStack(alignment: .topTrailing) {
-                    ZStack {
-                        Circle()
-                            .fill(Color(.systemGray5))
-                            .frame(width: 50, height: 50)
-                        
-                        Image("cart_icon")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(.primary)
-                    }
-                    
-                    if cartManager.totalItemCount > 0 {
-                        Text("\(cartManager.totalItemCount)")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 16, height: 16)
-                            .background(Color.red)
-                            .clipShape(Circle())
-                            .offset(x: 8, y: -8)
-                    }
-                }
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
             }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 20)
         .padding(.top, 12)
@@ -209,242 +112,247 @@ struct ShopView: View {
         .background(Color.white)
     }
     
-    // MARK: - Search Bar
+    // MARK: - Featured Carousel
     
-    private var searchBar: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 18))
-                .foregroundColor(Color(.systemGray2))
-            
-            TextField("Search for brands, products, or categories", text: $searchText)
-                .font(.system(size: 16))
-                .foregroundColor(.white)
-                .onChange(of: searchText) { oldValue, newValue in
-                    // Cancel previous search task
-                    searchTask?.cancel()
-                    
-                    // Clear results if search text is empty
-                    if newValue.isEmpty {
-                        searchResults = []
-                        selectedCategory = nil
-                        return
-                    }
-                    
-                    // Debounce search - wait 0.5s after user stops typing
-                    searchTask = Task {
-                        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-                        
-                        if !Task.isCancelled {
-                            await MainActor.run {
-                                performSearch()
+    private var featuredCarousel: some View {
+        VStack(spacing: 12) {
+            if !carouselProducts.isEmpty {
+                TabView(selection: $currentCarouselIndex) {
+                    ForEach(Array(carouselProducts.enumerated()), id: \.element.id) { index, product in
+                        LargeFeatureCard(
+                            product: product,
+                            onAddToCart: {
+                                cartManager.addToCart(product)
+                            },
+                            onCardTapped: {
+                                selectedProduct = product
                             }
-                        }
+                        )
+                        .tag(index)
                     }
                 }
-                .onSubmit {
-                    performSearch()
-                }
-            
-            if !searchText.isEmpty {
-                Button(action: {
-                    searchTask?.cancel()
-                    searchText = ""
-                    searchResults = []
-                    selectedCategory = nil
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 18))
-                        .foregroundColor(Color(.systemGray3))
-                }
+                .frame(height: 300)
+                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+                .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.black.opacity(0.8))
-        )
-        .padding(.horizontal, 20)
-        .padding(.bottom, 12)
+        .padding(.top, 8)
     }
     
-    // MARK: - Category Chips
+    // MARK: - Categories Section
     
-    private var categoryChips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
-                ForEach(categories, id: \.self) { category in
-                    Button(action: {
-                        selectedCategory = category
-                        searchByCategory(category)
-                    }) {
-                        Text(category)
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(selectedCategory == category ? .white : Color(red: 0, green: 0.48, blue: 1))
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(selectedCategory == category ? Color(red: 0, green: 0.48, blue: 1) : Color(red: 0, green: 0.48, blue: 1).opacity(0.1))
-                            )
+    private var categoriesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Categories")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.black)
+                .padding(.horizontal, 20)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(categories, id: \.self) { category in
+                        Button(action: {
+                            selectedCategory = category
+                            searchByCategory(category)
+                        }) {
+                            Text(category)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(Color.white)
+                                .cornerRadius(12)
+                                .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 2)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
+                .padding(.horizontal, 20)
+            }
+        }
+    }
+    
+    // MARK: - Featured Products Section
+    
+    private var featuredProductsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Featured Products")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.black)
+                
+                Spacer()
+                
+                Button(action: {
+                    showingAllFeatured = true
+                }) {
+                    Text("See All")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                }
+                .buttonStyle(.plain)
             }
             .padding(.horizontal, 20)
-        }
-        .padding(.bottom, 8)
-    }
-    
-    // MARK: - Sort Button
-    
-    private var sortButton: some View {
-        Menu {
-            Button("Suggested") { }
-            Button("Price: Low to High") { }
-            Button("Price: High to Low") { }
-            Button("Newest First") { }
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "arrow.up.arrow.down")
-                    .font(.system(size: 14, weight: .medium))
-                Text("Suggested")
-                    .font(.system(size: 15, weight: .medium))
-            }
-            .foregroundColor(.primary)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color(.systemGray4), lineWidth: 1)
-            )
-        }
-    }
-    
-    // MARK: - Product Grid
-    
-    private var productGrid: some View {
-        let columns = [
-            GridItem(.flexible(), spacing: 24),
-            GridItem(.flexible(), spacing: 24)
-        ]
-        
-        return LazyVGrid(columns: columns, spacing: 20) {
-            ForEach(displayedProducts) { product in
-                ShopProductCard(
-                    product: product,
-                    isSaved: savedProductsManager.isProductSaved(product),
-                    onSaveTapped: {
-                        savedProductsManager.toggleSaveProduct(product)
-                    },
-                    onAddToCart: {
-                        cartManager.addToCart(product)
-                    },
-                    onCardTapped: {
-                        selectedProduct = product
+            
+            if !gridProducts.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        ForEach(gridProducts) { product in
+                            ShortFeatureCard(
+                                product: product,
+                                isSaved: savedProductsManager.isProductSaved(product),
+                                onSaveTapped: {
+                                    savedProductsManager.toggleSaveProduct(product)
+                                },
+                                onAddToCart: {
+                                    cartManager.addToCart(product)
+                                },
+                                onCardTapped: {
+                                    selectedProduct = product
+                                }
+                            )
+                            .frame(width: 160)
+                        }
                     }
-                )
-            }
-        }
-        .padding(.horizontal, 20)
-    }
-    
-    private var displayedProducts: [Product] {
-        return searchResults.isEmpty ? featuredProducts : searchResults
-    }
-    
-    // MARK: - Search Methods
-    
-    private func performSearch() {
-        guard !searchText.isEmpty else { return }
-        
-        isSearching = true
-        searchError = nil
-        
-        Task {
-            do {
-                let products = try await typesenseClient.searchProducts(
-                    query: searchText,
-                    page: 1,
-                    perPage: 50
-                )
-                
-                await MainActor.run {
-                    isSearching = false
-                    searchResults = products
-                }
-            } catch {
-                await MainActor.run {
-                    isSearching = false
-                    searchError = error.localizedDescription
+                    .padding(.horizontal, 20)
                 }
             }
         }
     }
+    
+    // MARK: - Search Category
     
     private func searchByCategory(_ category: String) {
-        Task {
-            do {
-                let products = try await typesenseClient.searchProducts(
-                    query: category,
-                    page: 1,
-                    perPage: 50
-                )
-                
-                await MainActor.run {
-                    searchResults = products
-                }
-            } catch {
-                print("Category search error: \(error)")
-            }
-        }
+        // Navigate to SearchView with category pre-filled
+        showingSearch = true
     }
     
-    private func loadFeaturedProducts() {
-        print("🛍️ Loading featured products...")
-        print("📡 Typesense Host: \(Env.typesenseHost)")
-        print("🔑 API Key: \(Env.typesenseApiKey.prefix(10))... (length: \(Env.typesenseApiKey.count))")
-        print("🔗 Search URL: \(Env.typesenseSearchURL())")
+    // MARK: - Load Products
+    
+    private func loadAllProducts() {
+        print("🛍️ Loading all products...")
         
+        isLoading = true
         searchError = nil
-        isSearching = true
         
         Task {
             do {
-                let products = try await typesenseClient.searchProducts(
+                // Get all products
+                let allProducts = try await typesenseClient.searchProducts(
                     query: "*",
                     page: 1,
-                    perPage: 20
+                    perPage: 200
                 )
                 
                 await MainActor.run {
-                    isSearching = false
-                    featuredProducts = products
-                    print("✅ Loaded \(products.count) featured products")
+                    // Get unique companies
+                    let uniqueCompanies = Array(Set(allProducts.map { $0.company }))
+                    
+                    // Select 12 random companies for carousel
+                    let selectedCompanies = uniqueCompanies.shuffled().prefix(12)
+                    var carousel: [Product] = []
+                    
+                    // Get one product from each selected company for carousel
+                    for company in selectedCompanies {
+                        if let product = allProducts.first(where: { $0.company == company }) {
+                            carousel.append(product)
+                        }
+                    }
+                    
+                    // Get 12 random products for grid (excluding carousel products)
+                    let carouselIds = Set(carousel.map { $0.id })
+                    let remainingProducts = allProducts.filter { !carouselIds.contains($0.id) }
+                    let grid = Array(remainingProducts.shuffled().prefix(12))
+                    
+                    carouselProducts = carousel.shuffled()
+                    gridProducts = grid
+                    isLoading = false
+                    
+                    print("✅ Loaded \(carousel.count) carousel products and \(grid.count) grid products")
                 }
             } catch {
                 await MainActor.run {
-                    isSearching = false
+                    isLoading = false
                     searchError = error.localizedDescription
-                }
-                print("❌ Failed to load featured products: \(error)")
-                print("❌ Error type: \(type(of: error))")
-                print("❌ Error details: \(String(describing: error))")
-                
-                // Print localized description
-                if let localizedError = error as? LocalizedError {
-                    print("❌ Localized description: \(localizedError.errorDescription ?? "N/A")")
-                    print("❌ Failure reason: \(localizedError.failureReason ?? "N/A")")
-                    print("❌ Recovery suggestion: \(localizedError.recoverySuggestion ?? "N/A")")
+                    print("❌ Failed to load products: \(error)")
                 }
             }
         }
     }
 }
 
-/// Product card for shop grid (matches screenshot design)
-struct ShopProductCard: View {
+// MARK: - Large Feature Card (Carousel)
+
+struct LargeFeatureCard: View {
+    let product: Product
+    let onAddToCart: () -> Void
+    let onCardTapped: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top) {
+                // Left side: Text content
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Featured Product")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundColor(.black)
+                    
+                    Text(product.name)
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                    
+                    Text(product.company)
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundColor(Color(.systemGray2))
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    Button(action: onAddToCart) {
+                        Text("Add to Cart")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(Color(red: 0, green: 0.48, blue: 1))
+                            .cornerRadius(12)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(20)
+                
+                // Right side: Product image
+                AsyncImage(url: URL(string: product.imageUrl)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(1, contentMode: .fill)
+                } placeholder: {
+                    Color(.systemGray6)
+                        .overlay(
+                            ProgressView()
+                        )
+                }
+                .frame(width: 140, height: 140)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .padding(16)
+            }
+        }
+        .frame(height: 280)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
+        .padding(.horizontal, 20)
+        .onTapGesture {
+            onCardTapped()
+        }
+    }
+}
+
+// MARK: - Short Feature Card (Grid)
+
+struct ShortFeatureCard: View {
     let product: Product
     let isSaved: Bool
     let onSaveTapped: () -> Void
@@ -458,49 +366,48 @@ struct ShopProductCard: View {
                 AsyncImage(url: URL(string: product.imageUrl)) { image in
                     image
                         .resizable()
-                        .aspectRatio(contentMode: .fill)
+                        .aspectRatio(1, contentMode: .fill)
                 } placeholder: {
                     Color(.systemGray6)
                         .overlay(
-                            Image(systemName: "photo")
-                                .font(.system(size: 32))
-                                .foregroundColor(Color(.systemGray4))
+                            ProgressView()
                         )
                 }
-                .frame(height: 180)
+                .frame(height: 120)
                 .clipped()
                 
                 // Heart Button
                 Button(action: onSaveTapped) {
-                    ZStack {
-                        Circle()
-                            .fill(Color(.darkGray).opacity(0.7))
-                            .frame(width: 36, height: 36)
-                        
-                        Image(systemName: isSaved ? "heart.fill" : "heart")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(isSaved ? .red : .white)
-                    }
+                    Image(systemName: isSaved ? "heart.fill" : "heart")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(isSaved ? .red : .gray)
+                        .frame(width: 32, height: 32)
+                        .background(Color.white.opacity(0.9))
+                        .clipShape(Circle())
                 }
-                .padding(10)
+                .buttonStyle(.plain)
+                .padding(8)
             }
             .onTapGesture {
                 onCardTapped()
             }
             
             // Product Info
-            VStack(alignment: .leading, spacing: 4) {
-                Text(product.name)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.black)
-                    .lineLimit(2)
-                    .frame(height: 38, alignment: .top)
-                
+            VStack(alignment: .leading, spacing: 6) {
+                // Company name first (light grey)
                 Text(product.company)
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                    .font(.system(size: 16, weight: .regular))
+                    .foregroundColor(Color(.systemGray2))
                     .lineLimit(1)
                 
+                // Product name (black)
+                Text(product.name)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.black)
+                    .lineLimit(2)
+                    .frame(height: 40, alignment: .top)
+                
+                // Price and Add button
                 HStack {
                     Text(product.formattedPrice)
                         .font(.system(size: 17, weight: .bold))
@@ -509,20 +416,17 @@ struct ShopProductCard: View {
                     Spacer()
                     
                     Button(action: onAddToCart) {
-                        ZStack {
-                            Circle()
-                                .fill(Color(red: 0, green: 0.48, blue: 1))
-                                .frame(width: 32, height: 32)
-                            
-                            Image(systemName: "plus")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
+                        Image(systemName: "plus")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 32, height: 32)
+                            .background(Color(red: 0, green: 0.48, blue: 1))
+                            .clipShape(Circle())
                     }
+                    .buttonStyle(.plain)
                 }
-                .padding(.top, 2)
             }
-            .padding(14)
+            .padding(12)
         }
         .background(Color.white)
         .cornerRadius(16)
