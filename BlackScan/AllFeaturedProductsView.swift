@@ -44,6 +44,7 @@ struct AllFeaturedProductsView: View {
                             ShortFeatureCard(
                                 product: product,
                                 isSaved: savedProductsManager.isProductSaved(product),
+                                isInCart: cartManager.isInCart(product),
                                 onSaveTapped: {
                                     savedProductsManager.toggleSaveProduct(product)
                                 },
@@ -52,7 +53,8 @@ struct AllFeaturedProductsView: View {
                                 },
                                 onCardTapped: {
                                     selectedProduct = product
-                                }
+                                },
+                                onCompanyTapped: nil
                             )
                         }
                     }
