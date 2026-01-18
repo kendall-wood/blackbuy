@@ -89,6 +89,8 @@ struct ShopView: View {
             set: { selectedCompany = $0?.value }
         )) { company in
             CompanyView(companyName: company.value)
+                .environmentObject(savedProductsManager)
+                .environmentObject(cartManager)
         }
     }
     
