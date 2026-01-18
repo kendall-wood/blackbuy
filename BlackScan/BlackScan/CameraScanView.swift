@@ -67,10 +67,10 @@ struct CameraScanView: View {
                         ZStack {
                             Circle()
                                 .fill(Color.white)
-                                .frame(width: 60, height: 60)
+                                .frame(width: 50, height: 50)
                             
-                            Image(systemName: flashlightOn ? "flashlight.on.fill" : "bolt.fill")
-                                .font(.system(size: 26))
+                            Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                                .font(.system(size: 22))
                                 .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
                         }
                     }
@@ -86,10 +86,10 @@ struct CameraScanView: View {
                         ZStack {
                             Circle()
                                 .fill(Color(red: 0, green: 0.48, blue: 1))
-                                .frame(width: 60, height: 60)
+                                .frame(width: 50, height: 50)
                             
                             Image(systemName: "person.fill")
-                                .font(.system(size: 26))
+                                .font(.system(size: 22))
                                 .foregroundColor(.white)
                         }
                     }
