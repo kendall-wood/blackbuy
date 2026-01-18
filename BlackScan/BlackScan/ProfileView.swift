@@ -232,7 +232,7 @@ struct ProfileView: View {
             VStack(spacing: 0) {
                 // Privacy Policy Row
                 Button(action: {
-                    if let url = URL(string: "https://blackscan.app/privacy-policy") {
+                    if let url = URL(string: "https://kendall-wood.github.io/blackbuy/privacy-policy/") {
                         UIApplication.shared.open(url)
                     }
                 }) {
