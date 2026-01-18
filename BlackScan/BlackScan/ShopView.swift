@@ -15,6 +15,7 @@ struct ShopView: View {
     @State private var searchError: String?
     @State private var selectedCategory: String? = nil
     @State private var selectedProduct: Product?
+    @State private var selectedCompany: String?
     @State private var currentCarouselIndex = 0
     @State private var showingSearch = false
     @State private var showingAllFeatured = false
@@ -82,6 +83,12 @@ struct ShopView: View {
         }
         .fullScreenCover(isPresented: $showingAllFeatured) {
             AllFeaturedProductsView(excludedProductIds: Set(carouselProducts.map { $0.id } + gridProducts.map { $0.id }))
+        }
+        .fullScreenCover(item: Binding(
+            get: { selectedCompany.map { IdentifiableString(value: $0) } },
+            set: { selectedCompany = $0?.value }
+        )) { company in
+            CompanyView(companyName: company.value)
         }
     }
     
@@ -374,6 +381,9 @@ struct ShopView: View {
                                 },
                                 onCardTapped: {
                                     selectedProduct = product
+                                },
+                                onCompanyTapped: {
+                                    selectedCompany = product.company
                                 }
                             )
                             .frame(width: 190)
@@ -580,6 +590,7 @@ struct ShortFeatureCard: View {
     let onSaveTapped: () -> Void
     let onAddToCart: () -> Void
     let onCardTapped: () -> Void
+    let onCompanyTapped: (() -> Void)?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -620,11 +631,17 @@ struct ShortFeatureCard: View {
             
             // Product Info
             VStack(alignment: .leading, spacing: 4) {
-                // Company name first (light grey)
-                Text(product.company)
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(Color(.systemGray2))
-                    .lineLimit(1)
+                // Company name first (light grey) - clickable
+                Button(action: {
+                    onCompanyTapped?()
+                }) {
+                    Text(product.company)
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(Color(.systemGray2))
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
                 
                 // Product name (black)
                 Text(product.name)
@@ -658,6 +675,13 @@ struct ShortFeatureCard: View {
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
     }
+}
+
+// MARK: - Helper Struct for Identifiable String
+
+struct IdentifiableString: Identifiable {
+    let id = UUID()
+    let value: String
 }
 
 #Preview {

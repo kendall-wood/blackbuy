@@ -150,7 +150,8 @@ struct SearchView: View {
                                     },
                                     onCardTapped: {
                                         selectedProduct = product
-                                    }
+                                    },
+                                    onCompanyTapped: nil
                                 )
                             }
                         }

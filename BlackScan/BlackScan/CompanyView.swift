@@ -49,7 +49,8 @@ struct CompanyView: View {
                                     },
                                     onCardTapped: {
                                         selectedProduct = product
-                                    }
+                                    },
+                                    onCompanyTapped: nil
                                 )
                             }
                         }
@@ -85,16 +86,17 @@ struct CompanyView: View {
                             .frame(width: 40, height: 40)
                         
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.primary)
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundColor(.black)
                     }
                 }
+                .buttonStyle(.plain)
                 
                 Spacer()
                 
                 // Company Name
                 Text(companyName)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 20, weight: .medium))
                     .lineLimit(1)
                 
                 Spacer()
@@ -105,10 +107,7 @@ struct CompanyView: View {
                     .frame(width: 40, height: 40)
             }
             .padding(.horizontal, 20)
-            .padding(.top, 12)
-            .padding(.bottom, 16)
-            
-            Divider()
+            .padding(.vertical, 12)
         }
     }
     

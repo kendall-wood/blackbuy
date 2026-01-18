@@ -53,7 +53,8 @@ struct AllFeaturedProductsView: View {
                                 },
                                 onCardTapped: {
                                     selectedProduct = product
-                                }
+                                },
+                                onCompanyTapped: nil
                             )
                         }
                     }
