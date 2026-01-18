@@ -28,6 +28,9 @@ struct ProfileView: View {
                     
                     // Saved Products Section
                     savedProductsSection
+                    
+                    // Legal Section
+                    legalSection
                 }
                 .padding(.top, 24)
                 .padding(.bottom, 40)
@@ -208,6 +211,58 @@ struct ProfileView: View {
                             .foregroundColor(.red)
                         
                         Spacer()
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 16)
+                }
+                .buttonStyle(.plain)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
+            )
+            .padding(.horizontal, 24)
+        }
+    }
+    
+    // MARK: - Legal Section
+    
+    private var legalSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 12) {
+                Image(systemName: "doc.text.fill")
+                    .font(.system(size: 22))
+                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                
+                Text("Legal")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(.black)
+            }
+            .padding(.horizontal, 24)
+            
+            VStack(spacing: 0) {
+                // Privacy Policy Row
+                Button(action: {
+                    if let url = URL(string: "https://blackscan.app/privacy-policy") {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: "hand.raised.fill")
+                            .font(.system(size: 18))
+                            .foregroundColor(Color(.systemGray))
+                            .frame(width: 40)
+                        
+                        Text("Privacy Policy")
+                            .font(.system(size: 16, weight: .regular))
+                            .foregroundColor(.black)
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Color(.systemGray3))
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 16)
