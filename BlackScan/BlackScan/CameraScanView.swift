@@ -29,25 +29,16 @@ struct CameraScanView: View {
             // BlackScan Logo & Instructions Overlay (centered top area)
             VStack {
                 Spacer()
-                    .frame(height: 140)
+                    .frame(height: 80)
                 
-                VStack(spacing: 12) {
-                    // Logo - use SVG asset
-                    Image("logo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 60)
-                    
-                    // Instructions
-                    Text("Find nearby text or barcodes.")
-                        .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(.white)
-                    
+                VStack(spacing: 8) {
+                    // Logo - smaller
                     Text("blackscan")
-                        .font(.system(size: 44, weight: .thin))
+                        .font(.system(size: 32, weight: .thin))
                         .foregroundColor(.white)
                         .tracking(2)
                     
+                    // Simple instruction
                     Text("Scan any product to")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.white.opacity(0.9))
@@ -160,7 +151,7 @@ struct CameraScanView: View {
                             .frame(height: 70)
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color(red: 0, given: 0.48, blue: 1))
+                                    .fill(Color(red: 0, green: 0.48, blue: 1))
                             )
                         }
                         .padding(.horizontal, 40)
