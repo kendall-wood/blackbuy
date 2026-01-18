@@ -17,7 +17,7 @@ struct ProfileView: View {
             
             // Content
             ScrollView {
-                VStack(spacing: 48) {
+                VStack(spacing: 32) {
                     // Avatar and Welcome
                     welcomeSection
                     
@@ -29,8 +29,8 @@ struct ProfileView: View {
                     // Saved Products Section
                     savedProductsSection
                 }
-                .padding(.top, 40)
-                .padding(.bottom, 60)
+                .padding(.top, 24)
+                .padding(.bottom, 40)
             }
             .background(Color.white)
         }
@@ -73,7 +73,7 @@ struct ProfileView: View {
     // MARK: - Welcome Section
     
     private var welcomeSection: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 16) {
             // Avatar Circle
             ZStack {
                 Circle()
@@ -86,7 +86,7 @@ struct ProfileView: View {
             }
             
             // Welcome Text
-            VStack(spacing: 12) {
+            VStack(spacing: 8) {
                 Text("Welcome")
                     .font(.system(size: 28, weight: .medium))
                     .foregroundColor(.black)
@@ -101,7 +101,7 @@ struct ProfileView: View {
     // MARK: - Get Started Section
     
     private var getStartedSection: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 22))
@@ -114,8 +114,8 @@ struct ProfileView: View {
             .padding(.horizontal, 24)
             
             // Save Your Favorites Card
-            VStack(spacing: 24) {
-                VStack(spacing: 16) {
+            VStack(spacing: 20) {
+                VStack(spacing: 12) {
                     Text("Save Your Favorites")
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.black)
@@ -126,7 +126,7 @@ struct ProfileView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
                 }
-                .padding(.top, 32)
+                .padding(.top, 24)
                 
                 // Sign In Button
                 SignInWithAppleButton(
@@ -141,7 +141,7 @@ struct ProfileView: View {
                 .frame(height: 56)
                 .cornerRadius(12)
                 .padding(.horizontal, 40)
-                .padding(.bottom, 32)
+                .padding(.bottom, 24)
                 .onTapGesture {
                     authManager.signIn()
                 }
@@ -157,7 +157,7 @@ struct ProfileView: View {
     // MARK: - Saved Products Section
     
     private var savedProductsSection: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 12) {
                 Image(systemName: "heart.fill")
                     .font(.system(size: 22))
@@ -188,7 +188,7 @@ struct ProfileView: View {
                         .foregroundColor(Color(.systemGray))
                 }
                 .padding(.horizontal, 24)
-                .padding(.vertical, 20)
+                .padding(.vertical, 16)
                 
                 Divider()
                     .padding(.leading, 64)
@@ -210,7 +210,7 @@ struct ProfileView: View {
                         Spacer()
                     }
                     .padding(.horizontal, 24)
-                    .padding(.vertical, 20)
+                    .padding(.vertical, 16)
                 }
                 .buttonStyle(.plain)
             }
