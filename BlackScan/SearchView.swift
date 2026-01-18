@@ -22,24 +22,8 @@ struct SearchView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Header with back button and logo
+                // Header with logo
                 VStack(spacing: 16) {
-                    // Back button row
-                    HStack {
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 22, weight: .medium))
-                                .foregroundColor(Color(.systemGray3))
-                        }
-                        .buttonStyle(.plain)
-                        
-                        Spacer()
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 12)
-                    
                     // BlackBuy Logo
                     Image("shop_logo")
                         .renderingMode(.template)
@@ -47,6 +31,7 @@ struct SearchView: View {
                         .scaledToFit()
                         .frame(height: 28)
                         .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                        .padding(.top, 12)
                     
                     // Search Bar
                     HStack(spacing: 12) {
@@ -163,13 +148,6 @@ struct SearchView: View {
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
         }
-        .onAppear {
-            if !searchText.isEmpty {
-                Task {
-                    await performSearch(query: searchText)
-                }
-            }
-        }
     }
     
     private func performSearch(query: String) async {
@@ -199,7 +177,7 @@ struct SearchView: View {
 }
 
 #Preview {
-    SearchView(initialSearchText: "")
+    SearchView()
         .environmentObject(SavedProductsManager())
         .environmentObject(CartManager())
 }
