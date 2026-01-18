@@ -58,7 +58,7 @@ struct CompanyView: View {
                 }
             }
             .navigationBarHidden(true)
-            .background(Color(.systemBackground))
+            .background(Color.white)
             .onAppear {
                 loadCompanyProducts()
             }

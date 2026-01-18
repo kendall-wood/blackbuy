@@ -66,6 +66,7 @@ struct CheckoutManagerView: View {
                     totalBar
                 }
             }
+            .background(Color.white)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarHidden(true)
         }
@@ -377,6 +378,7 @@ struct ScanHistoryView: View {
                     }
                 }
             }
+            .background(Color.white)
             .navigationTitle("Scan History")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {

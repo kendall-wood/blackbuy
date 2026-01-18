@@ -103,6 +103,7 @@ struct ShopView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Featured Brand")
                                     .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.primary)
                                     .padding(.horizontal, 20)
                                 
                                 // Product Grid
@@ -131,6 +132,7 @@ struct ShopView: View {
                     .padding(.bottom, 40)
                 }
             }
+            .background(Color.white)
             .navigationBarHidden(true)
         }
         .onAppear {
@@ -151,22 +153,24 @@ struct ShopView: View {
             }) {
                 ZStack {
                     Circle()
-                        .fill(Color(.systemGray6))
-                        .frame(width: 40, height: 40)
+                        .fill(Color(.systemGray5))
+                        .frame(width: 50, height: 50)
                     
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
                 }
             }
             
             Spacer()
             
-            // BlackBuy Logo - use SVG asset
+            // BlackBuy Logo - use SVG asset (will be blue)
             Image("shop_logo")
+                .renderingMode(.template)
                 .resizable()
                 .scaledToFit()
                 .frame(height: 32)
+                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
             
             Spacer()
             
@@ -175,9 +179,17 @@ struct ShopView: View {
                 showingCart = true
             }) {
                 ZStack(alignment: .topTrailing) {
-                    Image(systemName: "bag")
-                        .font(.system(size: 24, weight: .regular))
-                        .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                    ZStack {
+                        Circle()
+                            .fill(Color(.systemGray5))
+                            .frame(width: 50, height: 50)
+                        
+                        Image("cart_icon")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .foregroundColor(.primary)
+                    }
                     
                     if cartManager.totalItemCount > 0 {
                         Text("\(cartManager.totalItemCount)")
@@ -194,7 +206,7 @@ struct ShopView: View {
         .padding(.horizontal, 20)
         .padding(.top, 12)
         .padding(.bottom, 16)
-        .background(Color(.systemBackground))
+        .background(Color.white)
     }
     
     // MARK: - Search Bar
@@ -203,10 +215,11 @@ struct ShopView: View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 18))
-                .foregroundColor(Color(.systemGray))
+                .foregroundColor(Color(.systemGray2))
             
             TextField("Search for brands, products, or categories", text: $searchText)
                 .font(.system(size: 16))
+                .foregroundColor(.white)
                 .onChange(of: searchText) { oldValue, newValue in
                     // Cancel previous search task
                     searchTask?.cancel()
@@ -250,7 +263,7 @@ struct ShopView: View {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.systemGray6))
+                .fill(Color.black.opacity(0.8))
         )
         .padding(.horizontal, 20)
         .padding(.bottom, 12)
@@ -313,11 +326,11 @@ struct ShopView: View {
     
     private var productGrid: some View {
         let columns = [
-            GridItem(.flexible(), spacing: 12),
-            GridItem(.flexible(), spacing: 12)
+            GridItem(.flexible(), spacing: 24),
+            GridItem(.flexible(), spacing: 24)
         ]
         
-        return LazyVGrid(columns: columns, spacing: 16) {
+        return LazyVGrid(columns: columns, spacing: 20) {
             ForEach(displayedProducts) { product in
                 ShopProductCard(
                     product: product,
@@ -454,34 +467,34 @@ struct ShopProductCard: View {
                                 .foregroundColor(Color(.systemGray4))
                         )
                 }
-                .frame(height: 160)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .frame(height: 180)
+                .clipped()
                 
                 // Heart Button
                 Button(action: onSaveTapped) {
                     ZStack {
                         Circle()
-                            .fill(Color.white.opacity(0.9))
+                            .fill(Color(.darkGray).opacity(0.7))
                             .frame(width: 36, height: 36)
                         
                         Image(systemName: isSaved ? "heart.fill" : "heart")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(isSaved ? .red : Color(.systemGray))
+                            .foregroundColor(isSaved ? .red : .white)
                     }
                 }
-                .padding(8)
+                .padding(10)
             }
             .onTapGesture {
                 onCardTapped()
             }
             
             // Product Info
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(product.name)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.black)
                     .lineLimit(2)
-                    .frame(height: 40, alignment: .top)
+                    .frame(height: 38, alignment: .top)
                 
                 Text(product.company)
                     .font(.system(size: 14, weight: .regular))
@@ -491,7 +504,7 @@ struct ShopProductCard: View {
                 HStack {
                     Text(product.formattedPrice)
                         .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.black)
                     
                     Spacer()
                     
@@ -507,11 +520,13 @@ struct ShopProductCard: View {
                         }
                     }
                 }
-                .padding(.top, 4)
+                .padding(.top, 2)
             }
-            .padding(.horizontal, 4)
-            .padding(.top, 8)
+            .padding(14)
         }
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
     }
 }
 

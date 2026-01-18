@@ -113,6 +113,7 @@ struct ProductDetailView: View {
                 }
                 .padding(.vertical)
             }
+            .background(Color.white)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

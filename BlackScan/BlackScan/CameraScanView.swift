@@ -258,6 +258,7 @@ struct ScanResultsSheet: View {
                     .padding(.bottom, 40)
                 }
             }
+            .background(Color.white)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

@@ -34,6 +34,7 @@ struct SavedView: View {
                 .padding(.top, 20)
                 .padding(.bottom, 40)
             }
+            .background(Color.white)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

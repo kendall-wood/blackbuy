@@ -28,6 +28,7 @@ struct ProfileView: View {
                 .padding(.top, 24)
                 .padding(.bottom, 40)
             }
+            .background(Color.white)
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
