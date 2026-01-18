@@ -135,6 +135,8 @@ struct CompanyView: View {
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
+                .environmentObject(savedProductsManager)
+                .environmentObject(cartManager)
         }
     }
     
