@@ -16,6 +16,7 @@ struct ShopView: View {
     @State private var selectedCategory: String? = nil
     @State private var showingCart = false
     @State private var selectedProduct: Product?
+    @State private var searchTask: Task<Void, Never>?
     
     @Environment(\.dismiss) var dismiss
     
@@ -206,14 +207,38 @@ struct ShopView: View {
             
             TextField("Search for brands, products, or categories", text: $searchText)
                 .font(.system(size: 16))
+                .onChange(of: searchText) { oldValue, newValue in
+                    // Cancel previous search task
+                    searchTask?.cancel()
+                    
+                    // Clear results if search text is empty
+                    if newValue.isEmpty {
+                        searchResults = []
+                        selectedCategory = nil
+                        return
+                    }
+                    
+                    // Debounce search - wait 0.5s after user stops typing
+                    searchTask = Task {
+                        try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                        
+                        if !Task.isCancelled {
+                            await MainActor.run {
+                                performSearch()
+                            }
+                        }
+                    }
+                }
                 .onSubmit {
                     performSearch()
                 }
             
             if !searchText.isEmpty {
                 Button(action: {
+                    searchTask?.cancel()
                     searchText = ""
                     searchResults = []
+                    selectedCategory = nil
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 18))

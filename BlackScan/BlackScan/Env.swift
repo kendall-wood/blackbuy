@@ -87,7 +87,7 @@ struct Env {
     ]
     
     /// Default sort field
-    static let defaultSortBy: String = "price:asc"
+    static let defaultSortBy: String = "_text_match:desc"
     
     // MARK: - App Configuration
     

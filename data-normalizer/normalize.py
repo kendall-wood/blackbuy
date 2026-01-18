@@ -132,14 +132,24 @@ def normalize_product(product, main_category_map, product_type_synonyms):
     
     # Extract basic fields (adjust these keys based on your actual JSON structure)
     # You'll need to adapt these field names to match your 87k product JSON
-    name = product.get('name', product.get('title', ''))
-    company = product.get('company', product.get('brand', product.get('vendor', '')))
-    price = product.get('price', product.get('cost', 0))
-    image_url = product.get('image_url', product.get('image', ''))
-    product_url = product.get('product_url', product.get('url', ''))
-    description = product.get('description', '')
-    categories = product.get('categories', product.get('category', ''))
-    subcategories = product.get('subcategories', '')
+    name = product.get('name', product.get('Name', product.get('title', '')))
+    company = product.get('company', product.get('Company', product.get('brand', product.get('vendor', ''))))
+    
+    # Handle price - can be string or number, with capital or lowercase key
+    price_raw = product.get('price', product.get('Price', product.get('cost', 0)))
+    try:
+        # Convert to float if it's a string
+        price = float(price_raw) if price_raw else 0.0
+    except (ValueError, TypeError):
+        price = 0.0
+    
+    image_url = product.get('image_url', product.get('Image URL', product.get('image', '')))
+    product_url = product.get('product_url', product.get('Link', product.get('url', '')))
+    description = product.get('description', product.get('Description', ''))
+    
+    # Handle categories with both capital and lowercase
+    categories = product.get('categories', product.get('Main Category', product.get('category', '')))
+    subcategories = product.get('subcategories', product.get('Subcategory 1', product.get('Subcategory 2', '')))
     
     # Apply taxonomy mapping
     main_category = map_main_category(categories, subcategories, main_category_map)
@@ -199,9 +209,9 @@ def main():
             
         print(f"📦 Found {len(products)} products")
         
-        # Process first 1000 for testing
-        sample_size = min(1000, len(products))
-        print(f"🔬 Processing sample of {sample_size} products...")
+        # Process all products (or set a custom limit)
+        sample_size = len(products)  # Process all products
+        print(f"🔬 Processing {sample_size} products...")
         
         normalized_products = []
         stats = {

@@ -26,10 +26,82 @@ struct Product: Codable, Identifiable, Hashable {
         case setBundle = "set_bundle"
     }
     
+    // Memberwise initializer for creating products directly
+    init(
+        id: String,
+        name: String,
+        company: String,
+        price: Double,
+        imageUrl: String,
+        productUrl: String,
+        mainCategory: String,
+        productType: String,
+        form: String? = nil,
+        setBundle: String? = nil,
+        tags: [String]? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.company = company
+        self.price = price
+        self.imageUrl = imageUrl
+        self.productUrl = productUrl
+        self.mainCategory = mainCategory
+        self.productType = productType
+        self.form = form
+        self.setBundle = setBundle
+        self.tags = tags
+    }
+    
+    // Custom decoder to handle price as either String or Double
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        company = try container.decode(String.self, forKey: .company)
+        imageUrl = try container.decode(String.self, forKey: .imageUrl)
+        productUrl = try container.decode(String.self, forKey: .productUrl)
+        mainCategory = try container.decode(String.self, forKey: .mainCategory)
+        productType = try container.decode(String.self, forKey: .productType)
+        form = try container.decodeIfPresent(String.self, forKey: .form)
+        setBundle = try container.decodeIfPresent(String.self, forKey: .setBundle)
+        tags = try container.decodeIfPresent([String].self, forKey: .tags)
+        
+        // Handle price as either Double or String
+        if let priceDouble = try? container.decode(Double.self, forKey: .price) {
+            price = priceDouble
+        } else if let priceString = try? container.decode(String.self, forKey: .price),
+                  let priceDouble = Double(priceString) {
+            price = priceDouble
+        } else {
+            price = 0.0
+        }
+    }
+    
+    // Custom encoder
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(company, forKey: .company)
+        try container.encode(price, forKey: .price)
+        try container.encode(imageUrl, forKey: .imageUrl)
+        try container.encode(productUrl, forKey: .productUrl)
+        try container.encode(mainCategory, forKey: .mainCategory)
+        try container.encode(productType, forKey: .productType)
+        try container.encodeIfPresent(form, forKey: .form)
+        try container.encodeIfPresent(setBundle, forKey: .setBundle)
+        try container.encodeIfPresent(tags, forKey: .tags)
+    }
+    
     /// Computed property for display price
     var formattedPrice: String {
         if price > 0 {
             return String(format: "$%.2f", price)
+        } else if price == 0 {
+            return "Free"
         } else {
             return "Price varies"
         }
@@ -46,12 +118,12 @@ struct Product: Codable, Identifiable, Hashable {
 /// Typesense search hit containing product and relevance metadata
 struct TypesenseHit: Codable {
     let document: Product
-    let highlight: [String: TypesenseHighlight]?
     let textMatch: Int?
     
     enum CodingKeys: String, CodingKey {
-        case document, highlight
+        case document
         case textMatch = "text_match"
+        // Omit highlight - it has inconsistent structure (dict for some fields, array for tags)
     }
 }
 
