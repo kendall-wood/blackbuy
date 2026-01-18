@@ -633,17 +633,24 @@ struct ShortFeatureCard: View {
             
             // Product Info
             VStack(alignment: .leading, spacing: 4) {
-                // Company name first (light grey) - clickable
-                Button(action: {
-                    onCompanyTapped?()
-                }) {
+                // Company name first (light grey) - clickable if callback provided
+                if let onCompanyTapped = onCompanyTapped {
+                    Button(action: {
+                        onCompanyTapped()
+                    }) {
+                        Text(product.company)
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(Color(.systemGray2))
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.plain)
+                } else {
                     Text(product.company)
                         .font(.system(size: 13, weight: .regular))
                         .foregroundColor(Color(.systemGray2))
                         .lineLimit(1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .buttonStyle(.plain)
                 
                 // Product name (black)
                 Text(product.name)

@@ -137,6 +137,7 @@ struct CompanyView: View {
                 .environmentObject(typesenseClient)
                 .environmentObject(savedProductsManager)
                 .environmentObject(cartManager)
+                .presentationDragIndicator(.visible)
         }
     }
     
