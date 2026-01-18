@@ -17,98 +17,90 @@ struct CompanyView: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Header
-                header
-                
-                // Content
-                ScrollView {
-                    if isLoading {
-                        loadingView
-                    } else if searchResults.isEmpty && !isLoading {
-                        emptyStateView
-                    } else {
-                        // Products grid
-                        let columns = [
-                            GridItem(.flexible(), spacing: 24),
-                            GridItem(.flexible(), spacing: 24)
-                        ]
-                        
-                        LazyVGrid(columns: columns, spacing: 24) {
-                            ForEach(searchResults) { product in
-                                ShortFeatureCard(
-                                    product: product,
-                                    isSaved: savedProductsManager.isProductSaved(product),
-                                    isInCart: cartManager.isInCart(product),
-                                    onSaveTapped: {
-                                        savedProductsManager.toggleSaveProduct(product)
-                                    },
-                                    onAddToCart: {
-                                        cartManager.addToCart(product)
-                                    },
-                                    onCardTapped: {
-                                        selectedProduct = product
-                                    },
-                                    onCompanyTapped: nil
-                                )
-                            }
+        VStack(spacing: 0) {
+            // Header
+            header
+            
+            // Content
+            ScrollView {
+                if isLoading {
+                    loadingView
+                } else if searchResults.isEmpty && !isLoading {
+                    emptyStateView
+                } else {
+                    // Products grid
+                    let columns = [
+                        GridItem(.flexible(), spacing: 16),
+                        GridItem(.flexible(), spacing: 16)
+                    ]
+                    
+                    LazyVGrid(columns: columns, spacing: 24) {
+                        ForEach(searchResults) { product in
+                            ShortFeatureCard(
+                                product: product,
+                                isSaved: savedProductsManager.isProductSaved(product),
+                                isInCart: cartManager.isInCart(product),
+                                onSaveTapped: {
+                                    savedProductsManager.toggleSaveProduct(product)
+                                },
+                                onAddToCart: {
+                                    cartManager.addToCart(product)
+                                },
+                                onCardTapped: {
+                                    selectedProduct = product
+                                },
+                                onCompanyTapped: nil
+                            )
                         }
-                        .padding(20)
-                        .padding(.bottom, 20)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 40)
                 }
             }
-            .navigationBarHidden(true)
-            .background(Color.white)
-            .onAppear {
-                loadCompanyProducts()
-            }
-            .sheet(item: $selectedProduct) { product in
-                ProductDetailView(product: product)
-                    .environmentObject(typesenseClient)
-            }
+        }
+        .background(Color.white)
+        .onAppear {
+            loadCompanyProducts()
+        }
+        .sheet(item: $selectedProduct) { product in
+            ProductDetailView(product: product)
+                .environmentObject(typesenseClient)
         }
     }
     
     // MARK: - Header
     
     private var header: some View {
-        VStack(spacing: 0) {
-            HStack {
-                // Back Button
-                Button(action: {
-                    dismiss()
-                }) {
-                    ZStack {
-                        Circle()
-                            .fill(Color(.systemGray6))
-                            .frame(width: 40, height: 40)
-                        
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundColor(.black)
-                    }
-                }
-                .buttonStyle(.plain)
-                
-                Spacer()
-                
-                // Company Name
-                Text(companyName)
-                    .font(.system(size: 20, weight: .medium))
-                    .lineLimit(1)
-                
-                Spacer()
-                
-                // Placeholder for symmetry
-                Circle()
-                    .fill(Color.clear)
-                    .frame(width: 40, height: 40)
+        HStack {
+            // Back Button
+            Button(action: {
+                dismiss()
+            }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundColor(Color(.systemGray3))
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+            .buttonStyle(.plain)
+            
+            Spacer()
+            
+            // Company Name
+            Text(companyName)
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(.black)
+                .lineLimit(1)
+            
+            Spacer()
+            
+            // Spacer for symmetry
+            Color.clear
+                .frame(width: 22)
         }
+        .frame(height: 44)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .background(Color.white)
     }
     
     // MARK: - Loading View
@@ -122,10 +114,11 @@ struct CompanyView: View {
             
             Text("Loading products...")
                 .font(.system(size: 17, weight: .medium))
-                .foregroundColor(.secondary)
+                .foregroundColor(Color(.systemGray))
             
             Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     // MARK: - Empty State
@@ -136,19 +129,21 @@ struct CompanyView: View {
             
             Image(systemName: "building.2")
                 .font(.system(size: 64))
-                .foregroundColor(.secondary)
+                .foregroundColor(Color(.systemGray2))
             
             Text("No Products Found")
-                .font(.system(size: 22, weight: .semibold))
+                .font(.system(size: 22, weight: .medium))
+                .foregroundColor(.black)
             
             Text("We couldn't find any products from \(companyName)")
                 .font(.system(size: 16, weight: .regular))
-                .foregroundColor(.secondary)
+                .foregroundColor(Color(.systemGray))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
             Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     // MARK: - Data Loading
