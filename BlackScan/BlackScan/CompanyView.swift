@@ -116,6 +116,7 @@ struct CompanyView: View {
                                         cartManager.addToCart(product)
                                     },
                                     onCardTapped: {
+                                        print("🔍 Card tapped - setting selectedProduct to: \(product.name)")
                                         selectedProduct = product
                                     },
                                     onCompanyTapped: nil
@@ -133,11 +134,13 @@ struct CompanyView: View {
             loadCompanyProducts()
         }
         .sheet(item: $selectedProduct) { product in
-            ProductDetailView(product: product)
+            print("📱 ProductDetailView sheet presenting for: \(product.name)")
+            return ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
                 .environmentObject(savedProductsManager)
                 .environmentObject(cartManager)
                 .presentationDragIndicator(.visible)
+                .interactiveDismissDisabled(false)
         }
     }
     
