@@ -14,6 +14,9 @@ struct CameraScanView: View {
     @State private var searchError: String?
     @State private var flashlightOn = false
     @State private var showingProfile = false
+    @State private var showingSaved = false
+    @State private var showingShop = false
+    @State private var showingScanHistory = false
     
     var body: some View {
         ZStack {
@@ -108,27 +111,88 @@ struct CameraScanView: View {
                     Button(action: {
                         isShowingResults = true
                     }) {
-                        VStack(spacing: 4) {
-                            Text("View \(searchResults.count)+ Products")
-                                .font(.system(size: 18, weight: .semibold))
+                        HStack(spacing: 16) {
+                            Image(systemName: "list.bullet")
+                                .font(.system(size: 24, weight: .medium))
+                                .foregroundColor(.white)
                             
-                            if let result = lastClassificationResult {
-                                Text("Black-owned \(result.productType)")
-                                    .font(.system(size: 14, weight: .regular))
-                                    .opacity(0.9)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("View \(searchResults.count)+ Products")
+                                    .font(.system(size: 18, weight: .medium))
+                                    .foregroundColor(.white)
+                                
+                                if let result = lastClassificationResult {
+                                    Text("Black-owned \(result.productType)")
+                                        .font(.system(size: 14, weight: .regular))
+                                        .foregroundColor(.white.opacity(0.9))
+                                }
                             }
+                            
+                            Spacer()
                         }
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 24)
                         .frame(height: 70)
                         .background(
-                            RoundedRectangle(cornerRadius: 16)
+                            RoundedRectangle(cornerRadius: 20)
                                 .fill(Color(red: 0, green: 0.48, blue: 1))
                         )
                     }
                     .padding(.horizontal, 40)
-                    .padding(.bottom, 160)
+                    .padding(.bottom, 140)
                 }
+            }
+            
+            // Bottom Navigation Icons
+            VStack {
+                Spacer()
+                
+                HStack(spacing: 60) {
+                    // Scan History Button
+                    Button(action: {
+                        showingScanHistory = true
+                    }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 60, height: 60)
+                            
+                            Image(systemName: "clock.fill")
+                                .font(.system(size: 28))
+                                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                        }
+                    }
+                    
+                    // Saved Button
+                    Button(action: {
+                        showingSaved = true
+                    }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 60, height: 60)
+                            
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 28))
+                                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                        }
+                    }
+                    
+                    // Shop Button
+                    Button(action: {
+                        showingShop = true
+                    }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 60, height: 60)
+                            
+                            Image(systemName: "storefront.fill")
+                                .font(.system(size: 28))
+                                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                        }
+                    }
+                }
+                .padding(.bottom, 50)
             }
         }
         // Scan Results Bottom Sheet
@@ -147,6 +211,18 @@ struct CameraScanView: View {
         // Profile Modal
         .sheet(isPresented: $showingProfile) {
             ProfileView()
+        }
+        // Saved Modal
+        .fullScreenCover(isPresented: $showingSaved) {
+            SavedView()
+        }
+        // Shop Modal
+        .fullScreenCover(isPresented: $showingShop) {
+            ShopView()
+        }
+        // Scan History Modal
+        .fullScreenCover(isPresented: $showingScanHistory) {
+            ScanHistoryView()
         }
     }
     
