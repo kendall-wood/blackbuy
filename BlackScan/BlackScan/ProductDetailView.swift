@@ -1,5 +1,57 @@
 import SwiftUI
 
+/// Flow layout for wrapping category chips
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+    
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let result = FlowResult(
+            in: proposal.replacingUnspecifiedDimensions().width,
+            subviews: subviews,
+            spacing: spacing
+        )
+        return result.size
+    }
+    
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let result = FlowResult(
+            in: bounds.width,
+            subviews: subviews,
+            spacing: spacing
+        )
+        for (index, subview) in subviews.enumerated() {
+            subview.place(at: CGPoint(x: bounds.minX + result.frames[index].minX, y: bounds.minY + result.frames[index].minY), proposal: .unspecified)
+        }
+    }
+    
+    struct FlowResult {
+        var frames: [CGRect] = []
+        var size: CGSize = .zero
+        
+        init(in maxWidth: CGFloat, subviews: Subviews, spacing: CGFloat) {
+            var currentX: CGFloat = 0
+            var currentY: CGFloat = 0
+            var lineHeight: CGFloat = 0
+            
+            for subview in subviews {
+                let size = subview.sizeThatFits(.unspecified)
+                
+                if currentX + size.width > maxWidth && currentX > 0 {
+                    currentX = 0
+                    currentY += lineHeight + spacing
+                    lineHeight = 0
+                }
+                
+                frames.append(CGRect(x: currentX, y: currentY, width: size.width, height: size.height))
+                lineHeight = max(lineHeight, size.height)
+                currentX += size.width + spacing
+            }
+            
+            self.size = CGSize(width: maxWidth, height: currentY + lineHeight)
+        }
+    }
+}
+
 /// Simple product detail view
 struct ProductDetailView: View {
     
@@ -32,6 +84,7 @@ struct ProductDetailView: View {
                         .frame(height: 320)
                         .background(Color.white)
                         .cornerRadius(16)
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
                         
                         // Heart Button (overlayed in top right)
                         Button(action: {
@@ -71,13 +124,51 @@ struct ProductDetailView: View {
                             .foregroundColor(.black)
                             .padding(.top, 4)
                         
-                        // Category chips (from actual product categories)
-                        if !productCategories.isEmpty {
-                            HStack(spacing: 8) {
+                        // Categories label
+                        Text("Categories")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .padding(.top, 12)
+                        
+                        // Category chips (from actual product categories, with fallback)
+                        FlowLayout(spacing: 8) {
+                            if !productCategories.isEmpty {
                                 ForEach(productCategories.prefix(4), id: \.self) { category in
                                     Text(category)
                                         .font(.system(size: 12, weight: .medium))
                                         .foregroundColor(.black)
+                                        .lineLimit(1)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.white)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
+                                        )
+                                }
+                            } else {
+                                // Fallback to product type and main category while loading
+                                if !product.productType.isEmpty && product.productType != "Other" {
+                                    Text(product.productType)
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundColor(.black)
+                                        .lineLimit(1)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.white)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
+                                        )
+                                }
+                                
+                                if !product.mainCategory.isEmpty && product.mainCategory != "Other" {
+                                    Text(product.mainCategory)
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundColor(.black)
+                                        .lineLimit(1)
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)
                                         .background(Color.white)
@@ -88,8 +179,8 @@ struct ProductDetailView: View {
                                         )
                                 }
                             }
-                            .padding(.top, 8)
                         }
+                        .padding(.top, 6)
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 32)

@@ -3,6 +3,7 @@ import SwiftUI
 /// Saved products and companies view - matches screenshot 2 exactly
 struct SavedView: View {
     
+    @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
@@ -56,6 +57,7 @@ struct SavedView: View {
         }
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
+                .environmentObject(typesenseClient)
         }
     }
     

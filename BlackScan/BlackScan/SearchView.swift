@@ -162,6 +162,7 @@ struct SearchView: View {
         }
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
+                .environmentObject(typesenseClient)
         }
         .onAppear {
             if !searchText.isEmpty {

@@ -211,6 +211,7 @@ struct ScanResultsSheet: View {
     @EnvironmentObject var cartManager: CartManager
     
     @State private var selectedProduct: Product?
+    @StateObject private var typesenseClient = TypesenseClient()
     
     var body: some View {
         NavigationView {
@@ -281,6 +282,7 @@ struct ScanResultsSheet: View {
         }
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
+                .environmentObject(typesenseClient)
         }
     }
 }
