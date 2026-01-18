@@ -133,14 +133,12 @@ struct CompanyView: View {
         .onAppear {
             loadCompanyProducts()
         }
-        .sheet(item: $selectedProduct) { product in
-            print("📱 ProductDetailView sheet presenting for: \(product.name)")
+        .fullScreenCover(item: $selectedProduct) { product in
+            print("📱 ProductDetailView fullScreenCover presenting for: \(product.name)")
             return ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
                 .environmentObject(savedProductsManager)
                 .environmentObject(cartManager)
-                .presentationDragIndicator(.visible)
-                .interactiveDismissDisabled(false)
         }
     }
     
