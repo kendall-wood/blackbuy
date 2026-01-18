@@ -9,145 +9,141 @@ struct CheckoutManagerView: View {
     @State private var showingMenu = false
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Header
-                header
-                
-                // Item Count and Sort
-                HStack {
-                    Text("\(cartManager.totalItemCount) items")
-                        .font(.system(size: 17, weight: .regular))
-                        .foregroundColor(.secondary)
-                    
-                    Spacer()
-                    
-                    Menu {
-                        Button("By Company") { }
-                        Button("By Price") { }
-                        Button("By Name") { }
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "arrow.up.arrow.down")
-                                .font(.system(size: 14, weight: .medium))
-                            Text("Sort")
-                                .font(.system(size: 15, weight: .medium))
-                        }
-                        .foregroundColor(.primary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(Color(.systemGray4), lineWidth: 1)
-                        )
-                    }
-                }
+        VStack(spacing: 0) {
+            // Header
+            header
+            
+            // Checkout Manager Title
+            Text("Checkout Manager")
+                .font(.system(size: 24, weight: .medium))
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                
-                Divider()
-                
-                // Cart Items (grouped by company)
-                if cartManager.cartItems.isEmpty {
-                    emptyCartView
-                } else {
-                    ScrollView {
+                .padding(.top, 12)
+                .padding(.bottom, 8)
+            
+            // Content
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Item Count and Sort
+                    HStack {
+                        Text("\(cartManager.totalItemCount) items")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(Color(.systemGray))
+                        
+                        Spacer()
+                        
+                        Menu {
+                            Button("By Company") { }
+                            Button("By Price") { }
+                            Button("By Name") { }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "arrow.up.arrow.down")
+                                    .font(.system(size: 13, weight: .medium))
+                                Text("Sort")
+                                    .font(.system(size: 14, weight: .medium))
+                            }
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.white)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
+                                    )
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    
+                    // Cart Items (grouped by company)
+                    if cartManager.cartItems.isEmpty {
+                        emptyCartView
+                    } else {
                         VStack(spacing: 24) {
                             ForEach(cartManager.groupedByCompany()) { group in
                                 CompanyCartGroup(group: group)
                             }
                         }
-                        .padding(.vertical, 20)
+                        .padding(.bottom, 100)
                     }
-                }
-                
-                // Bottom Total Bar
-                if !cartManager.cartItems.isEmpty {
-                    totalBar
                 }
             }
             .background(Color.white)
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarHidden(true)
+            
+            // Bottom Total Bar
+            if !cartManager.cartItems.isEmpty {
+                totalBar
+            }
         }
+        .background(Color.white)
     }
     
     // MARK: - Header
     
     private var header: some View {
-        VStack(spacing: 0) {
-            HStack {
-                // Back Button
-                Button(action: {
-                    dismiss()
-                }) {
-                    ZStack {
-                        Circle()
-                            .fill(Color(.systemGray6))
-                            .frame(width: 40, height: 40)
-                        
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(.primary)
-                    }
-                }
-                
-                Spacer()
-                
-                // BlackBuy Logo - use SVG asset
-                Image("shop_logo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 32)
-                
-                Spacer()
-                
-                // Menu Button
-                Button(action: {
-                    showingMenu = true
-                }) {
-                    ZStack {
-                        Circle()
-                            .fill(Color(.systemGray6))
-                            .frame(width: 40, height: 40)
-                        
-                        Image(systemName: "ellipsis")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(.primary)
-                    }
-                }
+        HStack {
+            // Back Button
+            Button(action: {
+                dismiss()
+            }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundColor(Color(.systemGray3))
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 12)
-            .padding(.bottom, 16)
+            .buttonStyle(.plain)
             
-            Text("Checkout Manager")
-                .font(.system(size: 28, weight: .bold))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
+            Spacer()
+            
+            // BlackBuy Logo
+            Image("shop_logo")
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 28)
+                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+            
+            Spacer()
+            
+            // Menu Button
+            Button(action: {
+                showingMenu = true
+            }) {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(Color(.systemGray3))
+            }
+            .buttonStyle(.plain)
         }
+        .frame(height: 44)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .background(Color.white)
     }
     
     // MARK: - Empty Cart
     
     private var emptyCartView: some View {
-        VStack(spacing: 20) {
-            Spacer()
-            
+        VStack(spacing: 16) {
             Image(systemName: "bag")
-                .font(.system(size: 64))
+                .font(.system(size: 48))
                 .foregroundColor(.secondary)
             
             Text("Your cart is empty")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.system(size: 18, weight: .medium))
+                .foregroundColor(.black)
             
             Text("Add products to get started")
-                .font(.system(size: 16, weight: .regular))
+                .font(.system(size: 15, weight: .regular))
                 .foregroundColor(.secondary)
-            
-            Spacer()
         }
+        .padding(.horizontal, 40)
+        .padding(.vertical, 80)
     }
     
     // MARK: - Total Bar
@@ -160,56 +156,45 @@ struct CheckoutManagerView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Total")
                         .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(.systemGray))
                     
                     Text(cartManager.formattedTotalPrice)
-                        .font(.system(size: 32, weight: .bold))
+                        .font(.system(size: 32, weight: .medium))
+                        .foregroundColor(.black)
                 }
                 
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("\(cartManager.totalItemCount) items")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(Color(.systemGray))
                     
                     Text("\(cartManager.companyCount) stores")
                         .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(.systemGray2))
                 }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 20)
-            .background(Color(.systemBackground))
+            .background(Color.white)
         }
     }
 }
 
-/// Company cart group (matches screenshot design)
+/// Company cart group (matches established styling)
 struct CompanyCartGroup: View {
     
     let group: CartItemGroup
     @EnvironmentObject var cartManager: CartManager
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Company Header
-            HStack {
-                Text(group.company)
-                    .font(.system(size: 20, weight: .semibold))
-                
-                Spacer()
-                
-                Text(group.formattedTotalPrice)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
-            }
-            .padding(.horizontal, 20)
-            
-            // Products in this company
+        VStack(spacing: 12) {
+            // Products in this company (no header)
             ForEach(group.items) { entry in
                 CartProductRow(
                     item: entry.item,
+                    companyName: group.company,
                     onQuantityChange: { newQuantity in
                         cartManager.updateQuantity(for: entry.item.product, quantity: newQuantity)
                     },
@@ -220,9 +205,9 @@ struct CompanyCartGroup: View {
                         openProductURL(entry.item.product.productUrl)
                     }
                 )
-                .padding(.horizontal, 20)
             }
         }
+        .padding(.horizontal, 20)
     }
     
     private func openProductURL(_ urlString: String) {
@@ -231,104 +216,119 @@ struct CompanyCartGroup: View {
     }
 }
 
-/// Cart product row (matches screenshot design)
+/// Cart product row (matches established styling)
 struct CartProductRow: View {
     
     let item: CartItem
+    let companyName: String
     let onQuantityChange: (Int) -> Void
     let onRemove: () -> Void
     let onBuy: () -> Void
     
     var body: some View {
-        HStack(spacing: 12) {
-            // Product Image
-            AsyncImage(url: URL(string: item.product.imageUrl)) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Color(.systemGray6)
-            }
-            .frame(width: 80, height: 80)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+        VStack(alignment: .leading, spacing: 0) {
+            // Company name - prominent at top
+            Text(companyName)
+                .font(.system(size: 17, weight: .medium))
+                .foregroundColor(.black)
+                .lineLimit(1)
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
             
-            // Product Info
-            VStack(alignment: .leading, spacing: 8) {
-                Text(item.product.name)
-                    .font(.system(size: 16, weight: .semibold))
-                    .lineLimit(2)
-                
-                Text(item.product.formattedPrice)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.secondary)
-                
-                // Quantity Controls
-                HStack(spacing: 12) {
-                    Button(action: {
-                        if item.quantity > 1 {
-                            onQuantityChange(item.quantity - 1)
-                        } else {
-                            onRemove()
-                        }
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color(.systemGray5))
-                                .frame(width: 32, height: 32)
-                            
-                            Image(systemName: "minus")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    
-                    Text("\(item.quantity)")
-                        .font(.system(size: 16, weight: .semibold))
-                        .frame(minWidth: 24)
-                    
-                    Button(action: {
-                        onQuantityChange(item.quantity + 1)
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color(red: 0, green: 0.48, blue: 1))
-                                .frame(width: 32, height: 32)
-                            
-                            Image(systemName: "plus")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                    }
-                }
-            }
+            // Divider line
+            Divider()
+                .padding(.horizontal, 12)
             
-            Spacer()
-            
-            // Total Price and Buy Button
-            VStack(spacing: 8) {
-                Text(item.formattedTotalPrice)
-                    .font(.system(size: 17, weight: .bold))
-                
-                Button(action: onBuy) {
-                    Text("Buy")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color(red: 0, green: 0.48, blue: 1))
+            HStack(alignment: .top, spacing: 12) {
+                // Product Image
+                CachedAsyncImage(url: URL(string: item.product.imageUrl)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    Color.white
+                        .overlay(
+                            ProgressView()
                         )
                 }
+                .frame(width: 80, height: 80)
+                .background(Color.white)
+                .cornerRadius(8)
+                .clipped()
+                
+                // Product Info
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(item.product.name)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.black)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    Text(item.product.formattedPrice)
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(Color(.systemGray))
+                        .padding(.bottom, 2)
+                    
+                    // Quantity Controls
+                    HStack(spacing: 16) {
+                        Button(action: {
+                            if item.quantity > 1 {
+                                onQuantityChange(item.quantity - 1)
+                            } else {
+                                onRemove()
+                            }
+                        }) {
+                            Image(systemName: "minus")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(Color(.systemGray))
+                                .frame(width: 32, height: 32)
+                        }
+                        .buttonStyle(.plain)
+                        
+                        Text("\(item.quantity)")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.black)
+                            .frame(minWidth: 24)
+                        
+                        Button(action: {
+                            onQuantityChange(item.quantity + 1)
+                        }) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                                .frame(width: 32, height: 32)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                // Total Price and Buy Button stacked
+                VStack(spacing: 8) {
+                    Text(item.formattedTotalPrice)
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(.black)
+                    
+                    Button(action: onBuy) {
+                        Text("Buy")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color(red: 0, green: 0.48, blue: 1))
+                            .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
-        )
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
     }
 }
 
