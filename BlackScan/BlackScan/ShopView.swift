@@ -75,6 +75,7 @@ struct ShopView: View {
         }
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
+                .environmentObject(typesenseClient)
         }
         .fullScreenCover(isPresented: $showingSearch) {
             SearchView(initialSearchText: searchText)
@@ -196,7 +197,7 @@ struct ShopView: View {
                     }) {
                         HStack(spacing: 12) {
                             // Product image
-                            AsyncImage(url: URL(string: product.imageUrl)) { image in
+                            CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
                                 image
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
@@ -490,7 +491,7 @@ struct CompanyFeatureCard: View {
                 
                 HStack(alignment: .top, spacing: 12) {
                     // Left side: Product example image
-                    AsyncImage(url: URL(string: product.imageUrl)) { image in
+                    CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -582,7 +583,7 @@ struct ShortFeatureCard: View {
         VStack(alignment: .leading, spacing: 0) {
             // Image with Heart - 1:1 frame, aspect fit, white background, with padding
             ZStack(alignment: .topTrailing) {
-                AsyncImage(url: URL(string: product.imageUrl)) { image in
+                CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
