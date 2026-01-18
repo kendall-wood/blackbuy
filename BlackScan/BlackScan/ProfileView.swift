@@ -11,7 +11,11 @@ struct ProfileView: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationView {
+        VStack(spacing: 0) {
+            // Custom Header
+            header
+            
+            // Content
             ScrollView {
                 VStack(spacing: 32) {
                     // Avatar and Welcome
@@ -29,18 +33,41 @@ struct ProfileView: View {
                 .padding(.bottom, 40)
             }
             .background(Color.white)
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                    .font(.system(size: 17, weight: .regular))
-                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
-                }
-            }
         }
+        .background(Color.white)
+    }
+    
+    // MARK: - Header
+    
+    private var header: some View {
+        HStack {
+            // Back Button
+            Button(action: {
+                dismiss()
+            }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundColor(Color(.systemGray3))
+            }
+            .buttonStyle(.plain)
+            
+            Spacer()
+            
+            // Profile Title
+            Text("Profile")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(.black)
+            
+            Spacer()
+            
+            // Spacer for symmetry
+            Color.clear
+                .frame(width: 22)
+        }
+        .frame(height: 44)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .background(Color.white)
     }
     
     // MARK: - Welcome Section
@@ -61,11 +88,12 @@ struct ProfileView: View {
             // Welcome Text
             VStack(spacing: 8) {
                 Text("Welcome")
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.system(size: 28, weight: .medium))
+                    .foregroundColor(.black)
                 
                 Text("Sign in to save products")
                     .font(.system(size: 17, weight: .regular))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Color(.systemGray))
             }
         }
     }
@@ -80,7 +108,8 @@ struct ProfileView: View {
                     .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
                 
                 Text("Get Started")
-                    .font(.system(size: 22, weight: .semibold))
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundColor(.black)
             }
             .padding(.horizontal, 20)
             
@@ -88,11 +117,12 @@ struct ProfileView: View {
             VStack(spacing: 20) {
                 VStack(spacing: 12) {
                     Text("Save Your Favorites")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(.black)
                     
                     Text("Sign in with Apple ID to save products and sync across all your devices")
                         .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(.systemGray))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 20)
                 }
@@ -134,7 +164,8 @@ struct ProfileView: View {
                     .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
                 
                 Text("Saved Products")
-                    .font(.system(size: 22, weight: .semibold))
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundColor(.black)
             }
             .padding(.horizontal, 20)
             
@@ -143,17 +174,18 @@ struct ProfileView: View {
                 HStack {
                     Image(systemName: "heart")
                         .font(.system(size: 20))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(.systemGray))
                         .frame(width: 32)
                     
                     Text("Saved Items")
                         .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(.black)
                     
                     Spacer()
                     
                     Text("\(savedProductsManager.savedProducts.count)")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(Color(.systemGray))
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
@@ -184,8 +216,8 @@ struct ProfileView: View {
             }
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
             )
             .padding(.horizontal, 20)
         }
