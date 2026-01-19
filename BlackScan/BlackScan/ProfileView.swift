@@ -119,9 +119,9 @@ struct ProfileView: View {
                         // Handled by AuthManager
                     }
                 )
-                .frame(height: 56)
+                .frame(height: 48)
                 .cornerRadius(12)
-                .padding(.horizontal, 40)
+                .padding(.horizontal, 50)
                 .padding(.bottom, 24)
                 .onTapGesture {
                     authManager.signIn()

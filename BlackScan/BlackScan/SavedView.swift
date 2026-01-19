@@ -77,11 +77,11 @@ struct SavedView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.black)
                 
-                Spacer()
-                
                 Text("\(savedCompaniesManager.savedCompanies.count)")
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(Color(.systemGray))
+                
+                Spacer()
             }
             .padding(.horizontal, 24)
             
@@ -99,6 +99,8 @@ struct SavedView: View {
                     }
                 }
                 .padding(.horizontal, 24)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
             }
         }
     }
@@ -117,8 +119,11 @@ struct SavedView: View {
                     .foregroundColor(Color(.systemGray))
                 
                 Spacer()
-                
-                // Sort Menu
+            }
+            .padding(.horizontal, 24)
+            
+            // Sort Menu
+            HStack {
                 Menu {
                     Button("Recently Saved") { sortOrder = .recentlySaved }
                     Button("Alphabetical") { sortOrder = .alphabetical }
@@ -144,6 +149,8 @@ struct SavedView: View {
                     )
                 }
                 .buttonStyle(.plain)
+                
+                Spacer()
             }
             .padding(.horizontal, 24)
             

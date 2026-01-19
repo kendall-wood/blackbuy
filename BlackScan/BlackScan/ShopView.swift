@@ -331,7 +331,8 @@ struct ShopView: View {
                         }
                     }
                     .padding(.horizontal, 24)
-                    .padding(.vertical, 8)
+                    .padding(.top, 8)
+                    .padding(.bottom, 12)
                 }
             }
         }
@@ -384,7 +385,8 @@ struct ShopView: View {
                         }
                     }
                     .padding(.horizontal, 24)
-                    .padding(.vertical, 8)
+                    .padding(.top, 8)
+                    .padding(.bottom, 12)
                 }
             }
         }
