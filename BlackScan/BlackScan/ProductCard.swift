@@ -29,7 +29,7 @@ struct ProductCard: View {
                 
                 // Company Name
                 Text(product.company)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
                 

@@ -331,6 +331,7 @@ struct ShopView: View {
                         }
                     }
                     .padding(.horizontal, 24)
+                    .padding(.vertical, 8)
                 }
             }
         }
@@ -383,6 +384,7 @@ struct ShopView: View {
                         }
                     }
                     .padding(.horizontal, 24)
+                    .padding(.vertical, 8)
                 }
             }
         }
@@ -632,7 +634,7 @@ struct ShortFeatureCard: View {
                         onCompanyTapped()
                     }) {
                         Text(product.company)
-                            .font(.system(size: 13, weight: .regular))
+                            .font(.system(size: 13, weight: .medium))
                             .foregroundColor(Color(red: 0.4, green: 0.7, blue: 1))
                             .lineLimit(1)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -640,7 +642,7 @@ struct ShortFeatureCard: View {
                     .buttonStyle(.plain)
                 } else {
                     Text(product.company)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(Color(red: 0.4, green: 0.7, blue: 1))
                         .lineLimit(1)
                 }

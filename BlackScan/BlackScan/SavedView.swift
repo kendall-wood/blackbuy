@@ -72,10 +72,18 @@ struct SavedView: View {
     
     private var savedCompaniesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Saved Companies")
-                .font(.system(size: 24, weight: .semibold))
-                .foregroundColor(.black)
-                .padding(.horizontal, 24)
+            HStack(alignment: .center) {
+                Text("Saved Companies")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.black)
+                
+                Spacer()
+                
+                Text("\(savedCompaniesManager.savedCompanies.count)")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(Color(.systemGray))
+            }
+            .padding(.horizontal, 24)
             
             // Companies Horizontal Scroll
             ScrollView(.horizontal, showsIndicators: false) {
@@ -101,8 +109,12 @@ struct SavedView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .center) {
                 Text("Saved Products")
-                    .font(.system(size: 24, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.black)
+                
+                Text("\(savedProductsManager.savedProducts.count)")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(Color(.systemGray))
                 
                 Spacer()
                 
@@ -315,7 +327,7 @@ struct SavedProductCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 // Company name first (light grey)
                     Text(product.company)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(Color(.systemGray2))
                         .lineLimit(1)
                 

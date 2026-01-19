@@ -191,7 +191,7 @@ struct CompanyCartGroup: View {
             .padding(.bottom, 12)
             
             // Products in this company
-            VStack(spacing: 10) {
+            VStack(spacing: 14) {
                 ForEach(group.items) { entry in
                     CartProductRow(
                         item: entry.item,
@@ -249,7 +249,7 @@ struct CartProductRow: View {
                         Image(systemName: "checkmark")
                             .font(.system(size: 20, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 92, height: 110)
+                            .frame(width: 92, height: 120)
                             .background(
                                 UnevenRoundedRectangle(cornerRadii: .init(
                                     topLeading: 12,
@@ -276,7 +276,7 @@ struct CartProductRow: View {
                         Image(systemName: "trash")
                             .font(.system(size: 20, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 92, height: 110)
+                            .frame(width: 92, height: 120)
                             .background(
                                 UnevenRoundedRectangle(cornerRadii: .init(
                                     topLeading: 0,
@@ -322,10 +322,9 @@ struct CartProductRow: View {
                             }
                     )
             }
-            .frame(height: 110)
+            .frame(height: 120)
         }
-        .frame(height: 110)
-        .clipped()
+        .frame(height: 120)
     }
     
     private var cardContent: some View {
@@ -341,7 +340,7 @@ struct CartProductRow: View {
                             ProgressView()
                         )
                 }
-                .frame(width: 70, height: 70)
+                .frame(width: 80, height: 80)
                 .background(Color.white)
                 .cornerRadius(8)
                 .clipped()
@@ -400,6 +399,7 @@ struct CartProductRow: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.trailing, 12)
                 
                 // Total Price and Buy Button stacked
                 VStack(spacing: 10) {
@@ -421,7 +421,7 @@ struct CartProductRow: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
-        .frame(height: 110)
+        .frame(height: 120)
         .background(Color.white)
         .cornerRadius(12)
         .overlay(
