@@ -65,12 +65,12 @@ struct AllFeaturedProductsView: View {
                         Button(action: loadMore) {
                             Text("Load More")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 48)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color(red: 0, green: 0.48, blue: 1), lineWidth: 2)
+                                        .stroke(Color(red: 0.26, green: 0.63, blue: 0.95), lineWidth: 2)
                                 )
                         }
                         .buttonStyle(.plain)

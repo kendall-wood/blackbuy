@@ -37,7 +37,7 @@ struct SearchView: View {
                         
                         Spacer()
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                     .padding(.top, 12)
                     
                     // BlackBuy Logo
@@ -46,7 +46,7 @@ struct SearchView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(height: 28)
-                        .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                     
                     // Search Bar
                     HStack(spacing: 12) {
@@ -94,7 +94,7 @@ struct SearchView: View {
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color(.systemGray6))
                     )
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                 }
                 .background(Color.white)
                 

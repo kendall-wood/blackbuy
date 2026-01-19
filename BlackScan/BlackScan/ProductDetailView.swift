@@ -101,7 +101,7 @@ struct ProductDetailView: View {
                         .buttonStyle(.plain)
                         .padding(16)
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                     .padding(.top, 80)
                     .padding(.bottom, 24)
                     
@@ -182,7 +182,7 @@ struct ProductDetailView: View {
                         }
                         .padding(.top, 6)
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                     .padding(.bottom, 32)
                     
                     Spacer(minLength: 100)
@@ -206,7 +206,7 @@ struct ProductDetailView: View {
                     Spacer()
                 }
                 .frame(height: 44)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 24)
                 .padding(.vertical, 8)
                 .background(Color.white)
                 
@@ -227,7 +227,7 @@ struct ProductDetailView: View {
                             .font(.system(size: 24, weight: .medium))
                             .foregroundColor(.white)
                             .frame(width: 56, height: 56)
-                            .background(cartManager.isInCart(product) ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0, green: 0.48, blue: 1))
+                            .background(cartManager.isInCart(product) ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0.26, green: 0.63, blue: 0.95))
                             .clipShape(Circle())
                             .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
                     }

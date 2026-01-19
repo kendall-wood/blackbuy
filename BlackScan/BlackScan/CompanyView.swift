@@ -94,7 +94,7 @@ struct CompanyView: View {
                             }
                             .buttonStyle(.plain)
                         }
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 24)
                         .padding(.top, 20)
                         
                         // Products grid
@@ -123,7 +123,7 @@ struct CompanyView: View {
                                 )
                             }
                         }
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 40)
                     }
                 }
@@ -171,7 +171,7 @@ struct CompanyView: View {
                 .frame(width: 22)
         }
         .frame(height: 44)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 24)
         .padding(.vertical, 8)
         .background(Color.white)
     }

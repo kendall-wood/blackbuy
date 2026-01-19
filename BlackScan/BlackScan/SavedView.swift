@@ -11,8 +11,6 @@ struct SavedView: View {
     @State private var selectedProduct: Product?
     @State private var sortOrder: SortOrder = .recentlySaved
     
-    @Environment(\.dismiss) var dismiss
-    
     enum SortOrder {
         case recentlySaved
         case alphabetical
@@ -52,16 +50,6 @@ struct SavedView: View {
     
     private var header: some View {
         HStack {
-            // Back Button
-            Button(action: {
-                dismiss()
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(Color(.systemGray3))
-            }
-            .buttonStyle(.plain)
-            
             Spacer()
             
             // BlackBuy Logo
@@ -70,16 +58,12 @@ struct SavedView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(height: 28)
-                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
             
             Spacer()
-            
-            // Spacer for symmetry
-            Color.clear
-                .frame(width: 22)
         }
         .frame(height: 44)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 24)
         .padding(.vertical, 8)
         .background(Color.white)
     }
@@ -89,9 +73,9 @@ struct SavedView: View {
     private var savedCompaniesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Saved Companies")
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 24, weight: .semibold))
                 .foregroundColor(.black)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 24)
             
             // Companies Horizontal Scroll
             ScrollView(.horizontal, showsIndicators: false) {
@@ -106,7 +90,7 @@ struct SavedView: View {
                         .frame(width: 160)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 24)
             }
         }
     }
@@ -117,7 +101,7 @@ struct SavedView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .center) {
                 Text("Saved Products")
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(.black)
                 
                 Spacer()
@@ -149,7 +133,7 @@ struct SavedView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             
             // Products Grid
             if savedProductsManager.savedProducts.isEmpty {
@@ -190,10 +174,10 @@ struct SavedView: View {
                         selectedProduct = product
                     }
                 )
-                .frame(width: 190)
             }
         }
-        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
     }
     
     private var sortedProducts: [Product] {
@@ -243,18 +227,25 @@ struct CompanyCircleCard: View {
                 
                 Text(company.name.prefix(1).uppercased())
                     .font(.system(size: 28, weight: .medium))
-                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
             }
             .padding(.top, 12)
             
             // Company Name
             Text(company.name)
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.black)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
-                .frame(height: 36, alignment: .top)
                 .padding(.horizontal, 8)
+            
+            // Product Count
+            if let productCount = company.productCount {
+                Text("\(productCount) products")
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundColor(Color(.systemGray))
+                    .padding(.top, 2)
+            }
             
             // Unsave Heart Button
             Button(action: onUnsave) {
@@ -263,6 +254,7 @@ struct CompanyCircleCard: View {
                     .foregroundColor(.red)
             }
             .buttonStyle(.plain)
+            .padding(.top, 6)
             .padding(.bottom, 12)
         }
         .frame(maxWidth: .infinity)
@@ -320,22 +312,22 @@ struct SavedProductCard: View {
             // Product Info
             VStack(alignment: .leading, spacing: 4) {
                 // Company name first (light grey)
-                Text(product.company)
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(Color(.systemGray2))
-                    .lineLimit(1)
+                    Text(product.company)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(Color(.systemGray2))
+                        .lineLimit(1)
                 
                 // Product name (black)
                 Text(product.name)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.black)
                     .lineLimit(2)
-                    .frame(height: 38, alignment: .top)
+                    .frame(height: 36, alignment: .top)
                 
                 // Price and Add button
                 HStack {
                     Text(product.formattedPrice)
-                        .font(.system(size: 17, weight: .medium))
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.black)
                     
                     Spacer()
@@ -345,7 +337,7 @@ struct SavedProductCard: View {
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.white)
                             .frame(width: 32, height: 32)
-                            .background(isInCart ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0, green: 0.48, blue: 1))
+                            .background(isInCart ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0.26, green: 0.63, blue: 0.95))
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)

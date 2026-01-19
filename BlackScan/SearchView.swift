@@ -30,7 +30,7 @@ struct SearchView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(height: 28)
-                        .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                         .padding(.top, 12)
                     
                     // Search Bar

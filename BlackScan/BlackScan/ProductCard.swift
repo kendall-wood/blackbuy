@@ -22,14 +22,15 @@ struct ProductCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 // Product Name (2 lines max)
                 Text(product.name)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.primary)
                     .lineLimit(2)
+                    .frame(height: 36, alignment: .top)
                     .multilineTextAlignment(.leading)
                 
                 // Company Name
                 Text(product.company)
-                    .font(.system(size: 14, weight: .regular))
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
                 
@@ -37,7 +38,7 @@ struct ProductCard: View {
                 HStack {
                     // Price
                     Text(product.formattedPrice)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.primary)
                     
                     Spacer()

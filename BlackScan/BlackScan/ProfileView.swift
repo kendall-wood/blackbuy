@@ -8,8 +8,6 @@ struct ProfileView: View {
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var cartManager: CartManager
     
-    @Environment(\.dismiss) var dismiss
-    
     var body: some View {
         VStack(spacing: 0) {
             // Custom Header
@@ -44,31 +42,17 @@ struct ProfileView: View {
     
     private var header: some View {
         HStack {
-            // Back Button
-            Button(action: {
-                dismiss()
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(Color(.systemGray3))
-            }
-            .buttonStyle(.plain)
-            
             Spacer()
             
             // Profile Title
             Text("Profile")
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.black)
             
             Spacer()
-            
-            // Spacer for symmetry
-            Color.clear
-                .frame(width: 22)
         }
         .frame(height: 44)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 24)
         .padding(.vertical, 8)
         .background(Color.white)
     }
@@ -80,7 +64,7 @@ struct ProfileView: View {
             // Avatar Circle
             ZStack {
                 Circle()
-                    .fill(Color(red: 0, green: 0.48, blue: 1))
+                    .fill(Color(red: 0.26, green: 0.63, blue: 0.95))
                     .frame(width: 120, height: 120)
                 
                 Image(systemName: "person.fill")
@@ -91,7 +75,7 @@ struct ProfileView: View {
             // Welcome Text
             VStack(spacing: 8) {
                 Text("Welcome")
-                    .font(.system(size: 28, weight: .medium))
+                    .font(.system(size: 26, weight: .bold))
                     .foregroundColor(.black)
                 
                 Text("Sign in to save products")
@@ -106,7 +90,7 @@ struct ProfileView: View {
     private var getStartedSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Get Started")
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.black)
                 .padding(.horizontal, 24)
             
@@ -114,7 +98,7 @@ struct ProfileView: View {
             VStack(spacing: 20) {
                 VStack(spacing: 12) {
                     Text("Save Your Favorites")
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.black)
                     
                     Text("Sign in with Apple ID to save products and sync across all your devices")
@@ -156,7 +140,7 @@ struct ProfileView: View {
     private var savedProductsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Saved Products")
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.black)
                 .padding(.horizontal, 24)
             
@@ -221,7 +205,7 @@ struct ProfileView: View {
             HStack(spacing: 12) {
                 Image(systemName: "doc.text.fill")
                     .font(.system(size: 22))
-                    .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                 
                 Text("Legal")
                     .font(.system(size: 20, weight: .medium))

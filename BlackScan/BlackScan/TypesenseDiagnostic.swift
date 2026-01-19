@@ -103,7 +103,7 @@ struct TypesenseDiagnosticView: View {
                         .padding(.vertical, 16)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(red: 0, green: 0.48, blue: 1))
+                                .fill(Color(red: 0.26, green: 0.63, blue: 0.95))
                         )
                     }
                     .disabled(status == .testing)

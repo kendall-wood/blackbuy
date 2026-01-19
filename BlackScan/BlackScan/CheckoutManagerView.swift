@@ -4,7 +4,6 @@ import SwiftUI
 struct CheckoutManagerView: View {
     
     @EnvironmentObject var cartManager: CartManager
-    @Environment(\.dismiss) var dismiss
     
     @State private var showingMenu = false
     
@@ -15,10 +14,10 @@ struct CheckoutManagerView: View {
             
             // Checkout Manager Title
             Text("Checkout Manager")
-                .font(.system(size: 24, weight: .medium))
+                .font(.system(size: 32, weight: .bold))
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 24)
                 .padding(.top, 12)
                 .padding(.bottom, 8)
             
@@ -58,14 +57,14 @@ struct CheckoutManagerView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                     .padding(.top, 8)
                     
                     // Cart Items (grouped by company)
                     if cartManager.cartItems.isEmpty {
                         emptyCartView
                     } else {
-                        VStack(spacing: 24) {
+                        VStack(spacing: 16) {
                             ForEach(cartManager.groupedByCompany()) { group in
                                 CompanyCartGroup(group: group)
                             }
@@ -84,20 +83,15 @@ struct CheckoutManagerView: View {
         .background(Color.white)
     }
     
+    private func openProductURL(_ urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+        UIApplication.shared.open(url)
+    }
+    
     // MARK: - Header
     
     private var header: some View {
         HStack {
-            // Back Button
-            Button(action: {
-                dismiss()
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundColor(Color(.systemGray3))
-            }
-            .buttonStyle(.plain)
-            
             Spacer()
             
             // BlackBuy Logo
@@ -106,22 +100,12 @@ struct CheckoutManagerView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(height: 28)
-                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
             
             Spacer()
-            
-            // Menu Button
-            Button(action: {
-                showingMenu = true
-            }) {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(Color(.systemGray3))
-            }
-            .buttonStyle(.plain)
         }
         .frame(height: 44)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 24)
         .padding(.vertical, 8)
         .background(Color.white)
     }
@@ -159,7 +143,7 @@ struct CheckoutManagerView: View {
                         .foregroundColor(Color(.systemGray))
                     
                     Text(cartManager.formattedTotalPrice)
-                        .font(.system(size: 32, weight: .medium))
+                        .font(.system(size: 36, weight: .bold))
                         .foregroundColor(.black)
                 }
                 
@@ -175,7 +159,7 @@ struct CheckoutManagerView: View {
                         .foregroundColor(Color(.systemGray2))
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             .padding(.vertical, 20)
             .background(Color.white)
         }
@@ -189,25 +173,48 @@ struct CompanyCartGroup: View {
     @EnvironmentObject var cartManager: CartManager
     
     var body: some View {
-        VStack(spacing: 12) {
-            // Products in this company (no header)
-            ForEach(group.items) { entry in
-                CartProductRow(
-                    item: entry.item,
-                    companyName: group.company,
-                    onQuantityChange: { newQuantity in
-                        cartManager.updateQuantity(for: entry.item.product, quantity: newQuantity)
-                    },
-                    onRemove: {
-                        cartManager.removeFromCart(entry.item.product)
-                    },
-                    onBuy: {
-                        openProductURL(entry.item.product.productUrl)
-                    }
-                )
+        VStack(alignment: .leading, spacing: 0) {
+            // Company name header
+            HStack {
+                Text(group.company)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.black)
+                
+                Spacer()
+                
+                Text(group.formattedTotalPrice)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 12)
+            
+            // Products in this company
+            VStack(spacing: 10) {
+                ForEach(group.items) { entry in
+                    CartProductRow(
+                        item: entry.item,
+                        companyName: group.company,
+                        onQuantityChange: { newQuantity in
+                            cartManager.updateQuantity(for: entry.item.product, quantity: newQuantity)
+                        },
+                        onRemove: {
+                            cartManager.removeFromCart(entry.item.product)
+                        },
+                        onBuy: {
+                            openProductURL(entry.item.product.productUrl)
+                        }
+                    )
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
         }
-        .padding(.horizontal, 20)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+        .padding(.horizontal, 24)
     }
     
     private func openProductURL(_ urlString: String) {
@@ -225,22 +232,80 @@ struct CartProductRow: View {
     let onRemove: () -> Void
     let onBuy: () -> Void
     
+    @State private var dragOffset: CGFloat = 0
+    @State private var isShowingActions = false
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Company name - prominent at top
-            Text(companyName)
-                .font(.system(size: 17, weight: .medium))
-                .foregroundColor(.black)
-                .lineLimit(1)
-                .padding(.horizontal, 12)
-                .padding(.top, 12)
-                .padding(.bottom, 8)
+        ZStack {
+            // Background swipe actions
+            HStack(spacing: 0) {
+                // Complete button (left/green)
+                if dragOffset > 0 {
+                    Button(action: {
+                        withAnimation {
+                            dragOffset = 0
+                            isShowingActions = false
+                        }
+                    }) {
+                        VStack {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                        .frame(width: 80)
+                        .frame(maxHeight: .infinity)
+                        .background(Color.green)
+                    }
+                }
+                
+                Spacer()
+                
+                // Delete button (right/red)
+                if dragOffset < 0 {
+                    Button(action: {
+                        onRemove()
+                    }) {
+                        VStack {
+                            Image(systemName: "trash")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+                        .frame(width: 80)
+                        .frame(maxHeight: .infinity)
+                        .background(Color.red)
+                    }
+                }
+            }
             
-            // Divider line
-            Divider()
-                .padding(.horizontal, 12)
-            
-            HStack(alignment: .top, spacing: 12) {
+            // Main card content
+            cardContent
+                .offset(x: dragOffset)
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            dragOffset = value.translation.width
+                        }
+                        .onEnded { value in
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                if value.translation.width < -80 {
+                                    dragOffset = -80
+                                    isShowingActions = true
+                                } else if value.translation.width > 80 {
+                                    dragOffset = 80
+                                    isShowingActions = true
+                                } else {
+                                    dragOffset = 0
+                                    isShowingActions = false
+                                }
+                            }
+                        }
+                )
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+    
+    private var cardContent: some View {
+        HStack(alignment: .top, spacing: 12) {
                 // Product Image
                 CachedAsyncImage(url: URL(string: item.product.imageUrl)) { image in
                     image
@@ -252,26 +317,26 @@ struct CartProductRow: View {
                             ProgressView()
                         )
                 }
-                .frame(width: 80, height: 80)
+                .frame(width: 70, height: 70)
                 .background(Color.white)
                 .cornerRadius(8)
                 .clipped()
                 
                 // Product Info
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(item.product.name)
-                        .font(.system(size: 16, weight: .medium))
+                        .font(.system(size: 15, weight: .medium))
                         .foregroundColor(.black)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                     
                     Text(item.product.formattedPrice)
-                        .font(.system(size: 15, weight: .regular))
+                        .font(.system(size: 14, weight: .regular))
                         .foregroundColor(Color(.systemGray))
-                        .padding(.bottom, 2)
+                        .padding(.bottom, 1)
                     
                     // Quantity Controls
-                    HStack(spacing: 16) {
+                    HStack(spacing: 10) {
                         Button(action: {
                             if item.quantity > 1 {
                                 onQuantityChange(item.quantity - 1)
@@ -279,25 +344,33 @@ struct CartProductRow: View {
                                 onRemove()
                             }
                         }) {
-                            Image(systemName: "minus")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(Color(.systemGray))
-                                .frame(width: 32, height: 32)
+                            ZStack {
+                                Circle()
+                                    .fill(Color(.systemGray5))
+                                    .frame(width: 30, height: 30)
+                                Image(systemName: "minus")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(Color(.systemGray))
+                            }
                         }
                         .buttonStyle(.plain)
                         
                         Text("\(item.quantity)")
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.black)
-                            .frame(minWidth: 24)
+                            .frame(minWidth: 20)
                         
                         Button(action: {
                             onQuantityChange(item.quantity + 1)
                         }) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
-                                .frame(width: 32, height: 32)
+                            ZStack {
+                                Circle()
+                                    .fill(Color(red: 0.26, green: 0.63, blue: 0.95))
+                                    .frame(width: 30, height: 30)
+                                Image(systemName: "plus")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.white)
+                            }
                         }
                         .buttonStyle(.plain)
                     }
@@ -305,30 +378,31 @@ struct CartProductRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 // Total Price and Buy Button stacked
-                VStack(spacing: 8) {
+                VStack(spacing: 6) {
                     Text(item.formattedTotalPrice)
-                        .font(.system(size: 17, weight: .medium))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundColor(.black)
                     
                     Button(action: onBuy) {
                         Text("Buy")
-                            .font(.system(size: 13, weight: .medium))
+                            .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.white)
-                            .padding(.horizontal, 16)
+                            .padding(.horizontal, 24)
                             .padding(.vertical, 8)
-                            .background(Color(red: 0, green: 0.48, blue: 1))
-                            .cornerRadius(6)
+                            .background(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            .cornerRadius(8)
                     }
                     .buttonStyle(.plain)
                 }
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
-            .padding(.bottom, 12)
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 12)
         .background(Color.white)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.black.opacity(0.08), lineWidth: 1)
+        )
     }
 }
 
@@ -380,7 +454,7 @@ struct ScanHistoryView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(height: 28)
-                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
             
             Spacer()
             
@@ -389,7 +463,7 @@ struct ScanHistoryView: View {
                 .frame(width: 22)
         }
         .frame(height: 44)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 24)
         .padding(.vertical, 8)
         .background(Color.white)
     }
@@ -422,7 +496,7 @@ struct ScanHistoryView: View {
             Text("Scan History")
                 .font(.system(size: 20, weight: .medium))
                 .foregroundColor(.black)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 24)
                 .padding(.top, 20)
             
             VStack(spacing: 12) {
@@ -430,7 +504,7 @@ struct ScanHistoryView: View {
                     ScanHistoryCard(entry: entry)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             .padding(.bottom, 40)
         }
     }
@@ -484,7 +558,7 @@ struct ScanHistoryCard: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Color(red: 0, green: 0.48, blue: 1))
+                    .background(Color(red: 0.26, green: 0.63, blue: 0.95))
                     .cornerRadius(8)
                 }
                 .buttonStyle(.plain)

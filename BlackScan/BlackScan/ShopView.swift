@@ -23,8 +23,6 @@ struct ShopView: View {
     @State private var searchTask: Task<Void, Never>?
     @State private var showSearchDropdown = false
     
-    @Environment(\.dismiss) var dismiss
-    
     private let categories = [
         "Baby Accessories",
         "Bags & Handbags",
@@ -52,12 +50,13 @@ struct ShopView: View {
                         VStack(spacing: 24) {
                             // Categories Section (moved to top)
                             categoriesSection
+                                .padding(.top, 16)
+                            
+                            // Featured Products Grid (moved above brands)
+                            featuredProductsSection
                             
                             // Featured Brands Section
                             featuredBrandsSection
-                            
-                            // Featured Products Grid
-                            featuredProductsSection
                         }
                         .padding(.bottom, 40)
                     }
@@ -98,16 +97,6 @@ struct ShopView: View {
     
     private var header: some View {
         HStack {
-            // Back Button - light grey
-            Button(action: {
-                dismiss()
-            }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundColor(Color(.systemGray3))
-            }
-            .buttonStyle(.plain)
-            
             Spacer()
             
             // BlackBuy Logo - blue
@@ -116,16 +105,12 @@ struct ShopView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(height: 28)
-                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
             
             Spacer()
-            
-            // Spacer for symmetry (no search button)
-            Color.clear
-                .frame(width: 22)
         }
         .frame(height: 44)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 24)
         .padding(.vertical, 8)
         .background(Color.white)
     }
@@ -137,11 +122,19 @@ struct ShopView: View {
             HStack(spacing: 12) {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 18))
-                    .foregroundColor(Color(.systemGray3))
+                    .foregroundColor(Color(.systemGray))
                 
-                TextField("Search for brands, products, or categories", text: $searchText)
-                    .font(.system(size: 15))
-                    .onChange(of: searchText) { oldValue, newValue in
+                ZStack(alignment: .leading) {
+                    if searchText.isEmpty {
+                        Text("Search for brands, products, or categories")
+                            .font(.system(size: 15))
+                            .foregroundColor(Color(.systemGray))
+                    }
+                    TextField("", text: $searchText)
+                        .font(.system(size: 15))
+                        .foregroundColor(.black)
+                }
+                .onChange(of: searchText) { oldValue, newValue in
                         // Cancel previous search
                         searchTask?.cancel()
                         
@@ -182,7 +175,7 @@ struct ShopView: View {
                     .fill(Color.white)
                     .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
             )
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             .padding(.top, 4)
             .padding(.bottom, 16)
             .background(Color.white)
@@ -253,7 +246,7 @@ struct ShopView: View {
                 }) {
                     Text("See more...")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                 }
@@ -263,7 +256,7 @@ struct ShopView: View {
             .background(Color.white)
             .cornerRadius(12)
             .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 5)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             
             Spacer()
         }
@@ -281,9 +274,9 @@ struct ShopView: View {
     private var categoriesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Categories")
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.black)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 24)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
@@ -294,21 +287,17 @@ struct ShopView: View {
                         }) {
                             Text(category)
                                 .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(.black)
+                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 10)
                                 .background(Color.white)
                                 .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
-                                )
                                 .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 2)
                         }
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 24)
                 .padding(.vertical, 8)
             }
         }
@@ -319,27 +308,24 @@ struct ShopView: View {
     private var featuredBrandsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Featured Brands")
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.black)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 24)
             
             if !carouselProducts.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
                         ForEach(carouselProducts) { product in
-                            CompanyFeatureCard(
+                            FeaturedBrandCircleCard(
                                 product: product,
-                                allCompanyProducts: carouselProducts.filter { $0.company == product.company },
                                 onCardTapped: {
-                                    // Navigate to company view
-                                },
-                                onProductTapped: {
                                     selectedProduct = product
                                 }
                             )
+                            .frame(width: 140)
                         }
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                 }
             }
         }
@@ -351,7 +337,7 @@ struct ShopView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Featured Products")
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.black)
                 
                 Spacer()
@@ -361,11 +347,11 @@ struct ShopView: View {
                 }) {
                     Text("See All")
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 24)
             
             if !gridProducts.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -388,10 +374,10 @@ struct ShopView: View {
                                     selectedCompany = product.company
                                 }
                             )
-                            .frame(width: 190)
+                            .frame(width: 170)
                         }
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, 24)
                 }
             }
         }
@@ -558,7 +544,7 @@ struct CompanyFeatureCard: View {
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white)
                     .frame(width: 32, height: 32)
-                    .background(Color(red: 0, green: 0.48, blue: 1))
+                    .background(Color(red: 0.26, green: 0.63, blue: 0.95))
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
@@ -608,7 +594,7 @@ struct ShortFeatureCard: View {
                             ProgressView()
                         )
                 }
-                .frame(width: 150, height: 150)
+                .frame(width: 140, height: 140)
                 .background(Color.white)
                 .cornerRadius(12)
                 .clipped()
@@ -640,29 +626,29 @@ struct ShortFeatureCard: View {
                     }) {
                         Text(product.company)
                             .font(.system(size: 13, weight: .regular))
-                            .foregroundColor(Color(.systemGray2))
+                            .foregroundColor(Color(red: 0.4, green: 0.7, blue: 1))
                             .lineLimit(1)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .buttonStyle(.plain)
                 } else {
                     Text(product.company)
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(Color(.systemGray2))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(Color(red: 0.4, green: 0.7, blue: 1))
                         .lineLimit(1)
                 }
                 
                 // Product name (black)
                 Text(product.name)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.black)
                     .lineLimit(2)
-                    .frame(height: 38, alignment: .top)
+                    .frame(height: 36, alignment: .top)
                 
                 // Price and Add button
                 HStack {
                     Text(product.formattedPrice)
-                        .font(.system(size: 17, weight: .medium))
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.black)
                     
                     Spacer()
@@ -672,7 +658,7 @@ struct ShortFeatureCard: View {
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.white)
                             .frame(width: 32, height: 32)
-                            .background(isInCart ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0, green: 0.48, blue: 1))
+                            .background(isInCart ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0.26, green: 0.63, blue: 0.95))
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)
@@ -683,6 +669,51 @@ struct ShortFeatureCard: View {
         .background(Color.white)
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
+    }
+}
+
+// MARK: - Featured Brand Circle Card (like saved companies style)
+
+struct FeaturedBrandCircleCard: View {
+    let product: Product
+    let onCardTapped: () -> Void
+    
+    var body: some View {
+        Button(action: onCardTapped) {
+            VStack(spacing: 8) {
+                // Company Logo Circle (using first letter)
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 0.95, green: 0.97, blue: 1))
+                        .frame(width: 80, height: 80)
+                    
+                    Text(product.company.prefix(1).uppercased())
+                        .font(.system(size: 32, weight: .medium))
+                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                }
+                .padding(.top, 12)
+                
+                // Company Name
+                Text(product.company)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .padding(.horizontal, 8)
+                
+                // Category
+                Text(product.mainCategory)
+                    .font(.system(size: 11, weight: .regular))
+                    .foregroundColor(Color(.systemGray))
+                    .padding(.top, 2)
+                    .padding(.bottom, 12)
+            }
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+        }
+        .buttonStyle(.plain)
     }
 }
 

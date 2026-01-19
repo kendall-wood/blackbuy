@@ -13,10 +13,6 @@ struct CameraScanView: View {
     @State private var isSearching = false
     @State private var searchError: String?
     @State private var flashlightOn = false
-    @State private var showingProfile = false
-    @State private var showingSaved = false
-    @State private var showingShop = false
-    @State private var showingScanHistory = false
     
     var body: some View {
         ZStack {
@@ -51,7 +47,7 @@ struct CameraScanView: View {
                 Spacer()
             }
             
-            // Top Corner Buttons (flashlight & profile)
+            // Top Corner Button (flashlight only)
             VStack {
                 HStack {
                     // Flashlight Button - top left
@@ -65,30 +61,13 @@ struct CameraScanView: View {
                             
                             Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
                                 .font(.system(size: 22))
-                                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                         }
                     }
                     .padding(.leading, 20)
                     .padding(.top, 50)
                     
                     Spacer()
-                    
-                    // Profile Button - top right
-                    Button(action: {
-                        showingProfile = true
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color(red: 0, green: 0.48, blue: 1))
-                                .frame(width: 50, height: 50)
-                            
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 22))
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .padding(.trailing, 20)
-                    .padding(.top, 50)
                 }
                 
                 Spacer()
@@ -109,9 +88,9 @@ struct CameraScanView: View {
                                 Image(systemName: "camera.fill")
                                     .font(.system(size: 18, weight: .medium))
                                 Text("Scan Again")
-                                    .font(.system(size: 18, weight: .medium))
+                                    .font(.system(size: 18, weight: .bold))
                             }
-                            .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
+                            .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                             .frame(width: 200, height: 50)
                             .background(
                                 RoundedRectangle(cornerRadius: 25)
@@ -135,7 +114,7 @@ struct CameraScanView: View {
                                 
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("View \(searchResults.count)+ Products")
-                                        .font(.system(size: 18, weight: .medium))
+                                        .font(.system(size: 20, weight: .bold))
                                         .foregroundColor(.white)
                                     
                                     if let result = lastClassificationResult {
@@ -151,66 +130,13 @@ struct CameraScanView: View {
                             .frame(height: 70)
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color(red: 0, green: 0.48, blue: 1))
+                                    .fill(Color(red: 0.26, green: 0.63, blue: 0.95))
                             )
                         }
                         .padding(.horizontal, 40)
                     }
-                    .padding(.bottom, 140)
+                    .padding(.bottom, 160)
                 }
-            }
-            
-            // Bottom Navigation Icons
-            VStack {
-                Spacer()
-                
-                HStack(spacing: 60) {
-                    // Scan History Button
-                    Button(action: {
-                        showingScanHistory = true
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 60, height: 60)
-                            
-                            Image(systemName: "clock.fill")
-                                .font(.system(size: 28))
-                                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
-                        }
-                    }
-                    
-                    // Saved Button
-                    Button(action: {
-                        showingSaved = true
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 60, height: 60)
-                            
-                            Image(systemName: "heart.fill")
-                                .font(.system(size: 28))
-                                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
-                        }
-                    }
-                    
-                    // Shop Button
-                    Button(action: {
-                        showingShop = true
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 60, height: 60)
-                            
-                            Image(systemName: "storefront.fill")
-                                .font(.system(size: 28))
-                                .foregroundColor(Color(red: 0, green: 0.48, blue: 1))
-                        }
-                    }
-                }
-                .padding(.bottom, 50)
             }
         }
         // Scan Results Bottom Sheet
@@ -225,22 +151,6 @@ struct CameraScanView: View {
                     searchResults = []
                 }
             )
-        }
-        // Profile Modal
-        .sheet(isPresented: $showingProfile) {
-            ProfileView()
-        }
-        // Saved Modal
-        .fullScreenCover(isPresented: $showingSaved) {
-            SavedView()
-        }
-        // Shop Modal
-        .fullScreenCover(isPresented: $showingShop) {
-            ShopView()
-        }
-        // Scan History Modal
-        .fullScreenCover(isPresented: $showingScanHistory) {
-            ScanHistoryView()
         }
     }
     
@@ -315,7 +225,7 @@ struct ScanResultsSheet: View {
                     if let classification = classification {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Black-owned \(classification.productType)")
-                                .font(.system(size: 24, weight: .bold))
+                                .font(.system(size: 28, weight: .bold))
                             
                             Text("\(results.count) products found")
                                 .font(.system(size: 16, weight: .regular))
@@ -412,7 +322,7 @@ struct ProductCardWithNumber: View {
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.white)
                     .frame(width: 28, height: 28)
-                    .background(Color(red: 0, green: 0.48, blue: 1))
+                    .background(Color(red: 0.26, green: 0.63, blue: 0.95))
                     .clipShape(Circle())
                     .padding(10)
             }
@@ -420,18 +330,19 @@ struct ProductCardWithNumber: View {
             // Product Info
             VStack(alignment: .leading, spacing: 6) {
                 Text(product.name)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.primary)
                     .lineLimit(2)
+                    .frame(height: 36, alignment: .top)
                 
                 Text(product.company)
-                    .font(.system(size: 13, weight: .regular))
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
                 
                 HStack {
                     Text(product.formattedPrice)
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.primary)
                     
                     Spacer()
