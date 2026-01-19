@@ -19,7 +19,7 @@ struct CheckoutManagerView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 24)
                 .padding(.top, 12)
-                .padding(.bottom, 8)
+                .padding(.bottom, 20)
             
             // Content
             ScrollView {
@@ -177,13 +177,13 @@ struct CompanyCartGroup: View {
             // Company name header
             HStack {
                 Text(group.company)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(.black)
                 
                 Spacer()
                 
                 Text(group.formattedTotalPrice)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
             }
             .padding(.horizontal, 16)
@@ -236,72 +236,96 @@ struct CartProductRow: View {
     @State private var isShowingActions = false
     
     var body: some View {
-        ZStack {
-            // Background swipe actions
-            HStack(spacing: 0) {
-                // Complete button (left/green)
-                if dragOffset > 0 {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // Complete button (left/green) - revealed when swiping right
+                HStack(spacing: 0) {
                     Button(action: {
                         withAnimation {
                             dragOffset = 0
                             isShowingActions = false
                         }
                     }) {
-                        VStack {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                        .frame(width: 80)
-                        .frame(maxHeight: .infinity)
-                        .background(Color.green)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 92, height: 110)
+                            .background(
+                                UnevenRoundedRectangle(cornerRadii: .init(
+                                    topLeading: 12,
+                                    bottomLeading: 12,
+                                    bottomTrailing: 0,
+                                    topTrailing: 0
+                                ))
+                                .fill(Color.green)
+                            )
                     }
+                    .buttonStyle(.plain)
+                    .opacity(dragOffset > 5 ? 1 : 0)
+                    
+                    Spacer()
                 }
                 
-                Spacer()
-                
-                // Delete button (right/red)
-                if dragOffset < 0 {
+                // Delete button (right/red) - revealed when swiping left
+                HStack(spacing: 0) {
+                    Spacer()
+                    
                     Button(action: {
                         onRemove()
                     }) {
-                        VStack {
-                            Image(systemName: "trash")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(.white)
-                        }
-                        .frame(width: 80)
-                        .frame(maxHeight: .infinity)
-                        .background(Color.red)
+                        Image(systemName: "trash")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 92, height: 110)
+                            .background(
+                                UnevenRoundedRectangle(cornerRadii: .init(
+                                    topLeading: 0,
+                                    bottomLeading: 0,
+                                    bottomTrailing: 12,
+                                    topTrailing: 12
+                                ))
+                                .fill(Color.red)
+                            )
                     }
+                    .buttonStyle(.plain)
+                    .opacity(dragOffset < -5 ? 1 : 0)
                 }
-            }
-            
-            // Main card content
-            cardContent
-                .offset(x: dragOffset)
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            dragOffset = value.translation.width
-                        }
-                        .onEnded { value in
-                            withAnimation(.easeOut(duration: 0.3)) {
-                                if value.translation.width < -80 {
-                                    dragOffset = -80
-                                    isShowingActions = true
-                                } else if value.translation.width > 80 {
-                                    dragOffset = 80
-                                    isShowingActions = true
+                
+                // Main card content
+                cardContent
+                    .frame(width: geometry.size.width)
+                    .offset(x: dragOffset)
+                    .highPriorityGesture(
+                        DragGesture()
+                            .onChanged { value in
+                                // Clamp the drag offset to prevent excessive dragging
+                                let translation = value.translation.width
+                                if translation > 0 {
+                                    dragOffset = min(translation, 80)
                                 } else {
-                                    dragOffset = 0
-                                    isShowingActions = false
+                                    dragOffset = max(translation, -80)
                                 }
                             }
-                        }
-                )
+                            .onEnded { value in
+                                withAnimation(.easeOut(duration: 0.3)) {
+                                    if value.translation.width < -50 {
+                                        dragOffset = -80
+                                        isShowingActions = true
+                                    } else if value.translation.width > 50 {
+                                        dragOffset = 80
+                                        isShowingActions = true
+                                    } else {
+                                        dragOffset = 0
+                                        isShowingActions = false
+                                    }
+                                }
+                            }
+                    )
+            }
+            .frame(height: 110)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .frame(height: 110)
+        .clipped()
     }
     
     private var cardContent: some View {
@@ -346,17 +370,17 @@ struct CartProductRow: View {
                         }) {
                             ZStack {
                                 Circle()
-                                    .fill(Color(.systemGray5))
-                                    .frame(width: 30, height: 30)
+                                    .fill(Color(.systemGray))
+                                    .frame(width: 24, height: 24)
                                 Image(systemName: "minus")
-                                    .font(.system(size: 13, weight: .medium))
-                                    .foregroundColor(Color(.systemGray))
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundColor(.white)
                             }
                         }
                         .buttonStyle(.plain)
                         
                         Text("\(item.quantity)")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.black)
                             .frame(minWidth: 20)
                         
@@ -366,9 +390,9 @@ struct CartProductRow: View {
                             ZStack {
                                 Circle()
                                     .fill(Color(red: 0.26, green: 0.63, blue: 0.95))
-                                    .frame(width: 30, height: 30)
+                                    .frame(width: 24, height: 24)
                                 Image(systemName: "plus")
-                                    .font(.system(size: 13, weight: .medium))
+                                    .font(.system(size: 10, weight: .medium))
                                     .foregroundColor(.white)
                             }
                         }
@@ -378,17 +402,17 @@ struct CartProductRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 // Total Price and Buy Button stacked
-                VStack(spacing: 6) {
+                VStack(spacing: 10) {
                     Text(item.formattedTotalPrice)
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.black)
                     
                     Button(action: onBuy) {
                         Text("Buy")
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.white)
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 8)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
                             .background(Color(red: 0.26, green: 0.63, blue: 0.95))
                             .cornerRadius(8)
                     }
@@ -397,6 +421,7 @@ struct CartProductRow: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
+        .frame(height: 110)
         .background(Color.white)
         .cornerRadius(12)
         .overlay(
