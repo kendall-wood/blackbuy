@@ -160,7 +160,7 @@ struct CompanyView: View {
             
             // Company Name
             Text(companyName)
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 24, weight: .semibold))
                 .foregroundColor(.black)
                 .lineLimit(1)
             

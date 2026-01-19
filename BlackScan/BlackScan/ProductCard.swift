@@ -14,7 +14,7 @@ struct ProductCard: View {
     private let spacing: CGFloat = 8
     
     var body: some View {
-        VStack(alignment: .leading, spacing: spacing) {
+        VStack(alignment: .leading, spacing: 6) {
             // Product Image
             productImage
             
@@ -22,10 +22,9 @@ struct ProductCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 // Product Name (2 lines max)
                 Text(product.name)
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.primary)
                     .lineLimit(2)
-                    .frame(height: 36, alignment: .top)
                     .multilineTextAlignment(.leading)
                 
                 // Company Name
@@ -46,7 +45,7 @@ struct ProductCard: View {
                     // Buy Button
                     buyButton
                 }
-                .padding(.top, 4)
+                .padding(.top, 8)
             }
             .padding(.horizontal, cardPadding)
             .padding(.bottom, cardPadding)

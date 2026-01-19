@@ -304,7 +304,9 @@ struct SavedProductCard: View {
                 .buttonStyle(.plain)
                 .padding(10)
             }
-            .padding(12)
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
+            .padding(.bottom, 6)
             .onTapGesture {
                 onCardTapped()
             }
@@ -319,10 +321,10 @@ struct SavedProductCard: View {
                 
                 // Product name (black)
                 Text(product.name)
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.black)
                     .lineLimit(2)
-                    .frame(height: 36, alignment: .top)
+                    .padding(.bottom, 4)
                 
                 // Price and Add button
                 HStack {
@@ -334,16 +336,18 @@ struct SavedProductCard: View {
                     
                     Button(action: onAddToCart) {
                         Image(systemName: isInCart ? "checkmark" : "plus")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.white)
-                            .frame(width: 32, height: 32)
+                            .frame(width: 28, height: 28)
                             .background(isInCart ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0.26, green: 0.63, blue: 0.95))
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(12)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
+            .padding(.top, 6)
         }
         .background(Color.white)
         .cornerRadius(16)

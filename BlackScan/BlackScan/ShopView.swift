@@ -5,6 +5,7 @@ struct ShopView: View {
     
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var savedProductsManager: SavedProductsManager
+    @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
     
     // State for different product sections
@@ -318,8 +319,12 @@ struct ShopView: View {
                         ForEach(carouselProducts) { product in
                             FeaturedBrandCircleCard(
                                 product: product,
+                                isSaved: savedCompaniesManager.isCompanySaved(product.company),
+                                onSaveTapped: {
+                                    savedCompaniesManager.toggleSaveCompany(product.company)
+                                },
                                 onCardTapped: {
-                                    selectedProduct = product
+                                    selectedCompany = product.company
                                 }
                             )
                             .frame(width: 140)
@@ -355,7 +360,7 @@ struct ShopView: View {
             
             if !gridProducts.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 16) {
+                    HStack(alignment: .center, spacing: 16) {
                         ForEach(gridProducts) { product in
                             ShortFeatureCard(
                                 product: product,
@@ -612,7 +617,9 @@ struct ShortFeatureCard: View {
                 .buttonStyle(.plain)
                 .padding(10)
             }
-            .padding(12)
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
+            .padding(.bottom, 6)
             .onTapGesture {
                 onCardTapped()
             }
@@ -640,10 +647,10 @@ struct ShortFeatureCard: View {
                 
                 // Product name (black)
                 Text(product.name)
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.black)
                     .lineLimit(2)
-                    .frame(height: 36, alignment: .top)
+                    .padding(.bottom, 4)
                 
                 // Price and Add button
                 HStack {
@@ -655,16 +662,18 @@ struct ShortFeatureCard: View {
                     
                     Button(action: onAddToCart) {
                         Image(systemName: isInCart ? "checkmark" : "plus")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.white)
-                            .frame(width: 32, height: 32)
+                            .frame(width: 28, height: 28)
                             .background(isInCart ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0.26, green: 0.63, blue: 0.95))
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(12)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
+            .padding(.top, 6)
         }
         .background(Color.white)
         .cornerRadius(16)
@@ -676,44 +685,60 @@ struct ShortFeatureCard: View {
 
 struct FeaturedBrandCircleCard: View {
     let product: Product
+    let isSaved: Bool
+    let onSaveTapped: () -> Void
     let onCardTapped: () -> Void
     
     var body: some View {
-        Button(action: onCardTapped) {
-            VStack(spacing: 8) {
-                // Company Logo Circle (using first letter)
-                ZStack {
-                    Circle()
-                        .fill(Color(red: 0.95, green: 0.97, blue: 1))
-                        .frame(width: 80, height: 80)
+        ZStack(alignment: .topTrailing) {
+            Button(action: onCardTapped) {
+                VStack(spacing: 4) {
+                    // Company Logo Circle (using first letter)
+                    ZStack {
+                        Circle()
+                            .fill(Color(red: 0.95, green: 0.97, blue: 1))
+                            .frame(width: 80, height: 80)
+                        
+                        Text(product.company.prefix(1).uppercased())
+                            .font(.system(size: 32, weight: .medium))
+                            .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                    }
+                    .padding(.top, 12)
                     
-                    Text(product.company.prefix(1).uppercased())
-                        .font(.system(size: 32, weight: .medium))
-                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                    // Company Name
+                    Text(product.company)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .padding(.horizontal, 8)
+                    
+                    // Category
+                    Text(product.mainCategory)
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundColor(Color(.systemGray))
+                        .padding(.top, 2)
+                        .padding(.bottom, 12)
                 }
-                .padding(.top, 12)
-                
-                // Company Name
-                Text(product.company)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .padding(.horizontal, 8)
-                
-                // Category
-                Text(product.mainCategory)
-                    .font(.system(size: 11, weight: .regular))
-                    .foregroundColor(Color(.systemGray))
-                    .padding(.top, 2)
-                    .padding(.bottom, 12)
+                .frame(maxWidth: .infinity)
+                .background(Color.white)
+                .cornerRadius(12)
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
             }
-            .frame(maxWidth: .infinity)
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+            .buttonStyle(.plain)
+            
+            // Heart Button
+            Button(action: onSaveTapped) {
+                Image(systemName: isSaved ? "heart.fill" : "heart")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(isSaved ? .red : .gray)
+                    .frame(width: 28, height: 28)
+                    .background(Color.white.opacity(0.9))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .padding(8)
         }
-        .buttonStyle(.plain)
     }
 }
 
@@ -727,5 +752,6 @@ struct IdentifiableString: Identifiable {
 #Preview {
     ShopView()
         .environmentObject(SavedProductsManager())
+        .environmentObject(SavedCompaniesManager())
         .environmentObject(CartManager())
 }
