@@ -94,7 +94,7 @@ struct SavedView: View {
     private var savedCompaniesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .center) {
-                Text("Saved Companies")
+                Text("Saved Brands")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.black)
                 
@@ -112,11 +112,12 @@ struct SavedView: View {
                     ForEach(savedCompaniesManager.savedCompanies) { company in
                         CompanyCircleCard(
                             company: company,
+                            typesenseClient: typesenseClient,
                             onUnsave: {
                                 savedCompaniesManager.removeSavedCompany(company.name)
                             }
                         )
-                        .frame(width: 160)
+                        .frame(width: 140)
                     }
                 }
                 .padding(.horizontal, 24)
@@ -252,55 +253,113 @@ struct SavedView: View {
     }
 }
 
-/// Company circle card (matches ShopView style)
+/// Company circle card with product image (matches ShopView style)
 struct CompanyCircleCard: View {
     let company: SavedCompaniesManager.SavedCompany
+    let typesenseClient: TypesenseClient
     let onUnsave: () -> Void
     
+    @State private var productImage: String?
+    @State private var mainCategory: String = ""
+    
     var body: some View {
-        VStack(spacing: 8) {
-            // Company Circle
-            ZStack {
-                Circle()
-                    .fill(Color(red: 0.95, green: 0.97, blue: 1)) // Very light blue
-                    .frame(width: 64, height: 64)
+        ZStack(alignment: .topTrailing) {
+            VStack(spacing: 4) {
+                // Company Logo Circle (using random product image)
+                AsyncImage(url: productImage.flatMap { URL(string: $0) }) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    case .failure(_):
+                        ZStack {
+                            Circle()
+                                .fill(Color(red: 0.95, green: 0.97, blue: 1))
+                            
+                            Text(company.name.prefix(1).uppercased())
+                                .font(.system(size: 32, weight: .medium))
+                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                        }
+                    case .empty:
+                        ZStack {
+                            Circle()
+                                .fill(Color(red: 0.95, green: 0.97, blue: 1))
+                            
+                            ProgressView()
+                                .tint(Color(red: 0.26, green: 0.63, blue: 0.95))
+                        }
+                    @unknown default:
+                        Circle()
+                            .fill(Color(red: 0.95, green: 0.97, blue: 1))
+                    }
+                }
+                .frame(width: 80, height: 80)
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(Color(red: 0.26, green: 0.63, blue: 0.95).opacity(0.2), lineWidth: 2)
+                )
+                .padding(.top, 12)
                 
-                Text(company.name.prefix(1).uppercased())
-                    .font(.system(size: 28, weight: .medium))
-                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
-            }
-            .padding(.top, 12)
-            
-            // Company Name
-            Text(company.name)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.black)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .padding(.horizontal, 8)
-            
-            // Product Count
-            if let productCount = company.productCount {
-                Text("\(productCount) products")
+                // Company Name with fixed height container
+                Text(company.name)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .frame(height: 40, alignment: .top)
+                    .padding(.horizontal, 8)
+                
+                Spacer()
+                
+                // Category
+                Text(mainCategory.isEmpty ? "Brand" : mainCategory)
                     .font(.system(size: 11, weight: .regular))
                     .foregroundColor(Color(.systemGray))
-                    .padding(.top, 2)
+                    .padding(.bottom, 12)
             }
+            .frame(maxWidth: .infinity, minHeight: 170)
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
             
-            // Unsave Heart Button
+            // Heart Button
             Button(action: onUnsave) {
                 Image(systemName: "heart.fill")
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.red)
+                    .frame(width: 28, height: 28)
+                    .background(Color.white.opacity(0.9))
+                    .clipShape(Circle())
             }
             .buttonStyle(.plain)
-            .padding(.top, 6)
-            .padding(.bottom, 12)
+            .padding(8)
         }
-        .frame(maxWidth: .infinity)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+        .onAppear {
+            loadRandomProduct()
+        }
+    }
+    
+    private func loadRandomProduct() {
+        Task {
+            do {
+                let products = try await typesenseClient.searchProducts(
+                    query: company.name,
+                    page: 1,
+                    perPage: 10
+                )
+                
+                if let randomProduct = products.randomElement() {
+                    await MainActor.run {
+                        productImage = randomProduct.imageUrl
+                        mainCategory = randomProduct.mainCategory
+                    }
+                }
+            } catch {
+                print("Error loading product image for \(company.name): \(error)")
+            }
+        }
     }
 }
 
