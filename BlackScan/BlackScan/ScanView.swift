@@ -12,6 +12,7 @@ struct ScanView: View {
     @State private var lastClassification: ScanClassification?  // Changed from ClassificationResult
     @State private var isSearching = false
     @State private var searchError: String?
+    @State private var isScannerActive = false  // Controls camera activation
     
     // MARK: - UI Configuration
     
@@ -22,8 +23,8 @@ struct ScanView: View {
     
     var body: some View {
         ZStack {
-            // Camera Scanner Background (only active when scanning)
-            if isSearching || lastClassification != nil {
+            // Camera Scanner Background (always active when scanner is on)
+            if isScannerActive {
                 ScannerContainerView { recognizedText in
                     handleRecognizedText(recognizedText)
                 }
@@ -67,6 +68,7 @@ struct ScanView: View {
                 .background(buttonBackgroundColor)
                 .foregroundColor(buttonTextColor)
                 .cornerRadius(12)
+                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
             }
             .disabled(isSearching)
             
@@ -110,9 +112,9 @@ struct ScanView: View {
         if !scanResults.isEmpty {
             // Show results sheet
             isShowingResults = true
-        } else {
-            // Start scanning - camera is already active in background
-            // Results will update automatically when scan completes
+        } else if !isScannerActive {
+            // Start scanning - activate camera
+            isScannerActive = true
         }
     }
     
