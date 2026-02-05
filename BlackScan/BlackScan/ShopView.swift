@@ -57,11 +57,11 @@ struct ShopView: View {
                             categoriesSection
                                 .padding(.top, 16)
                             
-                            // Featured Products Grid (moved above brands)
-                            featuredProductsSection
-                            
                             // Featured Brands Section
                             featuredBrandsSection
+                            
+                            // Featured Products Grid
+                            featuredProductsSection
                         }
                         .padding(.bottom, 40)
                     }
@@ -367,52 +367,31 @@ struct ShopView: View {
     
     private var featuredProductsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("Featured Products")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.black)
-                
-                Spacer()
-                
-                Button(action: {
-                    showingAllFeatured = true
-                }) {
-                    Text("See All")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 24)
+            Text("Featured Products")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.black)
+                .padding(.horizontal, 24)
             
             if !gridProducts.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(alignment: .center, spacing: 16) {
-                        ForEach(gridProducts) { product in
-                            ShortFeatureCard(
+                LazyVGrid(columns: [
+                    GridItem(.flexible(), spacing: 20),
+                    GridItem(.flexible(), spacing: 20)
+                ], spacing: 20) {
+                    ForEach(gridProducts.prefix(32)) { product in
+                        NavigationLink(destination: ProductDetailView(product: product)) {
+                            ProductCard(
                                 product: product,
-                                isSaved: savedProductsManager.isProductSaved(product),
-                                isInCart: cartManager.isInCart(product),
-                                onSaveTapped: {
-                                    savedProductsManager.toggleSaveProduct(product)
-                                },
-                                onAddToCart: {
-                                    cartManager.addToCart(product)
-                                },
-                                onCardTapped: {
-                                    selectedProduct = product
-                                },
-                                onCompanyTapped: {
-                                    selectedCompany = product.company
+                                onBuyTapped: {
+                                    if let url = URL(string: product.productUrl) {
+                                        UIApplication.shared.open(url)
+                                    }
                                 }
                             )
-                            .frame(width: 170)
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    .padding(.bottom, 12)
                 }
+                .padding(.horizontal, 24)
             }
         }
     }
@@ -759,22 +738,24 @@ struct FeaturedBrandCircleCard: View {
                     )
                     .padding(.top, 12)
                     
-                    // Company Name
+                    // Company Name with fixed height container
                     Text(product.company)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.black)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
+                        .frame(height: 40, alignment: .top)
                         .padding(.horizontal, 8)
+                    
+                    Spacer()
                     
                     // Category
                     Text(product.mainCategory)
                         .font(.system(size: 11, weight: .regular))
                         .foregroundColor(Color(.systemGray))
-                        .padding(.top, 2)
                         .padding(.bottom, 12)
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, minHeight: 170)
                 .background(Color.white)
                 .cornerRadius(12)
                 .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
