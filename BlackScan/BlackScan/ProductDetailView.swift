@@ -116,7 +116,7 @@ struct ProductDetailView: View {
                         
                         // Product name
                         Text(product.name)
-                            .font(.system(size: 24, weight: .medium))
+                            .font(.system(size: 24, weight: .semibold))
                             .tracking(-0.3)
                             .foregroundColor(.black)
                             .lineLimit(3)
@@ -125,7 +125,7 @@ struct ProductDetailView: View {
                         
                         // Price with tight kerning
                         Text(product.formattedPrice)
-                            .font(.system(size: 32, weight: .regular))
+                            .font(.system(size: 32, weight: .medium))
                             .tracking(-0.5)
                             .foregroundColor(.black)
                             .padding(.top, 8)
@@ -299,16 +299,22 @@ struct CategoryChip: View {
         Text(text.uppercased())
             .font(.system(size: 11, weight: .bold))
             .tracking(0.8)
-            .foregroundColor(isPrimary ? .white : Color(.systemGray2))
+            .foregroundColor(.white)
             .lineLimit(1)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color(.systemGray6))
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(isPrimary ? Color.clear : Color.clear, lineWidth: 0)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: isPrimary ? 
+                        [Color(red: 0.26, green: 0.63, blue: 0.95), Color(red: 0.20, green: 0.55, blue: 0.87)] :
+                        [Color(red: 0.45, green: 0.45, blue: 0.95), Color(red: 0.35, green: 0.35, blue: 0.85)]
+                    ),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
             )
+            .cornerRadius(8)
+            .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
     }
 }
 
