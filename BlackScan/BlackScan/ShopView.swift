@@ -148,9 +148,10 @@ struct ShopView: View {
                 
                 ZStack(alignment: .leading) {
                     if searchText.isEmpty {
-                        Text("Search for brands, products, or categories")
+                        Text("Search products and brands")
                             .font(.system(size: 15))
                             .foregroundColor(Color(.systemGray))
+                            .lineLimit(1)
                     }
                     TextField("", text: $searchText)
                         .font(.system(size: 15))

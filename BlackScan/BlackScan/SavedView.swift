@@ -195,11 +195,11 @@ struct SavedView: View {
     
     private var productsGrid: some View {
         let columns = [
-            GridItem(.flexible(), spacing: 16),
-            GridItem(.flexible(), spacing: 16)
+            GridItem(.flexible(), spacing: 20),
+            GridItem(.flexible(), spacing: 20)
         ]
         
-        return LazyVGrid(columns: columns, spacing: 24) {
+        return LazyVGrid(columns: columns, spacing: 20) {
             ForEach(sortedProducts) { product in
                 SavedProductCard(
                     product: product,

@@ -228,7 +228,7 @@ struct ScanView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.leading, 20)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 10)
                         
                         Spacer()
                     }
@@ -274,7 +274,7 @@ struct ScanView: View {
                         .buttonStyle(.plain)
                         .padding(.trailing, 20)
                     }
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 10)
                 }
             }
         }
@@ -825,6 +825,7 @@ struct ScanView: View {
                     successResultsContent
                 }
             }
+            .background(Color.white)
             .navigationBarHidden(true)
         }
         .presentationDetents(resultSheetDetents)
@@ -832,53 +833,55 @@ struct ScanView: View {
     }
     
     private var sheetHeader: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     if let analysis = lastAnalysis {
-                        Text("Found: \(analysis.productType)")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                        Text("\(scanResults.count) Black-owned \(analysis.productType)")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(.black)
                         
-                        HStack(spacing: 4) {
-                            Text("Black-owned products")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            if !scanResults.isEmpty, let topResult = scanResults.first {
-                                Text("•")
-                                    .foregroundColor(.secondary)
-                                Text("\(topResult.confidencePercentage)% match")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(confidenceColor(topResult.confidenceScore))
-                            }
+                        if !scanResults.isEmpty, let topResult = scanResults.first {
+                            Text("\(topResult.confidencePercentage)% match confidence")
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundColor(Color(.systemGray))
                         }
                     } else {
                         Text("Search Results")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(.black)
                     }
                 }
                 
                 Spacer()
                 
-                Button("Done") {
+                Button(action: {
                     isShowingResults = false
                     scanState = .initial
                     scanResults = []
                     lastAnalysis = nil
                     capturedImage = nil
+                }) {
+                    ZStack {
+                        Circle()
+                            .fill(Color(.systemGray6))
+                            .frame(width: 32, height: 32)
+                        
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color(.systemGray))
+                    }
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.plain)
             }
+            .padding(.horizontal, 24)
+            .padding(.top, 20)
+            .padding(.bottom, 16)
             
             Divider()
+                .background(Color(.systemGray5))
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 12)
-        .padding(.bottom, 8)
-        .background(Color(.systemBackground))
+        .background(Color.white)
     }
     
     private func errorContent(_ error: String) -> some View {
@@ -890,12 +893,12 @@ struct ScanView: View {
                 .foregroundColor(.orange)
             
             Text("Search Error")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(.black)
             
             Text(error)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+                .font(.system(size: 15))
+                .foregroundColor(Color(.systemGray))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
@@ -910,6 +913,7 @@ struct ScanView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.white)
     }
     
     private var emptyResultsContent: some View {
@@ -918,15 +922,15 @@ struct ScanView: View {
             
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 48))
-                .foregroundColor(.secondary)
+                .foregroundColor(Color(.systemGray))
             
             Text("No Matches Found")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundColor(.black)
             
             Text("Try scanning again with better lighting or a clearer view of the product label.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+                .font(.system(size: 15))
+                .foregroundColor(Color(.systemGray))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
@@ -940,14 +944,15 @@ struct ScanView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.white)
     }
     
     private var successResultsContent: some View {
         ScrollView {
             LazyVGrid(columns: [
-                GridItem(.flexible(), spacing: 16),
-                GridItem(.flexible(), spacing: 16)
-            ], spacing: 16) {
+                GridItem(.flexible(), spacing: 20),
+                GridItem(.flexible(), spacing: 20)
+            ], spacing: 20) {
                 ForEach(scanResults) { scoredProduct in
                     NavigationLink(destination: ProductDetailView(product: scoredProduct.product)) {
                         ProductCard(product: scoredProduct.product, onBuyTapped: {
@@ -960,10 +965,11 @@ struct ScanView: View {
                     .buttonStyle(PlainButtonStyle())
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+            .padding(.horizontal, 24)
+            .padding(.top, 20)
             .padding(.bottom, 100)
         }
+        .background(Color.white)
     }
     
     private func confidenceColor(_ confidence: Double) -> Color {
