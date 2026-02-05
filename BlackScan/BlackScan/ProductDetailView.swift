@@ -87,7 +87,7 @@ struct ProductDetailView: View {
                         .cornerRadius(16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color(red: 0.26, green: 0.63, blue: 0.95), lineWidth: 1)
+                                .stroke(Color(.systemGray5), lineWidth: 1)
                         )
                         
                         // Heart Button (overlayed in top right)
@@ -128,7 +128,7 @@ struct ProductDetailView: View {
                         
                         // Price with tight kerning
                         Text(product.formattedPrice)
-                            .font(.system(size: 26, weight: .medium))
+                            .font(.system(size: 26, weight: .semibold))
                             .tracking(-0.5)
                             .foregroundColor(.black)
                             .padding(.top, 8)
