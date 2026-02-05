@@ -210,7 +210,7 @@ struct ScanView: View {
             }
             
             // Step 2: Search Typesense
-            await searchForMatches(analysis: analysis)
+            await searchForMatches(analysis: scanResult.analysis)
             
         } catch {
             print("❌ OpenAI Vision error: \(error.localizedDescription)")

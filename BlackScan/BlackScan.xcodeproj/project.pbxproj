@@ -34,6 +34,9 @@
 		9895136B2F3433040093A83B /* BrandDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9895135F2F3433040093A83B /* BrandDatabase.swift */; };
 		9895136C2F3433040093A83B /* FormTaxonomy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989513612F3433040093A83B /* FormTaxonomy.swift */; };
 		9895136E2F34423F0093A83B /* OpenAIVisionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9895136D2F34423F0093A83B /* OpenAIVisionService.swift */; };
+		989513702F34514E0093A83B /* HybridScanService 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9895136F2F34514E0093A83B /* HybridScanService 2.swift */; };
+		989513732F34516F0093A83B /* MultiFrameOCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989513722F34516F0093A83B /* MultiFrameOCRService.swift */; };
+		989513742F34516F0093A83B /* GPT4TextService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989513712F34516F0093A83B /* GPT4TextService.swift */; };
 		98EC5A7D2F1D6BEE0093C455 /* AllFeaturedProductsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98EC5A7B2F1D6BEE0093C455 /* AllFeaturedProductsView.swift */; };
 		98EC5A7E2F1D6BEE0093C455 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98EC5A7C2F1D6BEE0093C455 /* SearchView.swift */; };
 		98EC5A802F1D7F1E0093C455 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98EC5A7F2F1D7F1E0093C455 /* ImageCache.swift */; };
@@ -109,6 +112,9 @@
 		989513632F3433040093A83B /* ProductTaxonomy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductTaxonomy.swift; sourceTree = "<group>"; };
 		989513642F3433040093A83B /* SizeExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SizeExtractor.swift; sourceTree = "<group>"; };
 		9895136D2F34423F0093A83B /* OpenAIVisionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIVisionService.swift; sourceTree = "<group>"; };
+		9895136F2F34514E0093A83B /* HybridScanService 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HybridScanService 2.swift"; sourceTree = "<group>"; };
+		989513712F34516F0093A83B /* GPT4TextService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPT4TextService.swift; sourceTree = "<group>"; };
+		989513722F34516F0093A83B /* MultiFrameOCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiFrameOCRService.swift; sourceTree = "<group>"; };
 		98EC5A7B2F1D6BEE0093C455 /* AllFeaturedProductsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllFeaturedProductsView.swift; sourceTree = "<group>"; };
 		98EC5A7C2F1D6BEE0093C455 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		98EC5A7F2F1D7F1E0093C455 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
@@ -240,6 +246,9 @@
 		989513652F3433040093A83B /* Scanning */ = {
 			isa = PBXGroup;
 			children = (
+				9895136F2F34514E0093A83B /* HybridScanService 2.swift */,
+				989513712F34516F0093A83B /* GPT4TextService.swift */,
+				989513722F34516F0093A83B /* MultiFrameOCRService.swift */,
 				9895135E2F3433040093A83B /* AdvancedClassifier.swift */,
 				9895135F2F3433040093A83B /* BrandDatabase.swift */,
 				989513602F3433040093A83B /* ConfidenceScorer.swift */,
@@ -392,6 +401,7 @@
 				86FDE1CFAE2144B5B254F7E3 /* CompanyView.swift in Sources */,
 				989513662F3433040093A83B /* ConfidenceScorer.swift in Sources */,
 				989513672F3433040093A83B /* ProductTaxonomy.swift in Sources */,
+				989513702F34514E0093A83B /* HybridScanService 2.swift in Sources */,
 				989513682F3433040093A83B /* IngredientDatabase.swift in Sources */,
 				989513692F3433040093A83B /* SizeExtractor.swift in Sources */,
 				9895136A2F3433040093A83B /* AdvancedClassifier.swift in Sources */,
@@ -413,6 +423,8 @@
 				5CF48CB932F34A94968108C3 /* SavedView.swift in Sources */,
 				7BC94C979D09429DAC131580 /* ScanHistoryManager.swift in Sources */,
 				F072230AA6CA4E5595432F8A /* ScanView.swift in Sources */,
+				989513732F34516F0093A83B /* MultiFrameOCRService.swift in Sources */,
+				989513742F34516F0093A83B /* GPT4TextService.swift in Sources */,
 				308D736FEEE54EDDAEE2DBF1 /* ShopView.swift in Sources */,
 				A2BA2EE6C51248D68611BF05 /* TestEnv.swift in Sources */,
 				98EC5A832F1EBC040093C455 /* MainTabView.swift in Sources */,
