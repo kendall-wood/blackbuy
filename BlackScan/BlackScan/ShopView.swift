@@ -722,16 +722,41 @@ struct FeaturedBrandCircleCard: View {
         ZStack(alignment: .topTrailing) {
             Button(action: onCardTapped) {
                 VStack(spacing: 4) {
-                    // Company Logo Circle (using first letter)
-                    ZStack {
-                        Circle()
-                            .fill(Color(red: 0.95, green: 0.97, blue: 1))
-                            .frame(width: 80, height: 80)
-                        
-                        Text(product.company.prefix(1).uppercased())
-                            .font(.system(size: 32, weight: .medium))
-                            .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                    // Company Logo Circle (using product image)
+                    AsyncImage(url: URL(string: product.imageUrl)) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        case .failure(_):
+                            ZStack {
+                                Circle()
+                                    .fill(Color(red: 0.95, green: 0.97, blue: 1))
+                                
+                                Text(product.company.prefix(1).uppercased())
+                                    .font(.system(size: 32, weight: .medium))
+                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            }
+                        case .empty:
+                            ZStack {
+                                Circle()
+                                    .fill(Color(red: 0.95, green: 0.97, blue: 1))
+                                
+                                ProgressView()
+                                    .tint(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            }
+                        @unknown default:
+                            Circle()
+                                .fill(Color(red: 0.95, green: 0.97, blue: 1))
+                        }
                     }
+                    .frame(width: 80, height: 80)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(Color(red: 0.26, green: 0.63, blue: 0.95).opacity(0.2), lineWidth: 2)
+                    )
                     .padding(.top, 12)
                     
                     // Company Name
