@@ -11,14 +11,17 @@ struct LiveScannerView: UIViewControllerRepresentable {
     
     let onRecognized: (String) -> Void
     let debounceDelay: TimeInterval
+    @Binding var isTorchOn: Bool  // Flashlight control
     
     // MARK: - Initialization
     
     init(
         debounceDelay: TimeInterval = 1.0,
+        isTorchOn: Binding<Bool> = .constant(false),
         onRecognized: @escaping (String) -> Void
     ) {
         self.debounceDelay = debounceDelay
+        self._isTorchOn = isTorchOn
         self.onRecognized = onRecognized
     }
     
@@ -46,6 +49,21 @@ struct LiveScannerView: UIViewControllerRepresentable {
         // Update coordinator's callback if needed
         context.coordinator.onRecognized = onRecognized
         context.coordinator.debounceDelay = debounceDelay
+        
+        // Update torch/flashlight state
+        if let device = AVCaptureDevice.default(for: .video), device.hasTorch {
+            do {
+                try device.lockForConfiguration()
+                if isTorchOn {
+                    try device.setTorchModeOn(level: 1.0)
+                } else {
+                    device.torchMode = .off
+                }
+                device.unlockForConfiguration()
+            } catch {
+                print("❌ Failed to set torch: \(error)")
+            }
+        }
         
         // Start scanning if not already started
         if !uiViewController.isScanning {
@@ -241,12 +259,18 @@ struct ScannerUnavailableView: View {
 
 struct ScannerContainerView: View {
     let onRecognized: (String) -> Void
+    @Binding var isTorchOn: Bool
+    
+    init(isTorchOn: Binding<Bool> = .constant(false), onRecognized: @escaping (String) -> Void) {
+        self._isTorchOn = isTorchOn
+        self.onRecognized = onRecognized
+    }
     
     var body: some View {
         Group {
             if #available(iOS 16.0, *) {
                 if LiveScannerView.isSupported {
-                    LiveScannerView(onRecognized: onRecognized)
+                    LiveScannerView(isTorchOn: $isTorchOn, onRecognized: onRecognized)
                 } else {
                     ScannerUnavailableView(
                         message: "Camera scanning is not supported on this device. Please use a physical iPhone to scan products."

@@ -13,6 +13,7 @@ struct ScanView: View {
     @State private var isSearching = false
     @State private var searchError: String?
     @State private var isListening = false  // Shows user that camera is actively scanning
+    @State private var flashlightOn = false
     
     // MARK: - UI Configuration
     
@@ -23,11 +24,36 @@ struct ScanView: View {
     
     var body: some View {
         ZStack {
-            // Live Camera Feed (same as CameraScanView)
-            ScannerContainerView { recognizedText in
+            // Live Camera Feed with flashlight control
+            ScannerContainerView(isTorchOn: $flashlightOn) { recognizedText in
                 handleRecognizedText(recognizedText)
             }
             .ignoresSafeArea()
+            
+            // Flashlight Button - top left
+            VStack {
+                HStack {
+                    Button(action: {
+                        flashlightOn.toggle()
+                    }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 50, height: 50)
+                            
+                            Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                                .font(.system(size: 22))
+                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                        }
+                    }
+                    .padding(.leading, 20)
+                    .padding(.top, 50)
+                    
+                    Spacer()
+                }
+                
+                Spacer()
+            }
             
             // Center Button UI
             VStack {
