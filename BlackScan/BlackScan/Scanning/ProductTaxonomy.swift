@@ -328,6 +328,16 @@ class ProductTaxonomy {
             // MARK: - Body Care Products
             
             ProductType(
+                canonical: "Hand Sanitizer",
+                variations: ["hand sanitizer", "hand sanitizer gel", "hand sanitizer spray", "foaming hand sanitizer"],
+                synonyms: ["Hand Gel", "Sanitizing Gel", "Hand Cleaner"],
+                category: "Body Care",
+                subcategory: "Hand Care",
+                typicalForms: ["gel", "liquid", "foam", "spray"],
+                keywords: ["hand", "sanitizer", "sanitizing", "clean", "antibacterial", "kills germs"]
+            ),
+            
+            ProductType(
                 canonical: "Body Butter",
                 variations: ["body butter", "body cream"],
                 synonyms: ["Body Cream", "Body Moisturizer", "Moisturizing Cream"],

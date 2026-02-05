@@ -314,9 +314,20 @@ class TypesenseClient: ObservableObject {
         let request = try buildSearchRequest(url: url)
         
         let (data, _) = try await session.data(for: request)
-        let response = try decoder.decode(TypesenseSearchResponse.self, from: data)
         
-        return response.products
+        // Debug: Log raw response if decoding fails
+        do {
+            let response = try decoder.decode(TypesenseSearchResponse.self, from: data)
+            return response.products
+        } catch {
+            if Env.isDebugMode {
+                print("❌ Typesense decode error: \(error)")
+                if let rawString = String(data: data, encoding: .utf8) {
+                    print("📄 Raw Typesense response: \(rawString.prefix(500))")
+                }
+            }
+            throw error
+        }
     }
     
     /// Pass 2: Category-based search
