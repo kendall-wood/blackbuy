@@ -114,6 +114,7 @@ struct LiveScannerView: UIViewControllerRepresentable {
             didAdd addedItems: [RecognizedItem],
             allItems: [RecognizedItem]
         ) {
+            print("📸 Camera recognized \(addedItems.count) new items (total: \(allItems.count))")
             // Process newly added items
             for item in addedItems {
                 processRecognizedItem(item)
