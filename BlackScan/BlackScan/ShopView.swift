@@ -378,17 +378,27 @@ struct ShopView: View {
                     GridItem(.flexible(), spacing: 20)
                 ], spacing: 20) {
                     ForEach(gridProducts.prefix(32)) { product in
-                        NavigationLink(destination: ProductDetailView(product: product)) {
-                            ProductCard(
-                                product: product,
-                                onBuyTapped: {
-                                    if let url = URL(string: product.productUrl) {
-                                        UIApplication.shared.open(url)
-                                    }
+                        ShortFeatureCard(
+                            product: product,
+                            isSaved: savedProductsManager.isSaved(product),
+                            isInCart: cartManager.isInCart(product),
+                            onSaveTapped: {
+                                if savedProductsManager.isSaved(product) {
+                                    savedProductsManager.removeSavedProduct(product)
+                                } else {
+                                    savedProductsManager.addSavedProduct(product)
                                 }
-                            )
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                            },
+                            onAddToCart: {
+                                cartManager.addToCart(product)
+                            },
+                            onCardTapped: {
+                                selectedProduct = product
+                            },
+                            onCompanyTapped: {
+                                selectedCompany = product.company
+                            }
+                        )
                     }
                 }
                 .padding(.horizontal, 24)
@@ -607,7 +617,7 @@ struct ShortFeatureCard: View {
                             ProgressView()
                         )
                 }
-                .frame(width: 140, height: 140)
+                .frame(width: 150, height: 150)
                 .background(Color.white)
                 .cornerRadius(12)
                 .clipped()
