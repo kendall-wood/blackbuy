@@ -9,29 +9,22 @@ struct MainTabView: View {
     @EnvironmentObject var authManager: AppleAuthManager
     
     var body: some View {
-        ZStack {
-            // Content based on selected tab
-            Group {
-                switch selectedTab {
-                case .profile:
-                    ProfileView()
-                case .saved:
-                    SavedView()
-                case .scan:
-                    ScanView(selectedTab: $selectedTab)
-                case .shop:
-                    ShopView()
-                case .checkout:
-                    CheckoutManagerView()
-                }
-            }
-            .ignoresSafeArea(.all, edges: .bottom)
-            
-            // Bottom Navigation Bar - hidden on scan view
-            if selectedTab != .scan {
-                BottomNavBar(selectedTab: $selectedTab)
+        // Content based on selected tab
+        Group {
+            switch selectedTab {
+            case .profile:
+                ProfileView(selectedTab: $selectedTab)
+            case .saved:
+                SavedView(selectedTab: $selectedTab)
+            case .scan:
+                ScanView(selectedTab: $selectedTab)
+            case .shop:
+                ShopView(selectedTab: $selectedTab)
+            case .checkout:
+                CheckoutManagerView(selectedTab: $selectedTab)
             }
         }
+        .ignoresSafeArea(.all, edges: .bottom)
     }
 }
 

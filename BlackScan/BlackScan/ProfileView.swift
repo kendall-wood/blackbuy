@@ -4,6 +4,7 @@ import AuthenticationServices
 /// Profile modal - matches screenshot 4 exactly
 struct ProfileView: View {
     
+    @Binding var selectedTab: BottomNavBar.AppTab
     @EnvironmentObject var authManager: AppleAuthManager
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var cartManager: CartManager
@@ -42,6 +43,23 @@ struct ProfileView: View {
     
     private var header: some View {
         HStack {
+            // Back Button
+            Button(action: {
+                selectedTab = .scan
+            }) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 50, height: 50)
+                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                }
+            }
+            .buttonStyle(.plain)
+            
             Spacer()
             
             // Profile Title
@@ -50,10 +68,13 @@ struct ProfileView: View {
                 .foregroundColor(.black)
             
             Spacer()
+            
+            // Spacer to balance the layout
+            Color.clear
+                .frame(width: 50, height: 50)
         }
-        .frame(height: 44)
-        .padding(.horizontal, 24)
-        .padding(.vertical, 8)
+        .frame(height: 60)
+        .padding(.horizontal, 20)
         .background(Color.white)
     }
     
