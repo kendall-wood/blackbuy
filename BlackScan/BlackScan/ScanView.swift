@@ -62,14 +62,15 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 65, height: 65)
+                                    .frame(width: 50, height: 50)
                                     .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
                                 
                                 Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
-                                    .font(.system(size: 24))
+                                    .font(.system(size: 20))
                                     .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                             }
                         }
+                        .buttonStyle(.plain)
                         .padding(.leading, 20)
                         .padding(.top, 50)
                         
@@ -90,14 +91,15 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 65, height: 65)
+                                    .frame(width: 50, height: 50)
                                     .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
                                 
                                 Image(systemName: "person.fill")
-                                    .font(.system(size: 24))
+                                    .font(.system(size: 20))
                                     .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                             }
                         }
+                        .buttonStyle(.plain)
                         .padding(.trailing, 20)
                         .padding(.top, 50)
                     }
@@ -137,23 +139,24 @@ struct ScanView: View {
                                     .progressViewStyle(CircularProgressViewStyle(tint: Color(red: 0.26, green: 0.63, blue: 0.95)))
                             } else {
                                 Image(systemName: "camera.fill")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 18))
                                     .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                             }
                             
                             Text(scanButtonText)
-                                .font(.system(size: 20, weight: .semibold))
+                                .font(.system(size: 18, weight: .semibold))
                                 .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                         }
-                        .frame(width: min(350, geometry.size.width * 0.88), height: 55)
+                        .frame(width: min(320, geometry.size.width * 0.85), height: 50)
                         .background(Color.white)
-                        .cornerRadius(28)
+                        .cornerRadius(25)
                         .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
                     }
+                    .buttonStyle(.plain)
                     .disabled(scanState == .capturing || scanState == .analyzing || scanState == .searching)
                     
                     Text("Shake to report issue")
-                        .font(.system(size: 13))
+                        .font(.system(size: 12))
                         .foregroundColor(Color(red: 0.67, green: 0.67, blue: 0.67))
                     
                     Spacer()
@@ -169,19 +172,19 @@ struct ScanView: View {
                         }) {
                             HStack(spacing: 0) {
                                 Image(systemName: "list.bullet")
-                                    .font(.system(size: 24))
+                                    .font(.system(size: 20))
                                     .foregroundColor(.white)
-                                    .frame(width: 50)
+                                    .frame(width: 44)
                                     .padding(.leading, 6)
                                 
-                                VStack(alignment: .leading, spacing: 4) {
+                                VStack(alignment: .leading, spacing: 3) {
                                     Text("View \(scanResults.count)+ Products")
-                                        .font(.system(size: 20, weight: .bold))
+                                        .font(.system(size: 18, weight: .bold))
                                         .foregroundColor(.white)
                                     
                                     if let productType = lastAnalysis?.productType {
                                         Text("Black-owned \(productType)")
-                                            .font(.system(size: 15, weight: .regular))
+                                            .font(.system(size: 14, weight: .regular))
                                             .foregroundColor(.white.opacity(0.9))
                                     }
                                 }
@@ -189,15 +192,16 @@ struct ScanView: View {
                                 Spacer()
                                 
                                 Image(systemName: "lock.fill")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 18))
                                     .foregroundColor(.white)
-                                    .padding(.trailing, 20)
+                                    .padding(.trailing, 18)
                             }
-                            .frame(width: geometry.size.width * 0.9, height: 85)
+                            .frame(width: geometry.size.width * 0.88, height: 75)
                             .background(Color(red: 0.26, green: 0.63, blue: 0.95))
-                            .cornerRadius(22)
+                            .cornerRadius(20)
                             .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
                         }
+                        .buttonStyle(.plain)
                         .padding(.bottom, 140)
                     }
                 }
@@ -213,14 +217,15 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 68, height: 68)
+                                    .frame(width: 55, height: 55)
                                     .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
                                 
                                 Image(systemName: "clock.fill")
-                                    .font(.system(size: 28))
+                                    .font(.system(size: 22))
                                     .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                             }
                         }
+                        .buttonStyle(.plain)
                         .padding(.leading, 20)
                         .padding(.bottom, 35)
                         
@@ -241,14 +246,15 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 68, height: 68)
+                                    .frame(width: 55, height: 55)
                                     .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
                                 
                                 Image(systemName: "heart.fill")
-                                    .font(.system(size: 28))
+                                    .font(.system(size: 22))
                                     .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                             }
                         }
+                        .buttonStyle(.plain)
                         
                         Button(action: {
                             selectedTab = .shop
@@ -256,14 +262,15 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 68, height: 68)
+                                    .frame(width: 55, height: 55)
                                     .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
                                 
                                 Image(systemName: "storefront.fill")
-                                    .font(.system(size: 28))
+                                    .font(.system(size: 22))
                                     .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                             }
                         }
+                        .buttonStyle(.plain)
                         .padding(.trailing, 20)
                     }
                     .padding(.bottom, 35)
