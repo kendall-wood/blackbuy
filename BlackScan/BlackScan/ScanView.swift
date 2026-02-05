@@ -28,20 +28,11 @@ struct ScanView: View {
             }
             .ignoresSafeArea()
             
-            // Center Button UI (same structure as CameraScanView)
+            // Center Button UI
             VStack {
                 Spacer()
                 
-                // DEBUG: Red test label
-                Text("TEST - Can you see this?")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.red)
-                    .cornerRadius(12)
-                
-                // Center Button
+                // Scan Button
                 Button(action: handleButtonTap) {
                     HStack(spacing: 12) {
                         if isSearching {
@@ -59,7 +50,6 @@ struct ScanView: View {
                     .shadow(color: Color.black.opacity(0.5), radius: 12, x: 0, y: 6)
                 }
                 .disabled(isSearching)
-                .padding(.top, 20)
                 
                 Spacer()
                     .frame(height: 120) // Account for tab bar
