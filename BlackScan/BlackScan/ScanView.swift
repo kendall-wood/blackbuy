@@ -28,9 +28,25 @@ struct ScanView: View {
             }
             .edgesIgnoringSafeArea(.all)
             
-            // Center Button UI (respects safe areas)
-            centerButton
-                .padding(.bottom, 100) // Account for tab bar
+            // DEBUG: Simple test view
+            VStack {
+                Spacer()
+                
+                Text("TEST - Can you see this?")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.red)
+                    .cornerRadius(12)
+                
+                // Center Button UI (respects safe areas)
+                centerButton
+                    .padding(.top, 20)
+                
+                Spacer()
+                    .frame(height: 100) // Account for tab bar
+            }
         }
         .sheet(isPresented: $isShowingResults) {
             resultsSheet
