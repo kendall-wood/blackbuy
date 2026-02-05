@@ -219,20 +219,16 @@ struct ScanView: View {
         print("🔍 Searching Typesense for: \(analysis.productType)")
         
         do {
-            // Build search query from analysis
-            let searchQuery = analysis.productType
-            
-            // Search Typesense
-            let results = try await typesenseClient.searchProducts(
-                query: searchQuery,
-                page: 1,
-                perPage: 20
-            )
-            
-            print("✅ Found \(results.count) products from Typesense")
-            
             // Convert OpenAI analysis to ScanClassification format
             let classification = convertToScanClassification(analysis: analysis)
+            
+            // Use advanced multi-pass search (retrieves up to 100 candidates)
+            let results = try await typesenseClient.searchForScanMatches(
+                classification: classification,
+                candidateCount: 100
+            )
+            
+            print("✅ Found \(results.count) candidate products from Typesense")
             
             // Use existing ConfidenceScorer (already tested and working!)
             let scoredResults = ConfidenceScorer.shared.scoreProducts(
@@ -240,10 +236,17 @@ struct ScanView: View {
                 classification: classification
             )
             
-            // Filter to 90%+ confidence
-            let filteredResults = scoredResults.filter { $0.confidenceScore >= 0.90 }
+            // Filter to 85%+ confidence (slightly lower for broader matching)
+            let filteredResults = scoredResults.filter { $0.confidenceScore >= 0.85 }
             
-            print("📊 After 90% confidence filter: \(filteredResults.count) products")
+            print("📊 After 85% confidence filter: \(filteredResults.count) products")
+            
+            if Env.isDebugMode && !filteredResults.isEmpty {
+                print("🏆 Top 3 matches:")
+                for (index, result) in filteredResults.prefix(3).enumerated() {
+                    print("   \(index + 1). \(result.product.name) - \(result.confidencePercentage)%")
+                }
+            }
             
             await MainActor.run {
                 scanResults = filteredResults
