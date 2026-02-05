@@ -280,14 +280,31 @@ struct ScanView: View {
                     return nil
                 }
                 
-                // Typesense position score (primary ranking signal)
+                // Typesense position score (primary ranking signal - now includes form!)
                 let positionScore = 1.0 - (Double(index) / Double(results.count) * 0.20)
                 
-                // Final score: 30% name + 70% position (Typesense controls ranking!)
-                let finalScore = (nameScore * 0.30) + (positionScore * 0.70)
+                // Form match bonus (explicit boost for matching forms)
+                let formBonus: Double
+                if let targetForm = analysis.form?.lowercased(),
+                   let productForm = product.form?.lowercased() {
+                    if targetForm == productForm {
+                        formBonus = 0.10  // +10% for exact form match
+                    } else if isFormCompatible(targetForm, productForm) {
+                        formBonus = 0.05  // +5% for compatible forms
+                    } else {
+                        formBonus = 0.0   // No bonus for different forms
+                    }
+                } else {
+                    formBonus = 0.0  // No bonus if form unknown
+                }
+                
+                // Final score: 30% name + 70% position + form bonus
+                let baseScore = (nameScore * 0.30) + (positionScore * 0.70)
+                let finalScore = min(baseScore + formBonus, 1.0)  // Cap at 100%
                 
                 if Env.isDebugMode {
-                    print("   ✅ #\(index + 1): \(product.name) = \(Int(finalScore * 100))% (name: \(Int(nameScore * 100))%, position: \(Int(positionScore * 100))%)")
+                    let formInfo = formBonus > 0 ? ", form: +\(Int(formBonus * 100))%" : ""
+                    print("   ✅ #\(index + 1): \(product.name) = \(Int(finalScore * 100))% (name: \(Int(nameScore * 100))%, position: \(Int(positionScore * 100))%\(formInfo))")
                 }
                 
                 return ScoredProduct(
@@ -296,13 +313,13 @@ struct ScanView: View {
                     confidenceScore: finalScore,
                     breakdown: ScoreBreakdown(
                         productTypeScore: nameScore,
-                        formScore: positionScore,
+                        formScore: formBonus > 0 ? 1.0 : 0.85,  // Show perfect form match
                         brandScore: 0.85,
                         ingredientScore: 0.85,
                         sizeScore: 0.85,
                         visualScore: 0.85
                     ),
-                    explanation: "Name: \(Int(nameScore * 100))%, Position: \(Int(positionScore * 100))%"
+                    explanation: formBonus > 0 ? "Name: \(Int(nameScore * 100))%, Position: \(Int(positionScore * 100))%, Form: +\(Int(formBonus * 100))%" : "Name: \(Int(nameScore * 100))%, Position: \(Int(positionScore * 100))%"
                 )
             }
             
