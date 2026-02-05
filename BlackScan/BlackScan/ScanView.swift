@@ -26,15 +26,15 @@ struct ScanView: View {
             ScannerContainerView { recognizedText in
                 handleRecognizedText(recognizedText)
             }
-            .ignoresSafeArea(.all)
+            .edgesIgnoringSafeArea(.all)
             
-            // Center Button UI
+            // Center Button UI (respects safe areas)
             centerButton
+                .padding(.bottom, 100) // Account for tab bar
         }
         .sheet(isPresented: $isShowingResults) {
             resultsSheet
         }
-        .navigationBarHidden(true)
     }
     
     // MARK: - Center Button UI
@@ -44,29 +44,26 @@ struct ScanView: View {
             Spacer()
             
             Button(action: handleButtonTap) {
-                HStack(spacing: 8) {
+                HStack(spacing: 12) {
                     if isSearching {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .scaleEffect(0.9)
                     }
                     
                     Text(buttonText)
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 18, weight: .semibold))
                 }
-                .frame(maxWidth: 280)
-                .padding(.vertical, 16)
-                .padding(.horizontal, 32)
+                .frame(width: 280, height: 56)
                 .background(buttonBackgroundColor)
                 .foregroundColor(buttonTextColor)
-                .cornerRadius(12)
-                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                .cornerRadius(16)
+                .shadow(color: Color.black.opacity(0.5), radius: 12, x: 0, y: 6)
             }
             .disabled(isSearching)
             
             Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     // MARK: - Button State Computed Properties
