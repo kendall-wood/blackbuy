@@ -10,7 +10,9 @@ struct ScanView: View {
     @StateObject private var typesenseClient = TypesenseClient()
     @State private var isShowingResults = false
     @State private var scanResults: [ScoredProduct] = []
-    @State private var lastAnalysis: OpenAIVisionService.ProductAnalysis?
+    @State private var lastAnalysis: HybridScanService.ProductAnalysis?
+    @State private var lastScanMethod: HybridScanService.ScanMethod?
+    @State private var lastScanCost: Double = 0.0
     @State private var searchError: String?
     @State private var flashlightOn = false
     @State private var capturedImage: UIImage?
@@ -187,19 +189,24 @@ struct ScanView: View {
             scanState = .analyzing
         }
         
-        print("🤖 Starting OpenAI Vision analysis...")
+        print("🤖 Starting Hybrid Scan (OCR+Text or Vision)...")
         
         do {
-            let analysis = try await OpenAIVisionService.shared.analyzeProduct(image: image)
+            let scanResult = try await HybridScanService.shared.analyzeProduct(image: image)
             
             print("✅ Analysis complete!")
-            print("   Product Type: \(analysis.productType)")
-            print("   Brand: \(analysis.brand ?? "unknown")")
-            print("   Form: \(analysis.form ?? "unknown")")
-            print("   Confidence: \(Int(analysis.confidence * 100))%")
+            print("   Method: \(scanResult.method.displayName)")
+            print("   Cost: ~$\(String(format: "%.4f", scanResult.cost))")
+            print("   Time: \(String(format: "%.2f", scanResult.processingTime))s")
+            print("   Product Type: \(scanResult.analysis.productType)")
+            print("   Brand: \(scanResult.analysis.brand ?? "unknown")")
+            print("   Form: \(scanResult.analysis.form ?? "unknown")")
+            print("   Confidence: \(Int(scanResult.analysis.confidence * 100))%")
             
             await MainActor.run {
-                lastAnalysis = analysis
+                lastAnalysis = scanResult.analysis
+                lastScanMethod = scanResult.method
+                lastScanCost = scanResult.cost
             }
             
             // Step 2: Search Typesense
@@ -215,7 +222,7 @@ struct ScanView: View {
         }
     }
     
-    private func searchForMatches(analysis: OpenAIVisionService.ProductAnalysis) async {
+    private func searchForMatches(analysis: HybridScanService.ProductAnalysis) async {
         await MainActor.run {
             scanState = .searching
         }
@@ -480,8 +487,8 @@ struct ScanView: View {
     
     // MARK: - Conversion
     
-    /// Convert OpenAI ProductAnalysis to ScanClassification
-    private func convertToScanClassification(analysis: OpenAIVisionService.ProductAnalysis) -> ScanClassification {
+    /// Convert Hybrid ProductAnalysis to ScanClassification
+    private func convertToScanClassification(analysis: HybridScanService.ProductAnalysis) -> ScanClassification {
         // Create ProductTypeResult
         let productTypeResult = ProductTypeResult(
             type: analysis.productType,
