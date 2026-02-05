@@ -1,10 +1,9 @@
 import Foundation
 import UIKit
-import VisionKit
+import Vision
 
 /// Multi-frame OCR service for better text capture accuracy
 /// Captures 3 frames and aggregates results for 90-95% accuracy
-@available(iOS 16.0, *)
 class MultiFrameOCRService {
     
     static let shared = MultiFrameOCRService()
@@ -90,14 +89,45 @@ class MultiFrameOCRService {
     // MARK: - Private Helpers
     
     private func extractText(from image: UIImage) async throws -> String {
-        // Use VisionKit DataScannerViewController's text recognition
-        // For now, simulate with a simple approach
-        // In production, this would use Vision framework's text recognition
+        guard let cgImage = image.cgImage else {
+            throw OCRError.invalidImage
+        }
         
-        // TODO: Implement actual Vision framework text recognition
-        // This is a placeholder that shows the structure
-        
-        return ""  // Placeholder - will be replaced with actual OCR
+        return try await withCheckedThrowingContinuation { continuation in
+            // Create Vision text recognition request
+            let request = VNRecognizeTextRequest { request, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                
+                guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                    continuation.resume(returning: "")
+                    return
+                }
+                
+                // Extract text from all observations
+                let recognizedStrings = observations.compactMap { observation in
+                    observation.topCandidates(1).first?.string
+                }
+                
+                let fullText = recognizedStrings.joined(separator: " ")
+                continuation.resume(returning: fullText)
+            }
+            
+            // Configure for accurate text recognition
+            request.recognitionLevel = .accurate
+            request.usesLanguageCorrection = true
+            request.minimumTextHeight = 0.0  // Recognize all text sizes
+            
+            // Perform the request
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            do {
+                try handler.perform([request])
+            } catch {
+                continuation.resume(throwing: error)
+            }
+        }
     }
     
     /// Merge multiple text results and deduplicate
@@ -181,6 +211,7 @@ class MultiFrameOCRService {
     enum OCRError: LocalizedError {
         case noImages
         case noTextRecognized
+        case invalidImage
         
         var errorDescription: String? {
             switch self {
@@ -188,6 +219,8 @@ class MultiFrameOCRService {
                 return "No images provided for OCR"
             case .noTextRecognized:
                 return "Could not recognize any text in images"
+            case .invalidImage:
+                return "Invalid image format"
             }
         }
     }

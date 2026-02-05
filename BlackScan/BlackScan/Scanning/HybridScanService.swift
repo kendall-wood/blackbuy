@@ -6,7 +6,6 @@ import UIKit
 /// - Expensive: OpenAI Vision API (~$0.01 per scan)
 /// 
 /// Strategy: Try cheap first, fallback to expensive if quality is low
-@available(iOS 16.0, *)
 class HybridScanService {
     
     static let shared = HybridScanService()
@@ -60,20 +59,75 @@ class HybridScanService {
         let startTime = Date()
         
         if Env.isDebugMode {
-            print("🔬 Hybrid Scan: Starting analysis...")
+            print("🔬 Hybrid Scan: Starting analysis (single frame mode)...")
         }
         
-        // For now, since we haven't implemented actual OCR yet,
-        // we'll use Vision API as the primary method
-        // TODO: Implement multi-frame OCR once camera capture is ready
+        // Single frame mode: Try OCR first, fallback to Vision
+        do {
+            // Try OCR + Text API (cheap!)
+            let ocrResult = try await MultiFrameOCRService.shared.analyzeImages([image])
+            
+            if ocrResult.shouldUseCheapAPI {
+                if Env.isDebugMode {
+                    print("✅ OCR quality good (\(Int(ocrResult.qualityScore * 100))%) - trying cheap text API")
+                }
+                
+                let textAnalysis = try await GPT4TextService.shared.analyzeOCRText(ocrResult.text)
+                
+                // Check if GPT is confident
+                if textAnalysis.confidence >= 0.7 {
+                    let processingTime = Date().timeIntervalSince(startTime)
+                    
+                    if Env.isDebugMode {
+                        print("✅ Hybrid Scan: SUCCESS via OCR + Text API!")
+                        print("   Time: \(String(format: "%.2f", processingTime))s")
+                        print("   Cost: ~$\(String(format: "%.4f", ScanMethod.ocrPlusText.estimatedCost))")
+                        print("   💰 SAVED: $\(String(format: "%.4f", ScanMethod.vision.estimatedCost - ScanMethod.ocrPlusText.estimatedCost))!")
+                    }
+                    
+                    let analysis = ProductAnalysis(
+                        brand: textAnalysis.brand,
+                        productType: textAnalysis.productType,
+                        form: textAnalysis.form,
+                        size: textAnalysis.size,
+                        ingredients: textAnalysis.ingredients,
+                        confidence: textAnalysis.confidence,
+                        rawText: textAnalysis.rawText
+                    )
+                    
+                    return ScanResult(
+                        analysis: analysis,
+                        method: .ocrPlusText,
+                        cost: ScanMethod.ocrPlusText.estimatedCost,
+                        processingTime: processingTime
+                    )
+                } else {
+                    if Env.isDebugMode {
+                        print("⚠️ GPT confidence low (\(Int(textAnalysis.confidence * 100))%) - falling back to Vision")
+                    }
+                }
+            } else {
+                if Env.isDebugMode {
+                    print("⚠️ OCR quality low (\(Int(ocrResult.qualityScore * 100))%) - falling back to Vision")
+                }
+            }
+        } catch {
+            if Env.isDebugMode {
+                print("⚠️ OCR failed: \(error.localizedDescription) - falling back to Vision")
+            }
+        }
         
-        // Use Vision API (will be replaced with OCR+Text in next step)
+        // Fallback to Vision API
+        if Env.isDebugMode {
+            print("🔄 Using Vision API fallback...")
+        }
+        
         let visionAnalysis = try await OpenAIVisionService.shared.analyzeProduct(image: image)
         
         let processingTime = Date().timeIntervalSince(startTime)
         
         if Env.isDebugMode {
-            print("✅ Hybrid Scan: Complete via Vision API")
+            print("✅ Hybrid Scan: Complete via Vision API (fallback)")
             print("   Time: \(String(format: "%.2f", processingTime))s")
             print("   Cost: ~$\(String(format: "%.4f", ScanMethod.vision.estimatedCost))")
         }
