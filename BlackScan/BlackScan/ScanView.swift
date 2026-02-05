@@ -24,8 +24,8 @@ struct ScanView: View {
     
     var body: some View {
         ZStack {
-            // Live Camera Feed with flashlight control
-            ScannerContainerView(isTorchOn: $flashlightOn) { recognizedText in
+            // Live Camera Feed with flashlight control - only active when listening
+            ScannerContainerView(isTorchOn: $flashlightOn, isActive: $isListening) { recognizedText in
                 handleRecognizedText(recognizedText)
             }
             .ignoresSafeArea()

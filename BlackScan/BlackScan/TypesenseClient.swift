@@ -385,25 +385,31 @@ class TypesenseClient: ObservableObject {
             throw TypesenseError.invalidURL
         }
         
-        // Weighted query_by fields
-        let queryBy = "product_type^3,form^2,name^1,tags^1"
+        // Use standard search fields without boost for now (Typesense may not support ^ syntax)
+        let queryBy = "product_type,form,name,tags"
         
         var queryItems: [URLQueryItem] = [
             URLQueryItem(name: "q", value: query),
             URLQueryItem(name: "query_by", value: queryBy),
             URLQueryItem(name: "page", value: "1"),
-            URLQueryItem(name: "per_page", value: String(candidateCount))
+            URLQueryItem(name: "per_page", value: String(candidateCount)),
+            // Sort by relevance (Typesense default text match score)
+            URLQueryItem(name: "sort_by", value: "_text_match:desc")
         ]
         
-        // Optional filter by product type
+        // Optional filter by product type for more accurate results
         if !productType.isEmpty && productType != "*" {
-            queryItems.append(URLQueryItem(name: "filter_by", value: "product_type:=\(productType)"))
+            queryItems.append(URLQueryItem(name: "filter_by", value: "product_type:[\(productType)]"))
         }
         
         components.queryItems = queryItems
         
         guard let url = components.url else {
             throw TypesenseError.invalidURL
+        }
+        
+        if Env.isDebugMode {
+            print("🔗 Typesense URL: \(url.absoluteString)")
         }
         
         return url

@@ -12,16 +12,19 @@ struct LiveScannerView: UIViewControllerRepresentable {
     let onRecognized: (String) -> Void
     let debounceDelay: TimeInterval
     @Binding var isTorchOn: Bool  // Flashlight control
+    @Binding var isActive: Bool   // Only process text when active
     
     // MARK: - Initialization
     
     init(
         debounceDelay: TimeInterval = 1.0,
         isTorchOn: Binding<Bool> = .constant(false),
+        isActive: Binding<Bool> = .constant(true),
         onRecognized: @escaping (String) -> Void
     ) {
         self.debounceDelay = debounceDelay
         self._isTorchOn = isTorchOn
+        self._isActive = isActive
         self.onRecognized = onRecognized
     }
     
@@ -46,9 +49,10 @@ struct LiveScannerView: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: DataScannerViewController, context: Context) {
-        // Update coordinator's callback if needed
+        // Update coordinator's callback and state
         context.coordinator.onRecognized = onRecognized
         context.coordinator.debounceDelay = debounceDelay
+        context.coordinator.isActive = isActive
         
         // Update torch/flashlight state
         if let device = AVCaptureDevice.default(for: .video), device.hasTorch {
@@ -74,6 +78,7 @@ struct LiveScannerView: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator(
             debounceDelay: debounceDelay,
+            isActive: isActive,
             onRecognized: onRecognized
         )
     }
@@ -114,6 +119,11 @@ struct LiveScannerView: UIViewControllerRepresentable {
             didAdd addedItems: [RecognizedItem],
             allItems: [RecognizedItem]
         ) {
+            // Only process if scanning is active
+            guard isActive else {
+                return
+            }
+            
             print("📸 Camera recognized \(addedItems.count) new items (total: \(allItems.count))")
             // Process newly added items
             for item in addedItems {
@@ -278,9 +288,15 @@ struct ScannerUnavailableView: View {
 struct ScannerContainerView: View {
     let onRecognized: (String) -> Void
     @Binding var isTorchOn: Bool
+    @Binding var isActive: Bool
     
-    init(isTorchOn: Binding<Bool> = .constant(false), onRecognized: @escaping (String) -> Void) {
+    init(
+        isTorchOn: Binding<Bool> = .constant(false),
+        isActive: Binding<Bool> = .constant(true),
+        onRecognized: @escaping (String) -> Void
+    ) {
         self._isTorchOn = isTorchOn
+        self._isActive = isActive
         self.onRecognized = onRecognized
     }
     
@@ -288,7 +304,7 @@ struct ScannerContainerView: View {
         Group {
             if #available(iOS 16.0, *) {
                 if LiveScannerView.isSupported {
-                    LiveScannerView(isTorchOn: $isTorchOn, onRecognized: onRecognized)
+                    LiveScannerView(isTorchOn: $isTorchOn, isActive: $isActive, onRecognized: onRecognized)
                 } else {
                     ScannerUnavailableView(
                         message: "Camera scanning is not supported on this device. Please use a physical iPhone to scan products."
