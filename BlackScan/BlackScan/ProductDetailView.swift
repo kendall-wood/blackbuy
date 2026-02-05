@@ -85,10 +85,7 @@ struct ProductDetailView: View {
                         .frame(height: 320)
                         .background(Color.white)
                         .cornerRadius(16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color(.systemGray5), lineWidth: 1)
-                        )
+                        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
                         
                         // Heart Button (overlayed in top right)
                         Button(action: {
