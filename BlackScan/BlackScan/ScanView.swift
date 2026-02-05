@@ -21,57 +21,50 @@ struct ScanView: View {
     ]
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                // Camera Scanner Background (ALWAYS ACTIVE - live view)
-                ScannerContainerView { recognizedText in
-                    handleRecognizedText(recognizedText)
-                }
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .edgesIgnoringSafeArea(.all)
+        ZStack {
+            // Live Camera Feed (same as CameraScanView)
+            ScannerContainerView { recognizedText in
+                handleRecognizedText(recognizedText)
+            }
+            .ignoresSafeArea()
+            
+            // Center Button UI (same structure as CameraScanView)
+            VStack {
+                Spacer()
                 
-                // UI Layer (guaranteed on top)
-                VStack {
-                    Spacer()
-                    
-                    // DEBUG: Red test label
-                    Text("TEST - Can you see this?")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.red)
-                        .cornerRadius(12)
-                        .zIndex(999)
-                    
-                    // Center Button UI
-                    Button(action: handleButtonTap) {
-                        HStack(spacing: 12) {
-                            if isSearching {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            }
-                            
-                            Text(buttonText)
-                                .font(.system(size: 18, weight: .semibold))
+                // DEBUG: Red test label
+                Text("TEST - Can you see this?")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.red)
+                    .cornerRadius(12)
+                
+                // Center Button
+                Button(action: handleButtonTap) {
+                    HStack(spacing: 12) {
+                        if isSearching {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         }
-                        .frame(width: 280, height: 56)
-                        .background(buttonBackgroundColor)
-                        .foregroundColor(buttonTextColor)
-                        .cornerRadius(16)
-                        .shadow(color: Color.black.opacity(0.5), radius: 12, x: 0, y: 6)
+                        
+                        Text(buttonText)
+                            .font(.system(size: 18, weight: .semibold))
                     }
-                    .disabled(isSearching)
-                    .padding(.top, 20)
-                    .zIndex(999)
-                    
-                    Spacer()
-                        .frame(height: 120) // Account for tab bar
+                    .frame(width: 280, height: 56)
+                    .background(buttonBackgroundColor)
+                    .foregroundColor(buttonTextColor)
+                    .cornerRadius(16)
+                    .shadow(color: Color.black.opacity(0.5), radius: 12, x: 0, y: 6)
                 }
-                .zIndex(1000) // Force UI layer on top
+                .disabled(isSearching)
+                .padding(.top, 20)
+                
+                Spacer()
+                    .frame(height: 120) // Account for tab bar
             }
         }
-        .edgesIgnoringSafeArea(.all)
         .sheet(isPresented: $isShowingResults) {
             resultsSheet
         }
