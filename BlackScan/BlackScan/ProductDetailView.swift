@@ -107,30 +107,35 @@ struct ProductDetailView: View {
                     .padding(.bottom, 24)
                     
                     // Product Info Section
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 8) {
                         // Company name
-                        Text(product.company)
-                            .font(.system(size: 13, weight: .semibold))
+                        Text(product.company.uppercased())
+                            .font(.system(size: 11, weight: .bold))
+                            .tracking(1.2)
                             .foregroundColor(Color(.systemGray))
                         
                         // Product name
                         Text(product.name)
-                            .font(.system(size: 22, weight: .bold))
+                            .font(.system(size: 26, weight: .bold))
                             .foregroundColor(.black)
                             .lineLimit(3)
-                            .lineSpacing(2)
+                            .lineSpacing(3)
+                            .padding(.top, 2)
                         
-                        // Price
+                        // Price with kerning
                         Text(product.formattedPrice)
-                            .font(.system(size: 28, weight: .semibold))
+                            .font(.system(size: 36, weight: .semibold))
+                            .tracking(0.5)
                             .foregroundColor(.black)
-                            .padding(.top, 8)
+                            .padding(.top, 12)
+                            .padding(.bottom, 4)
                         
                         // Categories label
-                        Text("Categories")
-                            .font(.system(size: 13, weight: .medium))
+                        Text("CATEGORIES")
+                            .font(.system(size: 11, weight: .bold))
+                            .tracking(1.2)
                             .foregroundColor(Color(.systemGray))
-                            .padding(.top, 12)
+                            .padding(.top, 16)
                         
                         // Category chips from taxonomy
                         FlowLayout(spacing: 8) {
@@ -157,9 +162,10 @@ struct ProductDetailView: View {
                     // Similar Products Section
                     if !similarProducts.isEmpty {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Similar Products")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.black)
+                            Text("SIMILAR PRODUCTS")
+                                .font(.system(size: 13, weight: .bold))
+                                .tracking(1.2)
+                                .foregroundColor(Color(.systemGray))
                                 .padding(.horizontal, 24)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -174,9 +180,10 @@ struct ProductDetailView: View {
                         .padding(.bottom, 32)
                     } else if isLoadingSimilar {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Similar Products")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.black)
+                            Text("SIMILAR PRODUCTS")
+                                .font(.system(size: 13, weight: .bold))
+                                .tracking(1.2)
+                                .foregroundColor(Color(.systemGray))
                                 .padding(.horizontal, 24)
                             
                             HStack(spacing: 16) {
@@ -288,17 +295,18 @@ struct CategoryChip: View {
     let isPrimary: Bool
     
     var body: some View {
-        Text(text)
-            .font(.system(size: 12, weight: .medium))
-            .foregroundColor(isPrimary ? .white : .black)
+        Text(text.uppercased())
+            .font(.system(size: 11, weight: .bold))
+            .tracking(0.8)
+            .foregroundColor(isPrimary ? .white : Color(.systemGray))
             .lineLimit(1)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color(.systemGray6))
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(isPrimary ? Color.clear : Color.black.opacity(0.15), lineWidth: 0.5)
+                    .stroke(isPrimary ? Color.clear : Color.clear, lineWidth: 0)
             )
     }
 }
@@ -362,25 +370,28 @@ struct SimilarProductCard: View {
             
             // Product Details
             VStack(alignment: .leading, spacing: 4) {
+                // Company Name (uppercase with tracking)
+                Text(product.company.uppercased())
+                    .font(.system(size: 10, weight: .bold))
+                    .tracking(0.8)
+                    .foregroundColor(Color(.systemGray))
+                    .lineLimit(1)
+                
                 // Product Name (2 lines max)
                 Text(product.name)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.black)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
+                    .lineSpacing(2)
                 
-                // Company Name
-                Text(product.company)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Color(.systemGray))
-                    .lineLimit(1)
-                
-                // Price
+                // Price with tracking
                 Text(product.formattedPrice)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 16, weight: .semibold))
+                    .tracking(0.3)
                     .foregroundColor(.black)
-                    .padding(.top, 2)
+                    .padding(.top, 4)
             }
             .padding(.horizontal, 10)
             .padding(.bottom, 10)

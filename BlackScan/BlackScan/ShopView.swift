@@ -377,7 +377,7 @@ struct ShopView: View {
                     GridItem(.flexible(), spacing: 20),
                     GridItem(.flexible(), spacing: 20)
                 ], spacing: 20) {
-                    ForEach(gridProducts.prefix(32)) { product in
+                    ForEach(gridProducts.prefix(100)) { product in
                         ShortFeatureCard(
                             product: product,
                             isSaved: savedProductsManager.isProductSaved(product),
