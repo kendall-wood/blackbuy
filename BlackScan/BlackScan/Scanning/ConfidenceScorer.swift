@@ -7,12 +7,12 @@ class ConfidenceScorer {
     // MARK: - Tier Weights
     
     private let tierWeights = TierWeights(
-        productType: 0.50,    // 50% - INCREASED (most important)
-        form: 0.20,           // 20% - DECREASED
+        productType: 0.45,    // 45% - DECREASED for looser grading
+        form: 0.15,           // 15% - DECREASED
         brandCategory: 0.15,  // 15%
-        ingredients: 0.08,    // 8% - DECREASED
-        size: 0.05,           // 5%
-        visual: 0.02          // 2% - DECREASED (Phase 2)
+        ingredients: 0.10,    // 10% - INCREASED (more forgiving)
+        size: 0.10,           // 10% - INCREASED (more forgiving)
+        visual: 0.05          // 5% - INCREASED (more forgiving)
     )
     
     // MARK: - Dependencies
@@ -79,18 +79,18 @@ class ConfidenceScorer {
             against: classification.brand
         )
         
-        // TIER 4: Ingredient Clarity (8%)
-        // Default to 0.8 (neutral/good) if no ingredients detected
-        let ingredientScore = classification.ingredientClarity > 0 ? classification.ingredientClarity : 0.8
+        // TIER 4: Ingredient Clarity (10%)
+        // Default to 0.90 (very positive) if no ingredients detected (LOOSER)
+        let ingredientScore = classification.ingredientClarity > 0 ? max(classification.ingredientClarity, 0.85) : 0.90
         
-        // TIER 5: Size (5%)
+        // TIER 5: Size (10%)
         let sizeScore = scoreSize(
             product,
             against: classification.size
         )
         
-        // TIER 6: Visual (2%) - Phase 2
-        let visualScore = 0.8  // Neutral/positive for now (was too harsh at 0.5)
+        // TIER 6: Visual (5%) - Phase 2
+        let visualScore = 0.90  // Very positive for now (MUCH LOOSER)
         
         // CUMULATIVE WEIGHTED SCORE
         let finalScore = (
@@ -245,7 +245,7 @@ class ConfidenceScorer {
         against target: FormResult?
     ) -> Double {
         guard let form = form, let target = target else {
-            return 0.85  // Unknown form = neutral/positive (don't penalize)
+            return 0.90  // Unknown form = very positive (don't penalize)
         }
         
         let normalizedForm = formTaxonomy.normalize(form) ?? form
@@ -258,16 +258,16 @@ class ConfidenceScorer {
         
         // Compatible forms
         if formTaxonomy.areCompatible(normalizedForm, normalizedTarget) {
-            return 0.90
+            return 0.95
         }
         
         // Generic/other
         if normalizedForm == "other" || normalizedTarget == "other" {
-            return 0.85
+            return 0.90
         }
         
-        // Incompatible - still decent if product type matches
-        return 0.75
+        // Incompatible - still very good if product type matches (MUCH LOOSER)
+        return 0.85
     }
     
     /// TIER 3: Score brand category association
@@ -280,7 +280,7 @@ class ConfidenceScorer {
         against brand: BrandResult?
     ) -> Double {
         guard let brand = brand else {
-            return 0.8  // No brand detected = neutral/positive (don't penalize)
+            return 0.90  // No brand detected = very positive (don't penalize)
         }
         
         let productCategory = product.mainCategory.lowercased()
@@ -304,11 +304,11 @@ class ConfidenceScorer {
         for (cat1, cat2) in relatedPairs {
             if (productCategory.contains(cat1) && brandCategories.contains(where: { $0.contains(cat2) })) ||
                (productCategory.contains(cat2) && brandCategories.contains(where: { $0.contains(cat1) })) {
-                return 0.85  // Related category
+                return 0.90  // Related category
             }
         }
         
-        return 0.7  // Different category but still decent (was too harsh at 0.5)
+        return 0.85  // Different category but still very good (MUCH LOOSER)
     }
     
     /// TIER 5: Score size compatibility
@@ -328,13 +328,13 @@ class ConfidenceScorer {
         let productSize = sizeExtractor.extractSize(product.name)
         
         guard let productSize = productSize else {
-            return 0.8  // Product has no size info = neutral/positive
+            return 0.90  // Product has no size info = very positive (LOOSER)
         }
         
         // Get compatibility score from size extractor (should return 0.7-1.0 range)
         let baseScore = sizeExtractor.scoreCompatibility(scannedSize, productSize)
-        // Ensure minimum of 0.7 even for mismatches
-        return max(baseScore, 0.7)
+        // Ensure minimum of 0.85 even for mismatches (MUCH LOOSER)
+        return max(baseScore, 0.85)
     }
     
     // MARK: - Explanation Builder

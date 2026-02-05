@@ -236,10 +236,10 @@ struct ScanView: View {
                 classification: classification
             )
             
-            // Filter to 85%+ confidence (slightly lower for broader matching)
-            let filteredResults = scoredResults.filter { $0.confidenceScore >= 0.85 }
+            // Filter to 70%+ confidence (very loose - show more results)
+            let filteredResults = scoredResults.filter { $0.confidenceScore >= 0.70 }
             
-            print("📊 After 85% confidence filter: \(filteredResults.count) products")
+            print("📊 After 70% confidence filter: \(filteredResults.count) products")
             
             if Env.isDebugMode && !filteredResults.isEmpty {
                 print("🏆 Top 3 matches:")
@@ -460,11 +460,11 @@ struct ScanView: View {
     }
     
     private func confidenceColor(_ confidence: Double) -> Color {
-        if confidence >= 0.95 {
+        if confidence >= 0.85 {
             return .green
-        } else if confidence >= 0.90 {
+        } else if confidence >= 0.75 {
             return Color(red: 0.6, green: 0.8, blue: 0.4) // Light green
-        } else if confidence >= 0.85 {
+        } else if confidence >= 0.70 {
             return .orange
         } else {
             return .red
