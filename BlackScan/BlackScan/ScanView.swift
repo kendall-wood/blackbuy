@@ -313,22 +313,36 @@ struct ScanView: View {
                 let nameScore: Double
                 let overlap = targetWords.intersection(nameWords)
                 
-                // Specific product descriptor words (REQUIRED to match for accuracy)
-                let specificWords = Set(["sanitizer", "cleanser", "wash", "soap", "shampoo", "conditioner", 
-                                        "lotion", "cream", "serum", "oil", "gel", "balm", "butter", 
-                                        "mask", "scrub", "toner", "primer", "foundation", "concealer",
-                                        "powder", "spray", "foam", "bar", "wipe", "towelette", "treatment"])
+                // Specific product descriptor roots (handles plurals: "towelette" matches "towelettes")
+                let specificDescriptors = ["sanitizer", "cleanser", "cleansing", "wash", "soap", "shampoo", "conditioner", 
+                                          "lotion", "cream", "serum", "oil", "gel", "balm", "butter", 
+                                          "mask", "scrub", "toner", "primer", "foundation", "concealer",
+                                          "powder", "spray", "foam", "bar", "wipe", "towelette", "treatment",
+                                          "moisturizer", "exfoliant"]
                 
-                let targetSpecificWords = targetWords.intersection(specificWords)
-                let productSpecificWords = nameWords.intersection(specificWords)
-                let specificOverlap = targetSpecificWords.intersection(productSpecificWords)
+                // Find specific descriptors in target and product (check if word STARTS WITH descriptor)
+                func findDescriptors(in words: Set<String>) -> Set<String> {
+                    var found = Set<String>()
+                    for word in words {
+                        for descriptor in specificDescriptors {
+                            if word.hasPrefix(descriptor) {
+                                found.insert(descriptor)
+                            }
+                        }
+                    }
+                    return found
+                }
                 
-                // CRITICAL: If target has specific words, product MUST match at least one
-                if !targetSpecificWords.isEmpty && specificOverlap.isEmpty {
+                let targetSpecific = findDescriptors(in: targetWords)
+                let productSpecific = findDescriptors(in: nameWords)
+                let specificOverlap = targetSpecific.intersection(productSpecific)
+                
+                // CRITICAL: If target has specific descriptors, product MUST match at least one
+                if !targetSpecific.isEmpty && specificOverlap.isEmpty {
                     // Target says "Facial Towelettes" but product is "Facial Wash"
-                    // → "towelettes" ≠ "wash" = MISMATCH
+                    // → "towelette" ≠ "wash" = MISMATCH
                     if Env.isDebugMode {
-                        print("   ❌ FILTERED OUT: '\(product.name)' - specific descriptor mismatch (need: \(targetSpecificWords), has: \(productSpecificWords))")
+                        print("   ❌ FILTERED OUT: '\(product.name)' - specific descriptor mismatch (need: \(targetSpecific), has: \(productSpecific))")
                     }
                     return nil
                 }
@@ -338,20 +352,19 @@ struct ScanView: View {
                     // Perfect: name contains full target phrase ("Hand Sanitizer")
                     nameScore = 1.0
                 } else if specificOverlap.count >= 2 {
-                    // Excellent: Multiple specific words match (e.g., "leave-in serum" → "hydrating leave-in serum")
+                    // Excellent: Multiple specific descriptors match (e.g., "leave-in serum" → "hydrating leave-in serum")
                     nameScore = 0.95
                 } else if specificOverlap.count == 1 {
-                    // Good: The specific word matches (e.g., "serum" in "leave-in serum")
+                    // Good: The specific descriptor matches (e.g., "serum" in "leave-in serum")
                     if overlap.count >= targetWords.count - 1 {
                         // Most words match (e.g., "leave-in serum" → "leave-in treatment")
                         nameScore = 0.85
                     } else {
-                        // Only the specific word matches (e.g., "hand sanitizer" → "sanitizer")
+                        // Only the specific descriptor matches (e.g., "hand sanitizer" → "sanitizer")
                         nameScore = 0.70
                     }
                 } else {
-                    // No specific words matched, or target had no specific words (rare)
-                    // This should rarely happen due to gate above
+                    // No specific descriptors matched (should be rare due to gate above)
                     if overlap.count >= 2 {
                         nameScore = 0.60
                     } else if targetWords.contains(where: { tagsLower.contains($0) }) {
