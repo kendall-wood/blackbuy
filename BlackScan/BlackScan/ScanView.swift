@@ -222,10 +222,10 @@ struct ScanView: View {
             // Convert OpenAI analysis to ScanClassification format
             let classification = convertToScanClassification(analysis: analysis)
             
-            // Use advanced multi-pass search (retrieves up to 100 candidates)
+            // Use advanced multi-pass search (retrieves up to 150 candidates for better coverage)
             let results = try await typesenseClient.searchForScanMatches(
                 classification: classification,
-                candidateCount: 100
+                candidateCount: 150
             )
             
             print("✅ Found \(results.count) candidate products from Typesense")
@@ -236,10 +236,18 @@ struct ScanView: View {
                 classification: classification
             )
             
-            // Filter to 70%+ confidence (very loose - show more results)
-            let filteredResults = scoredResults.filter { $0.confidenceScore >= 0.70 }
+            // TWO-STAGE FILTERING:
+            // Stage 1: Product type must be at least 70% (gate)
+            let productTypeFiltered = scoredResults.filter { result in
+                result.breakdown.productTypeScore >= 0.70
+            }
             
-            print("📊 After 70% confidence filter: \(filteredResults.count) products")
+            print("📊 After product type filter (70%+): \(productTypeFiltered.count) products")
+            
+            // Stage 2: Overall score 60%+ (very loose)
+            let filteredResults = productTypeFiltered.filter { $0.confidenceScore >= 0.60 }
+            
+            print("📊 After overall confidence filter (60%+): \(filteredResults.count) products")
             
             if Env.isDebugMode && !filteredResults.isEmpty {
                 print("🏆 Top 3 matches:")
@@ -460,11 +468,11 @@ struct ScanView: View {
     }
     
     private func confidenceColor(_ confidence: Double) -> Color {
-        if confidence >= 0.85 {
+        if confidence >= 0.80 {
             return .green
-        } else if confidence >= 0.75 {
-            return Color(red: 0.6, green: 0.8, blue: 0.4) // Light green
         } else if confidence >= 0.70 {
+            return Color(red: 0.6, green: 0.8, blue: 0.4) // Light green
+        } else if confidence >= 0.60 {
             return .orange
         } else {
             return .red

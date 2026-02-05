@@ -9,7 +9,6 @@ struct ProductCard: View {
     // MARK: - Layout Constants
     
     private let cardCornerRadius: CGFloat = 12
-    private let imageHeight: CGFloat = 160
     private let cardPadding: CGFloat = 12
     private let spacing: CGFloat = 8
     
@@ -77,7 +76,8 @@ struct ProductCard: View {
                     .foregroundColor(.secondary)
             }
         }
-        .frame(height: imageHeight)
+        .aspectRatio(1, contentMode: .fill)  // 1:1 SQUARE aspect ratio
+        .clipped()
         .clipShape(
             RoundedRectangle(
                 cornerRadius: cardCornerRadius,
