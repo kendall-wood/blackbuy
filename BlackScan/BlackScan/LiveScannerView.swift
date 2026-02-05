@@ -145,20 +145,25 @@ struct LiveScannerView: UIViewControllerRepresentable {
             switch item {
             case .text(let text):
                 extractedText = text.transcript
+                print("📷 Camera detected TEXT: '\(extractedText.prefix(50))'")
                 
             case .barcode(let barcode):
                 extractedText = barcode.payloadStringValue ?? ""
+                print("📷 Camera detected BARCODE: '\(extractedText)'")
                 
             @unknown default:
+                print("📷 Camera detected UNKNOWN item type")
                 return
             }
             
             // Filter out empty or very short text
             guard !extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                   extractedText.count >= 2 else {
+                print("⏭️ Skipping - text too short or empty")
                 return
             }
             
+            print("✅ Adding text to aggregation queue")
             textAggregationQueue.async { [weak self] in
                 self?.addRecognizedText(extractedText)
             }
@@ -179,12 +184,17 @@ struct LiveScannerView: UIViewControllerRepresentable {
         }
         
         private func processAggregatedText() {
-            guard !recognizedTexts.isEmpty else { return }
+            guard !recognizedTexts.isEmpty else {
+                print("🔇 No texts to process")
+                return
+            }
             
             // Combine all recognized texts into a single string
             let combinedText = Array(recognizedTexts)
                 .sorted { $0.count > $1.count } // Prioritize longer text
                 .joined(separator: " ")
+            
+            print("📤 LiveScannerView sending \(recognizedTexts.count) text chunks (\(combinedText.count) chars total)")
             
             // Call the recognition callback on main thread
             DispatchQueue.main.async { [weak self] in

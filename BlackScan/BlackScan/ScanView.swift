@@ -155,26 +155,35 @@ struct ScanView: View {
     }
     
     private func handleButtonTap() {
+        print("🔘 Button tapped! Current state - isListening: \(isListening), isSearching: \(isSearching), results: \(scanResults.count)")
+        
         if !scanResults.isEmpty {
             // Show results sheet
+            print("📊 Showing results sheet with \(scanResults.count) results")
             isShowingResults = true
         } else if !isSearching && !isListening {
             // Start active scanning mode
+            print("🟢 Starting active scanning mode...")
             isListening = true
             
             // Provide haptic feedback
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.impactOccurred()
             
+            print("⏱️ Scanning timeout set for 10 seconds")
+            
             // Auto-stop after 10 seconds if no text detected
             Task {
                 try? await Task.sleep(nanoseconds: 10_000_000_000)
                 await MainActor.run {
                     if isListening && scanResults.isEmpty && !isSearching {
+                        print("⏰ Scanning timeout reached - stopping")
                         isListening = false
                     }
                 }
             }
+        } else {
+            print("⚠️ Button tap ignored - already scanning or searching")
         }
     }
     
@@ -399,9 +408,11 @@ struct ScanView: View {
     
     /// Handles OCR text recognition from the camera scanner
     private func handleRecognizedText(_ recognizedText: String) {
+        print("📥 handleRecognizedText called! Text length: \(recognizedText.count), isListening: \(isListening), isSearching: \(isSearching)")
+        
         // Only process if we're in listening mode or already searching
         guard isListening || isSearching else {
-            print("⏸️ Ignoring text - not in scanning mode")
+            print("⏸️ Ignoring text - not in scanning mode (isListening: \(isListening), isSearching: \(isSearching))")
             return
         }
         
