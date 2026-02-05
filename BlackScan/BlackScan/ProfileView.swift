@@ -273,7 +273,7 @@ struct ProfileView: View {
 }
 
 #Preview("Profile - Signed Out") {
-    ProfileView()
+    ProfileView(selectedTab: .constant(.profile))
         .environmentObject(AppleAuthManager())
         .environmentObject(SavedProductsManager())
         .environmentObject(CartManager())

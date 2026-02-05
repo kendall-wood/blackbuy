@@ -775,7 +775,7 @@ struct IdentifiableString: Identifiable {
 }
 
 #Preview {
-    ShopView()
+    ShopView(selectedTab: .constant(.shop))
         .environmentObject(SavedProductsManager())
         .environmentObject(SavedCompaniesManager())
         .environmentObject(CartManager())

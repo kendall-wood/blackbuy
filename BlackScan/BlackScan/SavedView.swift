@@ -396,7 +396,7 @@ struct SavedProductCard: View {
 }
 
 #Preview {
-    SavedView()
+    SavedView(selectedTab: .constant(.saved))
         .environmentObject(SavedProductsManager())
         .environmentObject(SavedCompaniesManager())
         .environmentObject(CartManager())

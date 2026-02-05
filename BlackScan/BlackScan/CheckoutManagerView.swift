@@ -621,6 +621,6 @@ struct ScanHistoryCard: View {
 }
 
 #Preview {
-    CheckoutManagerView()
+    CheckoutManagerView(selectedTab: .constant(.checkout))
         .environmentObject(CartManager())
 }
