@@ -489,8 +489,8 @@ struct ScanView: View {
                     classification: classification
                 )
                 
-                // Step 3: Filter by minimum confidence (70%) and take top 20
-                let minConfidence = 0.70
+                // Step 3: Filter by minimum confidence (90%) and take top 20
+                let minConfidence = 0.90
                 let qualityResults = scoredResults.filter { $0.confidenceScore >= minConfidence }
                 let topResults = Array(qualityResults.prefix(20))
                 

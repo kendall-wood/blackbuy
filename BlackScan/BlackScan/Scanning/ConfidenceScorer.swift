@@ -79,8 +79,9 @@ class ConfidenceScorer {
             against: classification.brand
         )
         
-        // TIER 4: Ingredient Clarity (10%)
-        let ingredientScore = classification.ingredientClarity
+        // TIER 4: Ingredient Clarity (8%)
+        // Default to 0.8 (neutral/good) if no ingredients detected
+        let ingredientScore = classification.ingredientClarity > 0 ? classification.ingredientClarity : 0.8
         
         // TIER 5: Size (5%)
         let sizeScore = scoreSize(
@@ -88,8 +89,8 @@ class ConfidenceScorer {
             against: classification.size
         )
         
-        // TIER 6: Visual (5%) - Phase 2
-        let visualScore = 0.5  // Neutral for now
+        // TIER 6: Visual (2%) - Phase 2
+        let visualScore = 0.8  // Neutral/positive for now (was too harsh at 0.5)
         
         // CUMULATIVE WEIGHTED SCORE
         let finalScore = (
