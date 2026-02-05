@@ -36,7 +36,7 @@ struct ScanView: View {
                 // Scan Button
                 Button(action: handleButtonTap) {
                     HStack(spacing: 12) {
-                        if isSearching {
+                        if isSearching || isListening {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         }
@@ -50,7 +50,7 @@ struct ScanView: View {
                     .cornerRadius(16)
                     .shadow(color: Color.black.opacity(0.5), radius: 12, x: 0, y: 6)
                 }
-                .disabled(isSearching)
+                .disabled(isSearching || isListening)
                 
                 Spacer()
                     .frame(height: 120) // Account for tab bar
@@ -98,7 +98,7 @@ struct ScanView: View {
         } else if !scanResults.isEmpty {
             return "See \(scanResults.count)+ Results"
         } else if isListening {
-            return "Point at Product Label"
+            return "Scanning"
         } else {
             return "Start Scanning"
         }
@@ -110,7 +110,7 @@ struct ScanView: View {
         } else if !scanResults.isEmpty {
             return .blue
         } else if isListening {
-            return Color.orange
+            return .green  // Green when actively listening for text
         } else {
             return .white
         }
@@ -132,19 +132,19 @@ struct ScanView: View {
         if !scanResults.isEmpty {
             // Show results sheet
             isShowingResults = true
-        } else {
-            // Toggle listening mode - gives visual feedback
+        } else if !isSearching && !isListening {
+            // Start active scanning mode
             isListening = true
             
             // Provide haptic feedback
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.impactOccurred()
             
-            // Auto-disable after 3 seconds if no results
+            // Auto-stop after 10 seconds if no text detected
             Task {
-                try? await Task.sleep(nanoseconds: 3_000_000_000)
-                if scanResults.isEmpty {
-                    await MainActor.run {
+                try? await Task.sleep(nanoseconds: 10_000_000_000)
+                await MainActor.run {
+                    if isListening && scanResults.isEmpty && !isSearching {
                         isListening = false
                     }
                 }
@@ -373,6 +373,11 @@ struct ScanView: View {
     
     /// Handles OCR text recognition from the camera scanner
     private func handleRecognizedText(_ recognizedText: String) {
+        // Only process if we're in listening mode or already searching
+        guard isListening || isSearching else {
+            return
+        }
+        
         // Classify the recognized text using Advanced Classifier
         let classification = AdvancedClassifier.shared.classify(recognizedText)
         lastClassification = classification
