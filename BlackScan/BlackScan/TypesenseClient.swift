@@ -227,29 +227,28 @@ class TypesenseClient: ObservableObject {
         var allCandidates: [Product] = []
         
         // --- PASS 1: Specific Search ---
-        if let productType = classification.productType {
-            let pass1Results = try await performWeightedSearch(
-                productType: productType,
-                form: classification.form,
-                brand: classification.brand,
-                candidateCount: min(candidateCount, 50)
-            )
+        let productTypeString = classification.productType.type
+        let pass1Results = try await performWeightedSearch(
+            productType: productTypeString,
+            form: classification.form?.form,
+            brand: classification.brand,
+            candidateCount: min(candidateCount, 50)
+        )
             
-            allCandidates.append(contentsOf: pass1Results)
-            
-            if Env.shouldLogNetworkRequests {
-                print("🔍 PASS 1 (Specific): Found \(pass1Results.count) candidates for '\(productType)'")
-            }
+        allCandidates.append(contentsOf: pass1Results)
+        
+        if Env.shouldLogNetworkRequests {
+            print("🔍 PASS 1 (Specific): Found \(pass1Results.count) candidates for '\(productTypeString)'")
         }
         
         // --- PASS 2: Broader Search (if needed) ---
-        if allCandidates.count < 20, let productType = classification.productType {
+        if allCandidates.count < 20 {
             // Get category from taxonomy
-            let category = ProductTaxonomy.shared.getCategory(productType) ?? "Beauty & Personal Care"
+            let category = ProductTaxonomy.shared.getCategory(productTypeString) ?? "Beauty & Personal Care"
             
             let pass2Results = try await performCategorySearch(
                 category: category,
-                form: classification.form,
+                form: classification.form?.form,
                 candidateCount: 30
             )
             
@@ -293,7 +292,7 @@ class TypesenseClient: ObservableObject {
     private func performWeightedSearch(
         productType: String,
         form: String?,
-        brand: Brand?,
+        brand: BrandResult?,
         candidateCount: Int
     ) async throws -> [Product] {
         
@@ -346,7 +345,7 @@ class TypesenseClient: ObservableObject {
         
         // Use ingredients or form as fallback
         var query = "*"
-        if let form = classification.form {
+        if let form = classification.form?.form {
             query = form
         } else if let firstIngredient = classification.ingredients.first {
             query = firstIngredient

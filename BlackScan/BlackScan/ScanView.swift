@@ -95,7 +95,8 @@ struct ScanView: View {
     
     private func lastSearchStatus(_ classification: ScanClassification) -> some View {
         VStack(spacing: 4) {
-            if let productType = classification.productType {
+            let productType = classification.productType.type
+            if !productType.isEmpty {
                 Text("Found: \(productType)")
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -157,7 +158,8 @@ struct ScanView: View {
             
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    if let classification = lastClassification, let productType = classification.productType {
+                    if let classification = lastClassification {
+                        let productType = classification.productType.type
                         Text("Found: \(productType)")
                             .font(.title2)
                             .fontWeight(.semibold)
@@ -211,7 +213,8 @@ struct ScanView: View {
                 .font(.headline)
                 .multilineTextAlignment(.center)
             
-            if let classification = lastClassification, let productType = classification.productType {
+            if let classification = lastClassification {
+                let productType = classification.productType.type
                 Text("Looking for: \(productType)")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
@@ -352,8 +355,8 @@ struct ScanView: View {
         if Env.isDebugMode {
             print("🔍 OCR Text: \(recognizedText)")
             print("📋 Classification:")
-            print("   Product Type: \(classification.productType ?? "Unknown")")
-            print("   Form: \(classification.form ?? "Unknown")")
+            print("   Product Type: \(classification.productType.type)")
+            print("   Form: \(classification.form?.form ?? "Unknown")")
             print("   Brand: \(classification.brand?.name ?? "None")")
             print("   Ingredients: \(classification.ingredients.joined(separator: ", "))")
             if let size = classification.size {
@@ -368,7 +371,7 @@ struct ScanView: View {
     /// Performs advanced product search with confidence scoring
     private func performSearch(with classification: ScanClassification) {
         // Don't search if no product type was detected
-        guard classification.productType != nil else {
+        guard !classification.productType.type.isEmpty else {
             if Env.isDebugMode {
                 print("⚠️ Skipping search - no product type detected")
             }
