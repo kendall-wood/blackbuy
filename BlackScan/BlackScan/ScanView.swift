@@ -489,8 +489,10 @@ struct ScanView: View {
                     classification: classification
                 )
                 
-                // Step 3: Take top 20 results
-                let topResults = Array(scoredResults.prefix(20))
+                // Step 3: Filter by minimum confidence (70%) and take top 20
+                let minConfidence = 0.70
+                let qualityResults = scoredResults.filter { $0.confidenceScore >= minConfidence }
+                let topResults = Array(qualityResults.prefix(20))
                 
                 await MainActor.run {
                     isSearching = false

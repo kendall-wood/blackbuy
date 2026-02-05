@@ -394,13 +394,13 @@ class TypesenseClient: ObservableObject {
             URLQueryItem(name: "page", value: "1"),
             URLQueryItem(name: "per_page", value: String(candidateCount)),
             // Sort by relevance (Typesense default text match score)
-            URLQueryItem(name: "sort_by", value: "_text_match:desc")
+            URLQueryItem(name: "sort_by", value: "_text_match:desc"),
+            // Enable prefix matching for partial product type matches
+            URLQueryItem(name: "prefix", value: "true,true,true,true")
         ]
         
-        // Optional filter by product type for more accurate results
-        if !productType.isEmpty && productType != "*" {
-            queryItems.append(URLQueryItem(name: "filter_by", value: "product_type:[\(productType)]"))
-        }
+        // NO FILTER - let Typesense return all matches, we'll score locally
+        // Filtering by exact product type fails when "Hand Sanitizer" != "Hand Sanitizer Gel"
         
         components.queryItems = queryItems
         

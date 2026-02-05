@@ -7,12 +7,12 @@ class ConfidenceScorer {
     // MARK: - Tier Weights
     
     private let tierWeights = TierWeights(
-        productType: 0.40,    // 40%
-        form: 0.25,           // 25%
+        productType: 0.50,    // 50% - INCREASED (most important)
+        form: 0.20,           // 20% - DECREASED
         brandCategory: 0.15,  // 15%
-        ingredients: 0.10,    // 10%
+        ingredients: 0.08,    // 8% - DECREASED
         size: 0.05,           // 5%
-        visual: 0.05          // 5% (Phase 2)
+        visual: 0.02          // 2% - DECREASED (Phase 2)
     )
     
     // MARK: - Dependencies
