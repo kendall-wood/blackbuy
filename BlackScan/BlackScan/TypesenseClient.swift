@@ -206,6 +206,199 @@ class TypesenseClient: ObservableObject {
         return response.products
     }
     
+    // MARK: - Advanced Scan Search
+    
+    /// Advanced search optimized for scanning use case
+    /// Uses weighted fields and broader results for local confidence scoring
+    /// - Parameters:
+    ///   - classification: Scan classification from AdvancedClassifier
+    ///   - candidateCount: Number of candidates to retrieve (default: 100)
+    /// - Returns: Array of candidate Product objects for local scoring
+    func searchForScanMatches(
+        classification: ScanClassification,
+        candidateCount: Int = 100
+    ) async throws -> [Product] {
+        
+        // STRATEGY: Multi-pass search with weighted fields
+        // Pass 1: Specific search (product type + form)
+        // Pass 2: Broader search (category-based) if Pass 1 yields < 20 results
+        // Pass 3: Fallback (very broad) if Pass 2 yields < 10 results
+        
+        var allCandidates: [Product] = []
+        
+        // --- PASS 1: Specific Search ---
+        if let productType = classification.productType {
+            let pass1Results = try await performWeightedSearch(
+                productType: productType,
+                form: classification.form,
+                brand: classification.brand,
+                candidateCount: min(candidateCount, 50)
+            )
+            
+            allCandidates.append(contentsOf: pass1Results)
+            
+            if Env.shouldLogNetworkRequests {
+                print("🔍 PASS 1 (Specific): Found \(pass1Results.count) candidates for '\(productType)'")
+            }
+        }
+        
+        // --- PASS 2: Broader Search (if needed) ---
+        if allCandidates.count < 20, let productType = classification.productType {
+            // Get category from taxonomy
+            let category = ProductTaxonomy.shared.getCategory(productType) ?? "Beauty & Personal Care"
+            
+            let pass2Results = try await performCategorySearch(
+                category: category,
+                form: classification.form,
+                candidateCount: 30
+            )
+            
+            // Merge and deduplicate
+            let existingIds = Set(allCandidates.map { $0.id })
+            let newResults = pass2Results.filter { !existingIds.contains($0.id) }
+            allCandidates.append(contentsOf: newResults)
+            
+            if Env.shouldLogNetworkRequests {
+                print("🔍 PASS 2 (Broader): Found \(newResults.count) additional candidates in '\(category)'")
+            }
+        }
+        
+        // --- PASS 3: Fallback (if still needed) ---
+        if allCandidates.count < 10 {
+            let pass3Results = try await performFallbackSearch(
+                classification: classification,
+                candidateCount: 20
+            )
+            
+            // Merge and deduplicate
+            let existingIds = Set(allCandidates.map { $0.id })
+            let newResults = pass3Results.filter { !existingIds.contains($0.id) }
+            allCandidates.append(contentsOf: newResults)
+            
+            if Env.shouldLogNetworkRequests {
+                print("🔍 PASS 3 (Fallback): Found \(newResults.count) additional candidates")
+            }
+        }
+        
+        if Env.shouldLogNetworkRequests {
+            print("✅ Total scan candidates: \(allCandidates.count)")
+        }
+        
+        return allCandidates
+    }
+    
+    // MARK: - Private Search Strategies
+    
+    /// Pass 1: Weighted search with product type + form
+    private func performWeightedSearch(
+        productType: String,
+        form: String?,
+        brand: Brand?,
+        candidateCount: Int
+    ) async throws -> [Product] {
+        
+        // Build search query
+        var queryParts: [String] = [productType]
+        if let form = form {
+            queryParts.append(form)
+        }
+        
+        let query = queryParts.joined(separator: " ")
+        
+        let url = try buildWeightedSearchURL(
+            query: query,
+            productType: productType,
+            form: form,
+            candidateCount: candidateCount
+        )
+        
+        let request = try buildSearchRequest(url: url)
+        
+        let (data, _) = try await session.data(for: request)
+        let response = try decoder.decode(TypesenseSearchResponse.self, from: data)
+        
+        return response.products
+    }
+    
+    /// Pass 2: Category-based search
+    private func performCategorySearch(
+        category: String,
+        form: String?,
+        candidateCount: Int
+    ) async throws -> [Product] {
+        
+        let parameters = SearchParameters(
+            query: form ?? "*",  // Use form if available, else wildcard
+            page: 1,
+            perPage: candidateCount,
+            mainCategory: category
+        )
+        
+        let response = try await search(parameters: parameters)
+        return response.products
+    }
+    
+    /// Pass 3: Fallback broad search
+    private func performFallbackSearch(
+        classification: ScanClassification,
+        candidateCount: Int
+    ) async throws -> [Product] {
+        
+        // Use ingredients or form as fallback
+        var query = "*"
+        if let form = classification.form {
+            query = form
+        } else if let firstIngredient = classification.ingredients.first {
+            query = firstIngredient
+        }
+        
+        let parameters = SearchParameters(
+            query: query,
+            page: 1,
+            perPage: candidateCount
+        )
+        
+        let response = try await search(parameters: parameters)
+        return response.products
+    }
+    
+    /// Build weighted search URL with field boosting
+    /// Query format: product_type^3, form^2, name^1, tags^1
+    private func buildWeightedSearchURL(
+        query: String,
+        productType: String,
+        form: String?,
+        candidateCount: Int
+    ) throws -> URL {
+        
+        guard var components = URLComponents(string: Env.typesenseSearchURL()) else {
+            throw TypesenseError.invalidURL
+        }
+        
+        // Weighted query_by fields
+        let queryBy = "product_type^3,form^2,name^1,tags^1"
+        
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "q", value: query),
+            URLQueryItem(name: "query_by", value: queryBy),
+            URLQueryItem(name: "page", value: "1"),
+            URLQueryItem(name: "per_page", value: String(candidateCount))
+        ]
+        
+        // Optional filter by product type
+        if !productType.isEmpty && productType != "*" {
+            queryItems.append(URLQueryItem(name: "filter_by", value: "product_type:=\(productType)"))
+        }
+        
+        components.queryItems = queryItems
+        
+        guard let url = components.url else {
+            throw TypesenseError.invalidURL
+        }
+        
+        return url
+    }
+    
     // MARK: - Private Helper Methods
     
     /// Builds the complete search URL with query parameters

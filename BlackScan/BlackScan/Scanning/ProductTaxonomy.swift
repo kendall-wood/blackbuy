@@ -503,6 +503,320 @@ class ProductTaxonomy {
                 keywords: ["perfume", "oil", "fragrance", "roll"]
             ),
             
+            // MARK: - Additional Makeup Products
+            
+            ProductType(
+                canonical: "Blush",
+                variations: ["blush", "liquid blush", "blush stick", "cream blush"],
+                synonyms: ["Cheek Color", "Liquid Blush", "Blush Stick"],
+                category: "Makeup",
+                subcategory: "Face",
+                typicalForms: ["powder", "liquid", "cream", "stick"],
+                keywords: ["blush", "cheek", "color"]
+            ),
+            
+            ProductType(
+                canonical: "Highlighter",
+                variations: ["highlighter", "face highlighter", "liquid highlighter"],
+                synonyms: ["Glow", "Illuminator", "Shimmer"],
+                category: "Makeup",
+                subcategory: "Face",
+                typicalForms: ["powder", "liquid", "cream"],
+                keywords: ["highlighter", "glow", "illuminator", "shimmer"]
+            ),
+            
+            ProductType(
+                canonical: "Bronzer",
+                variations: ["bronzer", "bronzing powder"],
+                synonyms: ["Bronzing Powder", "Contour"],
+                category: "Makeup",
+                subcategory: "Face",
+                typicalForms: ["powder", "cream"],
+                keywords: ["bronzer", "bronzing", "contour"]
+            ),
+            
+            ProductType(
+                canonical: "Primer",
+                variations: ["primer", "face primer", "makeup primer"],
+                synonyms: ["Face Primer", "Makeup Base"],
+                category: "Makeup",
+                subcategory: "Face",
+                typicalForms: ["liquid", "cream", "gel"],
+                keywords: ["primer", "base", "prep"]
+            ),
+            
+            ProductType(
+                canonical: "Eyeliner",
+                variations: ["eyeliner", "eye liner", "liquid eyeliner"],
+                synonyms: ["Eye Liner", "Liquid Liner", "Pencil Liner"],
+                category: "Makeup",
+                subcategory: "Eyes",
+                typicalForms: ["liquid", "pencil", "gel"],
+                keywords: ["eyeliner", "liner", "eye"]
+            ),
+            
+            ProductType(
+                canonical: "Eyeshadow",
+                variations: ["eyeshadow", "eye shadow", "liquid eyeshadow"],
+                synonyms: ["Eye Shadow", "Liquid Eyeshadow"],
+                category: "Makeup",
+                subcategory: "Eyes",
+                typicalForms: ["powder", "liquid", "cream"],
+                keywords: ["eyeshadow", "eye", "shadow"]
+            ),
+            
+            ProductType(
+                canonical: "Brow Gel",
+                variations: ["brow gel", "eyebrow gel", "brow pomade"],
+                synonyms: ["Eyebrow Gel", "Brow Pomade"],
+                category: "Makeup",
+                subcategory: "Eyes",
+                typicalForms: ["gel", "cream"],
+                keywords: ["brow", "eyebrow", "gel", "pomade"]
+            ),
+            
+            ProductType(
+                canonical: "Makeup Brush",
+                variations: ["makeup brush", "cosmetic brush", "brush"],
+                synonyms: ["Cosmetic Brush", "Beauty Brush"],
+                category: "Makeup",
+                subcategory: "Tools",
+                typicalForms: ["other"],
+                keywords: ["brush", "makeup", "cosmetic"]
+            ),
+            
+            // MARK: - Additional Skincare Products
+            
+            ProductType(
+                canonical: "Eye Cream",
+                variations: ["eye cream", "under eye cream", "eye gel"],
+                synonyms: ["Under Eye Cream", "Eye Gel", "Eye Treatment"],
+                category: "Skincare",
+                subcategory: "Treatments",
+                typicalForms: ["cream", "gel"],
+                keywords: ["eye", "cream", "under", "treatment"]
+            ),
+            
+            ProductType(
+                canonical: "Moisturizer",
+                variations: ["moisturizer", "facial moisturizer", "hydrating cream"],
+                synonyms: ["Hydrating Cream", "Face Cream", "Facial Moisturizer"],
+                category: "Skincare",
+                subcategory: "Moisturizers",
+                typicalForms: ["cream", "liquid"],
+                keywords: ["moisturizer", "hydrating", "facial"]
+            ),
+            
+            ProductType(
+                canonical: "Facial Mist",
+                variations: ["facial mist", "face mist", "hydrating mist"],
+                synonyms: ["Face Mist", "Hydrating Spray", "Facial Spray"],
+                category: "Skincare",
+                subcategory: "Toners",
+                typicalForms: ["spray", "liquid"],
+                keywords: ["mist", "spray", "facial", "face"]
+            ),
+            
+            ProductType(
+                canonical: "Facial Scrub",
+                variations: ["facial scrub", "face scrub", "exfoliating scrub"],
+                synonyms: ["Face Scrub", "Exfoliating Scrub", "Face Exfoliant"],
+                category: "Skincare",
+                subcategory: "Exfoliants",
+                typicalForms: ["cream", "gel"],
+                keywords: ["scrub", "exfoliating", "facial", "face"]
+            ),
+            
+            ProductType(
+                canonical: "Sunscreen",
+                variations: ["sunscreen", "sun screen", "spf", "sunblock"],
+                synonyms: ["Sun Protection", "SPF", "Sunblock"],
+                category: "Skincare",
+                subcategory: "Sun Care",
+                typicalForms: ["cream", "liquid", "spray"],
+                keywords: ["sunscreen", "spf", "sun", "protection"]
+            ),
+            
+            // MARK: - Additional Body Care Products
+            
+            ProductType(
+                canonical: "Body Balm",
+                variations: ["body balm", "skin balm", "healing balm"],
+                synonyms: ["Skin Balm", "Healing Balm", "Body Salve"],
+                category: "Body Care",
+                subcategory: "Moisturizers",
+                typicalForms: ["balm", "cream"],
+                keywords: ["balm", "body", "skin", "healing"]
+            ),
+            
+            ProductType(
+                canonical: "Sugar Scrub",
+                variations: ["sugar scrub", "body sugar scrub"],
+                synonyms: ["Body Sugar Scrub", "Sweet Scrub"],
+                category: "Body Care",
+                subcategory: "Exfoliants",
+                typicalForms: ["cream"],
+                keywords: ["sugar", "scrub", "body", "exfoliating"]
+            ),
+            
+            ProductType(
+                canonical: "Hand Soap",
+                variations: ["hand soap", "foaming hand soap", "liquid hand soap"],
+                synonyms: ["Foaming Hand Soap", "Liquid Hand Soap"],
+                category: "Body Care",
+                subcategory: "Cleansers",
+                typicalForms: ["liquid", "foam"],
+                keywords: ["hand", "soap", "foaming", "liquid"]
+            ),
+            
+            ProductType(
+                canonical: "Body Gloss",
+                variations: ["body gloss", "shimmer oil", "glow oil"],
+                synonyms: ["Shimmer Oil", "Glow Oil", "Body Shimmer"],
+                category: "Body Care",
+                subcategory: "Oils",
+                typicalForms: ["oil", "liquid"],
+                keywords: ["gloss", "shimmer", "glow", "body"]
+            ),
+            
+            ProductType(
+                canonical: "Liquid Soap",
+                variations: ["liquid soap", "hand soap", "body soap"],
+                synonyms: ["Hand Soap", "Body Soap", "Castile Soap"],
+                category: "Body Care",
+                subcategory: "Cleansers",
+                typicalForms: ["liquid"],
+                keywords: ["liquid", "soap", "hand", "body"]
+            ),
+            
+            // MARK: - Men's Grooming Products
+            
+            ProductType(
+                canonical: "Beard Oil",
+                variations: ["beard oil", "facial hair oil"],
+                synonyms: ["Facial Hair Oil", "Beard Serum"],
+                category: "Men's Care",
+                subcategory: "Beard",
+                typicalForms: ["oil"],
+                keywords: ["beard", "oil", "facial", "hair"]
+            ),
+            
+            ProductType(
+                canonical: "Beard Balm",
+                variations: ["beard balm", "beard butter"],
+                synonyms: ["Beard Butter", "Beard Cream"],
+                category: "Men's Care",
+                subcategory: "Beard",
+                typicalForms: ["balm", "cream"],
+                keywords: ["beard", "balm", "butter"]
+            ),
+            
+            ProductType(
+                canonical: "Beard Conditioner",
+                variations: ["beard conditioner", "beard softener"],
+                synonyms: ["Beard Softener", "Beard Wash"],
+                category: "Men's Care",
+                subcategory: "Beard",
+                typicalForms: ["liquid", "cream"],
+                keywords: ["beard", "conditioner", "softener", "wash"]
+            ),
+            
+            // MARK: - Nail Care Products
+            
+            ProductType(
+                canonical: "Nail Polish",
+                variations: ["nail polish", "nail lacquer", "nail color"],
+                synonyms: ["Nail Lacquer", "Nail Color", "Nail Varnish"],
+                category: "Makeup",
+                subcategory: "Nails",
+                typicalForms: ["liquid"],
+                keywords: ["nail", "polish", "lacquer", "color"]
+            ),
+            
+            ProductType(
+                canonical: "Gel Polish",
+                variations: ["gel polish", "gel nail polish"],
+                synonyms: ["Gel Nail Polish", "UV Gel"],
+                category: "Makeup",
+                subcategory: "Nails",
+                typicalForms: ["gel"],
+                keywords: ["gel", "polish", "nail", "uv"]
+            ),
+            
+            // MARK: - Lip Care & Makeup
+            
+            ProductType(
+                canonical: "Lip Scrub",
+                variations: ["lip scrub", "lip exfoliant"],
+                synonyms: ["Lip Exfoliant", "Lip Polish"],
+                category: "Lip Care",
+                subcategory: "Treatments",
+                typicalForms: ["scrub"],
+                keywords: ["lip", "scrub", "exfoliant", "polish"]
+            ),
+            
+            ProductType(
+                canonical: "Liquid Lipstick",
+                variations: ["liquid lipstick", "liquid lip", "lip liquid"],
+                synonyms: ["Liquid Lip", "Matte Liquid Lipstick"],
+                category: "Makeup",
+                subcategory: "Lips",
+                typicalForms: ["liquid"],
+                keywords: ["liquid", "lipstick", "lip", "matte"]
+            ),
+            
+            // MARK: - Additional Hair Care Products
+            
+            ProductType(
+                canonical: "Deep Conditioner",
+                variations: ["deep conditioner", "deep conditioning treatment"],
+                synonyms: ["Deep Conditioning Treatment", "Intensive Conditioner", "Hair Treatment"],
+                category: "Hair Care",
+                subcategory: "Treatments",
+                typicalForms: ["cream"],
+                keywords: ["deep", "conditioner", "treatment", "intensive"]
+            ),
+            
+            ProductType(
+                canonical: "Hair Serum",
+                variations: ["hair serum", "hair treatment serum"],
+                synonyms: ["Hair Treatment Serum", "Shine Serum"],
+                category: "Hair Care",
+                subcategory: "Treatments",
+                typicalForms: ["liquid", "oil"],
+                keywords: ["serum", "hair", "treatment", "shine"]
+            ),
+            
+            ProductType(
+                canonical: "Styling Gel",
+                variations: ["styling gel", "hair styling gel"],
+                synonyms: ["Hair Gel", "Firm Hold Gel"],
+                category: "Hair Care",
+                subcategory: "Styling",
+                typicalForms: ["gel"],
+                keywords: ["styling", "gel", "hold", "hair"]
+            ),
+            
+            ProductType(
+                canonical: "Hair Balm",
+                variations: ["hair balm", "styling balm"],
+                synonyms: ["Styling Balm", "Hair Wax"],
+                category: "Hair Care",
+                subcategory: "Styling",
+                typicalForms: ["balm", "cream"],
+                keywords: ["balm", "hair", "styling", "wax"]
+            ),
+            
+            ProductType(
+                canonical: "Curl Cream",
+                variations: ["curl cream", "curling cream", "curl defining cream"],
+                synonyms: ["Curling Cream", "Curl Defining Cream", "Curl Enhancer"],
+                category: "Hair Care",
+                subcategory: "Styling",
+                typicalForms: ["cream"],
+                keywords: ["curl", "cream", "defining", "curling"]
+            ),
+            
             // MARK: - Candles & Home
             
             ProductType(
