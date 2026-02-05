@@ -99,7 +99,7 @@ struct ScanView: View {
         .sheet(isPresented: $isShowingResults) {
             resultsSheet
         }
-        .onChange(of: capturedImage) { newImage in
+        .onChange(of: capturedImage) { _, newImage in
             if let image = newImage {
                 handleCapturedImage(image)
             }
@@ -266,7 +266,6 @@ struct ScanView: View {
         
         return products.compactMap { product in
             var score: Double = 0.0
-            var matchDetails: [String: Any] = [:]
             
             // 1. Product Type Match (50% weight)
             let productTypeScore = scoreProductType(
@@ -274,15 +273,15 @@ struct ScanView: View {
                 catalog: product.productType
             )
             score += productTypeScore * 0.50
-            matchDetails["product_type_score"] = productTypeScore
             
             // 2. Form Match (20% weight)
+            let formScore: Double
             if let scannedForm = analysis.form, let catalogForm = product.form {
-                let formScore = scoreForm(scanned: scannedForm, catalog: catalogForm)
+                formScore = scoreForm(scanned: scannedForm, catalog: catalogForm)
                 score += formScore * 0.20
-                matchDetails["form_score"] = formScore
             } else {
-                score += 0.80 * 0.20 // Neutral if missing
+                formScore = 0.80
+                score += formScore * 0.20 // Neutral if missing
             }
             
             // 3. Ingredients Match (15% weight)
@@ -291,34 +290,35 @@ struct ScanView: View {
                 catalogTags: product.tags ?? []
             )
             score += ingredientScore * 0.15
-            matchDetails["ingredient_score"] = ingredientScore
             
             // 4. Size Match (10% weight)
-            if let scannedSize = analysis.size {
-                // For now, neutral score - size matching is complex
-                score += 0.80 * 0.10
-            } else {
-                score += 0.80 * 0.10
-            }
+            let sizeScore: Double = 0.80 // For now, neutral score - size matching is complex
+            score += sizeScore * 0.10
             
             // 5. Brand Association (5% weight) - not applicable for Black-owned alternatives
-            score += 0.70 * 0.05
+            let brandScore: Double = 0.70
+            score += brandScore * 0.05
             
             if Env.isDebugMode {
                 print("   \(product.name): \(Int(score * 100))% (type: \(Int(productTypeScore * 100))%)")
             }
             
+            // Create explanation
+            let explanation = "Product type: \(Int(productTypeScore * 100))%, Form: \(Int(formScore * 100))%"
+            
             return ScoredProduct(
+                id: product.id,
                 product: product,
                 confidenceScore: score,
-                matchDetails: MatchDetails(
-                    productTypeMatch: productTypeScore,
-                    formMatch: matchDetails["form_score"] as? Double ?? 0.8,
-                    brandMatch: 0.7,
-                    ingredientMatch: ingredientScore,
-                    sizeMatch: 0.8,
-                    visualMatch: nil
-                )
+                breakdown: ScoreBreakdown(
+                    productTypeScore: productTypeScore,
+                    formScore: formScore,
+                    brandScore: brandScore,
+                    ingredientScore: ingredientScore,
+                    sizeScore: sizeScore,
+                    visualScore: nil
+                ),
+                explanation: explanation
             )
         }
         .sorted { $0.confidenceScore > $1.confidenceScore }
@@ -546,7 +546,7 @@ struct ScanView: View {
                 GridItem(.flexible(), spacing: 16),
                 GridItem(.flexible(), spacing: 16)
             ], spacing: 16) {
-                ForEach(scanResults, id: \.product.id) { scoredProduct in
+                ForEach(scanResults) { scoredProduct in
                     NavigationLink(destination: ProductDetailView(product: scoredProduct.product)) {
                         ProductCard(product: scoredProduct.product, onBuyTapped: {
                             // Open product URL in Safari
