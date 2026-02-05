@@ -8,11 +8,10 @@ struct ScanView: View {
     
     @StateObject private var typesenseClient = TypesenseClient()
     @State private var isShowingResults = false
-    @State private var scanResults: [ScoredProduct] = []  // Changed from searchResults
-    @State private var lastClassification: ScanClassification?  // Changed from ClassificationResult
+    @State private var scanResults: [ScoredProduct] = []
+    @State private var lastClassification: ScanClassification?
     @State private var isSearching = false
     @State private var searchError: String?
-    @State private var isScannerActive = false  // Controls camera activation
     
     // MARK: - UI Configuration
     
@@ -23,17 +22,11 @@ struct ScanView: View {
     
     var body: some View {
         ZStack {
-            // Camera Scanner Background (always active when scanner is on)
-            if isScannerActive {
-                ScannerContainerView { recognizedText in
-                    handleRecognizedText(recognizedText)
-                }
-                .ignoresSafeArea(.all)
-            } else {
-                // Black background when not scanning
-                Color.black
-                    .ignoresSafeArea(.all)
+            // Camera Scanner Background (ALWAYS ACTIVE - live view)
+            ScannerContainerView { recognizedText in
+                handleRecognizedText(recognizedText)
             }
+            .ignoresSafeArea(.all)
             
             // Center Button UI
             centerButton
@@ -84,7 +77,7 @@ struct ScanView: View {
         } else if !scanResults.isEmpty {
             return "See \(scanResults.count)+ Results"
         } else {
-            return "Start Scanning"
+            return "Scan Product"
         }
     }
     
@@ -112,10 +105,8 @@ struct ScanView: View {
         if !scanResults.isEmpty {
             // Show results sheet
             isShowingResults = true
-        } else if !isScannerActive {
-            // Start scanning - activate camera
-            isScannerActive = true
         }
+        // Camera is always active, scanning automatically in background
     }
     
     // MARK: - Results Sheet
