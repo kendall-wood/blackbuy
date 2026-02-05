@@ -226,7 +226,6 @@ struct ScanView: View {
             // Search Typesense
             let results = try await typesenseClient.searchProducts(
                 query: searchQuery,
-                filters: nil,
                 page: 1,
                 perPage: 20
             )
@@ -272,7 +271,7 @@ struct ScanView: View {
             // 1. Product Type Match (50% weight)
             let productTypeScore = scoreProductType(
                 scanned: analysis.productType,
-                catalog: product.product_type ?? ""
+                catalog: product.productType
             )
             score += productTypeScore * 0.50
             matchDetails["product_type_score"] = productTypeScore
@@ -549,7 +548,12 @@ struct ScanView: View {
             ], spacing: 16) {
                 ForEach(scanResults, id: \.product.id) { scoredProduct in
                     NavigationLink(destination: ProductDetailView(product: scoredProduct.product)) {
-                        ProductCard(product: scoredProduct.product)
+                        ProductCard(product: scoredProduct.product, onBuyTapped: {
+                            // Open product URL in Safari
+                            if let url = URL(string: scoredProduct.product.productUrl) {
+                                UIApplication.shared.open(url)
+                            }
+                        })
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
