@@ -116,18 +116,19 @@ struct ProductDetailView: View {
                         
                         // Product name
                         Text(product.name)
-                            .font(.system(size: 26, weight: .bold))
+                            .font(.system(size: 20, weight: .bold))
+                            .tracking(-0.3)
                             .foregroundColor(.black)
                             .lineLimit(3)
-                            .lineSpacing(3)
+                            .lineSpacing(2)
                             .padding(.top, 2)
                         
-                        // Price with kerning
+                        // Price with tight kerning
                         Text(product.formattedPrice)
-                            .font(.system(size: 36, weight: .semibold))
-                            .tracking(0.5)
+                            .font(.system(size: 28, weight: .semibold))
+                            .tracking(-0.5)
                             .foregroundColor(.black)
-                            .padding(.top, 12)
+                            .padding(.top, 8)
                             .padding(.bottom, 4)
                         
                         // Categories label
@@ -386,10 +387,10 @@ struct SimilarProductCard: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .lineSpacing(2)
                 
-                // Price with tracking
+                // Price with tight tracking
                 Text(product.formattedPrice)
                     .font(.system(size: 16, weight: .semibold))
-                    .tracking(0.3)
+                    .tracking(-0.3)
                     .foregroundColor(.black)
                     .padding(.top, 4)
             }
