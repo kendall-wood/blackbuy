@@ -18,7 +18,7 @@ struct MainTabView: View {
                 case .saved:
                     SavedView()
                 case .scan:
-                    CameraScanView()
+                    ScanView()
                 case .shop:
                     ShopView()
                 case .checkout:
