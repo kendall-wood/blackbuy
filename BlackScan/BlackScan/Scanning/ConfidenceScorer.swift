@@ -63,7 +63,7 @@ class ConfidenceScorer {
     ) -> ScoredProduct {
         // TIER 1: Product Type (40%)
         let productTypeScore = scoreProductType(
-            product.productType,
+            product: product,
             against: classification.productType
         )
         
@@ -126,16 +126,41 @@ class ConfidenceScorer {
     
     /// TIER 1: Score product type match
     /// - Parameters:
-    ///   - productType: Product's type
+    ///   - product: Full product (to check both productType AND name)
     ///   - target: Target classification
     /// - Returns: Score 0.0-1.0
     private func scoreProductType(
-        _ productType: String,
+        product: Product,
         against target: ProductTypeResult
     ) -> Double {
-        // First, check raw strings for contains match BEFORE normalization
-        let productLower = productType.lowercased()
+        let productType = product.productType
+        let productName = product.name
+        
+        // CRITICAL FIX: Check product NAME first (handles bad product_type metadata)
+        let productNameLower = productName.lowercased()
         let targetLower = target.type.lowercased()
+        
+        // If product NAME contains target type → HIGH SCORE
+        if productNameLower.contains(targetLower) {
+            if Env.isDebugMode {
+                print("   ✅ Product NAME contains target: '\(productName)' contains '\(target.type)' = 0.95")
+            }
+            return 0.95 // High confidence - name is very reliable
+        }
+        
+        // If target type contains product NAME words (e.g., "Sanitizer" in "Hand Sanitizer")
+        let nameWords = Set(productNameLower.split(separator: " ").map(String.init))
+        let targetWords = Set(targetLower.split(separator: " ").map(String.init))
+        let commonWords = nameWords.intersection(targetWords)
+        if commonWords.count >= 2 { // At least 2 words match
+            if Env.isDebugMode {
+                print("   ✅ Product NAME has \(commonWords.count) matching words: \(commonWords) = 0.90")
+            }
+            return 0.90
+        }
+        
+        // Now check product_type field (may be garbage like "Gel/Gelly")
+        let productLower = productType.lowercased()
         
         // Direct substring match (most important)
         if productLower.contains(targetLower) || targetLower.contains(productLower) {
@@ -143,7 +168,7 @@ class ConfidenceScorer {
             let maxLength = max(productLower.count, targetLower.count)
             let ratio = Double(matchLength) / Double(maxLength)
             if Env.isDebugMode {
-                print("   🎯 Direct substring match: '\(productType)' vs '\(target.type)' = \(0.85 + ratio * 0.15)")
+                print("   🎯 Direct substring match in product_type: '\(productType)' vs '\(target.type)' = \(0.85 + ratio * 0.15)")
             }
             return 0.85 + (ratio * 0.15) // 0.85 to 1.0
         }
