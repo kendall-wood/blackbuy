@@ -125,7 +125,7 @@ struct ProductDetailView: View {
                         
                         // Price with tight kerning
                         Text(product.formattedPrice)
-                            .font(.system(size: 32, weight: .medium))
+                            .font(.system(size: 26, weight: .medium))
                             .tracking(-0.5)
                             .foregroundColor(.black)
                             .padding(.top, 8)
@@ -173,6 +173,9 @@ struct ProductDetailView: View {
                                 HStack(spacing: 16) {
                                     ForEach(similarProducts) { similarProduct in
                                         SimilarProductCardWrapper(product: similarProduct)
+                                            .environmentObject(typesenseClient)
+                                            .environmentObject(savedProductsManager)
+                                            .environmentObject(cartManager)
                                     }
                                 }
                                 .padding(.horizontal, 24)
@@ -299,7 +302,7 @@ struct CategoryChip: View {
         Text(text.uppercased())
             .font(.system(size: 11, weight: .bold))
             .tracking(0.8)
-            .foregroundColor(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color(red: 1.0, green: 0.45, blue: 0.0))
+            .foregroundColor(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color(.systemGray2))
             .lineLimit(1)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
@@ -307,7 +310,7 @@ struct CategoryChip: View {
             .cornerRadius(8)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color(red: 1.0, green: 0.45, blue: 0.0), lineWidth: 1.5)
+                    .stroke(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color(.systemGray5), lineWidth: 1.5)
             )
     }
 }
