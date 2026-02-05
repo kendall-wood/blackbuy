@@ -18,7 +18,7 @@ struct MainTabView: View {
                 case .saved:
                     SavedView()
                 case .scan:
-                    ScanView()
+                    ScanView(selectedTab: $selectedTab)
                 case .shop:
                     ShopView()
                 case .checkout:
@@ -27,8 +27,10 @@ struct MainTabView: View {
             }
             .ignoresSafeArea(.all, edges: .bottom)
             
-            // Bottom Navigation Bar
-            BottomNavBar(selectedTab: $selectedTab)
+            // Bottom Navigation Bar - hidden on scan view
+            if selectedTab != .scan {
+                BottomNavBar(selectedTab: $selectedTab)
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ struct ScanView: View {
     
     // MARK: - State Properties
     
+    @Binding var selectedTab: BottomNavBar.AppTab
     @StateObject private var typesenseClient = TypesenseClient()
     @State private var isShowingResults = false
     @State private var scanResults: [ScoredProduct] = []
@@ -17,6 +18,11 @@ struct ScanView: View {
     @State private var flashlightOn = false
     @State private var capturedImage: UIImage?
     @State private var shouldCapturePhoto = false
+    
+    // Default initializer for binding
+    init(selectedTab: Binding<BottomNavBar.AppTab> = .constant(.scan)) {
+        self._selectedTab = selectedTab
+    }
     
     // Scanning states for button UI
     enum ScanState {
@@ -37,65 +43,231 @@ struct ScanView: View {
     ]
     
     var body: some View {
-        ZStack {
-            // Live Camera Feed
-            CameraPreviewView(
-                flashlightOn: $flashlightOn,
-                capturedImage: $capturedImage,
-                shouldCapturePhoto: $shouldCapturePhoto
-            )
-            .ignoresSafeArea()
-            
-            // Flashlight Button - top left
-            VStack {
-                HStack {
-                    Button(action: {
-                        flashlightOn.toggle()
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 50, height: 50)
-                            
-                            Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
-                                .font(.system(size: 22))
-                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+        GeometryReader { geometry in
+            ZStack {
+                // Live Camera Feed
+                CameraPreviewView(
+                    flashlightOn: $flashlightOn,
+                    capturedImage: $capturedImage,
+                    shouldCapturePhoto: $shouldCapturePhoto
+                )
+                .ignoresSafeArea()
+                
+                // Top Left - Flashlight Button
+                VStack {
+                    HStack {
+                        Button(action: {
+                            flashlightOn.toggle()
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 65, height: 65)
+                                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                                
+                                Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            }
                         }
+                        .padding(.leading, 20)
+                        .padding(.top, 50)
+                        
+                        Spacer()
                     }
-                    .padding(.leading, 20)
-                    .padding(.top, 50)
                     
                     Spacer()
                 }
                 
-                Spacer()
-            }
-            
-            // Center Button UI
-            VStack {
-                Spacer()
+                // Top Right - Profile Button
+                VStack {
+                    HStack {
+                        Spacer()
+                        
+                        Button(action: {
+                            selectedTab = .profile
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 65, height: 65)
+                                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                                
+                                Image(systemName: "person.fill")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            }
+                        }
+                        .padding(.trailing, 20)
+                        .padding(.top, 50)
+                    }
+                    
+                    Spacer()
+                }
                 
-                // Scan Button
-                Button(action: handleButtonTap) {
+                // Top Center - Logo and Subtitle
+                VStack(spacing: 8) {
+                    Image("blackscan-logo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 210, height: 38)
+                        .padding(.top, 100)
+                    
+                    Text("Scan any product to")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(.white)
+                    +
+                    Text("\nfind your black-owned option")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                }
+                .multilineTextAlignment(.center)
+                
+                // Center - Scan Button
+                VStack(spacing: 10) {
+                    Spacer()
+                        .frame(height: geometry.size.height * 0.45)
+                    
+                    Button(action: handleButtonTap) {
+                        HStack(spacing: 10) {
+                            if scanState == .capturing || scanState == .analyzing || scanState == .searching {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: Color(red: 0.26, green: 0.63, blue: 0.95)))
+                            } else {
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            }
+                            
+                            Text(scanButtonText)
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                        }
+                        .frame(width: min(350, geometry.size.width * 0.88), height: 55)
+                        .background(Color.white)
+                        .cornerRadius(28)
+                        .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                    }
+                    .disabled(scanState == .capturing || scanState == .analyzing || scanState == .searching)
+                    
+                    Text("Shake to report issue")
+                        .font(.system(size: 13))
+                        .foregroundColor(Color(red: 0.67, green: 0.67, blue: 0.67))
+                    
+                    Spacer()
+                }
+                
+                // Bottom - Results Button
+                if scanState == .results && !scanResults.isEmpty {
+                    VStack {
+                        Spacer()
+                        
+                        Button(action: {
+                            isShowingResults = true
+                        }) {
+                            HStack(spacing: 0) {
+                                Image(systemName: "list.bullet")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.white)
+                                    .frame(width: 50)
+                                    .padding(.leading, 6)
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("View \(scanResults.count)+ Products")
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundColor(.white)
+                                    
+                                    if let productType = lastAnalysis?.productType {
+                                        Text("Black-owned \(productType)")
+                                            .font(.system(size: 15, weight: .regular))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "lock.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.white)
+                                    .padding(.trailing, 20)
+                            }
+                            .frame(width: geometry.size.width * 0.9, height: 85)
+                            .background(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            .cornerRadius(22)
+                            .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                        }
+                        .padding(.bottom, 140)
+                    }
+                }
+                
+                // Bottom Left - Clock Button
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Button(action: {
+                            selectedTab = .saved
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 68, height: 68)
+                                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                                
+                                Image(systemName: "clock.fill")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            }
+                        }
+                        .padding(.leading, 20)
+                        .padding(.bottom, 35)
+                        
+                        Spacer()
+                    }
+                }
+                
+                // Bottom Right - Heart and Shop Buttons
+                VStack {
+                    Spacer()
+                    
                     HStack(spacing: 12) {
-                        if scanState != .initial && scanState != .results {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        Spacer()
+                        
+                        Button(action: {
+                            selectedTab = .saved
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 68, height: 68)
+                                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                                
+                                Image(systemName: "heart.fill")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            }
                         }
                         
-                        Text(buttonText)
-                            .font(.system(size: 18, weight: .semibold))
+                        Button(action: {
+                            selectedTab = .shop
+                        }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 68, height: 68)
+                                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                                
+                                Image(systemName: "storefront.fill")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            }
+                        }
+                        .padding(.trailing, 20)
                     }
-                    .frame(width: 280, height: 56)
-                    .background(buttonBackgroundColor)
-                    .foregroundColor(buttonTextColor)
-                    .cornerRadius(16)
-                    .shadow(color: Color.black.opacity(0.5), radius: 12, x: 0, y: 6)
+                    .padding(.bottom, 35)
                 }
-                .disabled(scanState == .capturing || scanState == .analyzing || scanState == .searching)
-                
-                Spacer()
-                    .frame(height: 120) // Account for tab bar
             }
         }
         .sheet(isPresented: $isShowingResults) {
@@ -109,6 +281,21 @@ struct ScanView: View {
     }
     
     // MARK: - Button State Computed Properties
+    
+    private var scanButtonText: String {
+        switch scanState {
+        case .initial:
+            return "Start Scanning"
+        case .capturing:
+            return "Capturing..."
+        case .analyzing:
+            return "Analyzing..."
+        case .searching:
+            return "Searching..."
+        case .results:
+            return "Scan Again"
+        }
+    }
     
     private var buttonText: String {
         switch scanState {
@@ -153,12 +340,15 @@ struct ScanView: View {
     // MARK: - Button Action
     
     private func handleButtonTap() {
-        print("🔘 Button tapped! Current state: \(scanState), results: \(scanResults.count)")
+        print("🔘 Scan button tapped! Current state: \(scanState)")
         
         if scanState == .results {
-            // Show results sheet
-            print("📊 Showing results sheet with \(scanResults.count) results")
-            isShowingResults = true
+            // Reset to scan again
+            print("🔄 Resetting to scan again...")
+            scanState = .initial
+            scanResults = []
+            lastAnalysis = nil
+            capturedImage = nil
         } else if scanState == .initial {
             // Trigger image capture
             print("📸 Triggering image capture...")
