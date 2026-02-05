@@ -1,6 +1,6 @@
 {
-  "hair": "Hair Care",
   "hair care": "Hair Care",
+  "hair": "Hair Care",
   "haircare": "Hair Care",
   "hair products": "Hair Care",
   "hair styling": "Hair Care",
@@ -8,30 +8,33 @@
   "natural hair": "Hair Care",
   "curl care": "Hair Care",
   "relaxed hair": "Hair Care",
+  "hair conditioners": "Hair Care",
+  "hair cleansers": "Hair Care",
+  "hair oils": "Hair Care",
+  "hair masks": "Hair Care",
   
-  "skin": "Skincare",
-  "skincare": "Skincare",
   "skin care": "Skincare",
+  "skincare": "Skincare",
+  "skin": "Skincare",
   "facial": "Skincare",
-  "face": "Skincare",
   "face care": "Skincare",
+  "face": "Skincare",
   
-  "body": "Body Care",
   "body care": "Body Care",
+  "body": "Body Care",
   "bodycare": "Body Care",
   "bath": "Body Care",
   "shower": "Body Care",
   
   "makeup": "Makeup",
   "cosmetics": "Makeup",
-  "beauty": "Makeup",
   "eyes": "Makeup",
-  "lips": "Lip Care",
   "face makeup": "Makeup",
   
-  "lip": "Lip Care",
   "lip care": "Lip Care",
+  "lip": "Lip Care",
   "lipcare": "Lip Care",
+  "lips": "Lip Care",
   
   "fragrance": "Fragrance",
   "perfume": "Fragrance",
@@ -88,5 +91,16 @@
   "gift": "Gifts/Cards",
   "gift card": "Gifts/Cards",
   "e-gift": "Gifts/Cards",
-  "egift": "Gifts/Cards"
+  "egift": "Gifts/Cards",
+  
+  "jewelry": "Accessories",
+  "jewellery": "Accessories",
+  "office supplies": "Accessories",
+  "stationery": "Accessories",
+  "art": "Accessories",
+  "collectibles": "Accessories",
+  "books": "Accessories",
+  "hobbies": "Accessories",
+  "electronics": "Accessories",
+  "sports": "Accessories"
 }
