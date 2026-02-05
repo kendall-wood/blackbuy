@@ -62,7 +62,8 @@ struct ProductDetailView: View {
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var typesenseClient: TypesenseClient
     
-    @State private var productCategories: [String] = []
+    @State private var similarProducts: [Product] = []
+    @State private var isLoadingSimilar = false
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -130,60 +131,67 @@ struct ProductDetailView: View {
                             .foregroundColor(Color(.systemGray))
                             .padding(.top, 12)
                         
-                        // Category chips (from actual product categories, with fallback)
+                        // Category chips from taxonomy
                         FlowLayout(spacing: 8) {
-                            if !productCategories.isEmpty {
-                                ForEach(productCategories.prefix(4), id: \.self) { category in
-                                    Text(category)
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(.black)
-                                        .lineLimit(1)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(Color.white)
-                                        .cornerRadius(8)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
-                                        )
-                                }
-                            } else {
-                                // Fallback to product type and main category while loading
-                                if !product.productType.isEmpty && product.productType != "Other" {
-                                    Text(product.productType)
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(.black)
-                                        .lineLimit(1)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(Color.white)
-                                        .cornerRadius(8)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
-                                        )
-                                }
-                                
-                                if !product.mainCategory.isEmpty && product.mainCategory != "Other" {
-                                    Text(product.mainCategory)
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(.black)
-                                        .lineLimit(1)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(Color.white)
-                                        .cornerRadius(8)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
-                                        )
-                                }
+                            // Main Category chip
+                            if !product.mainCategory.isEmpty && product.mainCategory != "Other" {
+                                CategoryChip(text: product.mainCategory, isPrimary: true)
+                            }
+                            
+                            // Product Type chip (subcategory)
+                            if !product.productType.isEmpty && product.productType != "Other" {
+                                CategoryChip(text: product.productType, isPrimary: false)
+                            }
+                            
+                            // Form chip if available
+                            if let form = product.form, !form.isEmpty && form != "other" {
+                                CategoryChip(text: form.capitalized, isPrimary: false)
                             }
                         }
                         .padding(.top, 6)
                     }
                     .padding(.horizontal, 24)
-                    .padding(.bottom, 32)
+                    .padding(.bottom, 24)
+                    
+                    // Similar Products Section
+                    if !similarProducts.isEmpty {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Similar Products")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 24)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(similarProducts) { similarProduct in
+                                        NavigationLink(destination: ProductDetailView(product: similarProduct)) {
+                                            SimilarProductCard(product: similarProduct)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.horizontal, 24)
+                            }
+                        }
+                        .padding(.bottom, 32)
+                    } else if isLoadingSimilar {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Similar Products")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.black)
+                                .padding(.horizontal, 24)
+                            
+                            HStack(spacing: 16) {
+                                ForEach(0..<3, id: \.self) { _ in
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(.systemGray6))
+                                        .frame(width: 140, height: 200)
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                        }
+                        .padding(.bottom, 32)
+                    }
                     
                     Spacer(minLength: 100)
                 }
@@ -238,35 +246,106 @@ struct ProductDetailView: View {
             }
         }
         .onAppear {
-            loadCategories()
+            loadSimilarProducts()
         }
     }
     
-    private func loadCategories() {
+    private func loadSimilarProducts() {
         Task {
+            await MainActor.run {
+                isLoadingSimilar = true
+            }
+            
             do {
+                // Search for products in the same category and product type
                 let products = try await typesenseClient.searchProducts(
-                    query: product.company,
+                    query: product.productType,
                     page: 1,
-                    perPage: 100
+                    perPage: 20
                 )
                 
-                let companyProducts = products.filter { $0.company == product.company }
-                
-                // Extract unique categories from product types
-                let categoryStrings = companyProducts.compactMap { product -> String? in
-                    guard !product.productType.isEmpty, product.productType != "Other" else { return nil }
-                    return product.productType
-                }
-                let uniqueCategories = Array(Set(categoryStrings)).sorted()
+                // Filter to same main category, exclude current product, and limit to 10
+                let filtered = products
+                    .filter { $0.id != product.id && $0.mainCategory == product.mainCategory }
+                    .prefix(10)
                 
                 await MainActor.run {
-                    productCategories = Array(uniqueCategories.prefix(4))
+                    similarProducts = Array(filtered)
+                    isLoadingSimilar = false
                 }
             } catch {
-                print("Error loading categories: \(error)")
+                print("Error loading similar products: \(error)")
+                await MainActor.run {
+                    isLoadingSimilar = false
+                }
             }
         }
+    }
+}
+
+// MARK: - Category Chip Component
+
+struct CategoryChip: View {
+    let text: String
+    let isPrimary: Bool
+    
+    var body: some View {
+        Text(text)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundColor(isPrimary ? .white : .black)
+            .lineLimit(1)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color.white)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isPrimary ? Color.clear : Color.black.opacity(0.15), lineWidth: 0.5)
+            )
+    }
+}
+
+// MARK: - Similar Product Card Component
+
+struct SimilarProductCard: View {
+    let product: Product
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Product Image
+            CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Color(.systemGray6)
+                    .overlay(
+                        ProgressView()
+                            .tint(Color(.systemGray))
+                    )
+            }
+            .frame(width: 140, height: 140)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            
+            // Product Name
+            Text(product.name)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.black)
+                .lineLimit(2)
+                .frame(width: 140, alignment: .leading)
+            
+            // Company
+            Text(product.company)
+                .font(.system(size: 11, weight: .regular))
+                .foregroundColor(Color(.systemGray))
+                .lineLimit(1)
+            
+            // Price
+            Text(product.formattedPrice)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.black)
+        }
+        .frame(width: 140)
     }
 }
 
