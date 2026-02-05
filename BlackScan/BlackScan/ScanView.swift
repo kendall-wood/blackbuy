@@ -389,13 +389,6 @@ struct ScanView: View {
             return
         }
         
-        // Require minimum text length for quality scan
-        guard recognizedText.count >= 50 else {
-            print("⚠️ Text too short (\(recognizedText.count) chars) - need at least 50 chars for accurate classification")
-            isListening = false  // Stop listening, let user try again
-            return
-        }
-        
         print("📸 Camera detected text: \(recognizedText.prefix(100))...")
         
         // Classify the recognized text using Advanced Classifier
@@ -411,13 +404,6 @@ struct ScanView: View {
         print("   Ingredients: \(classification.ingredients.joined(separator: ", "))")
         if let size = classification.size {
             print("   Size: \(size.value) \(size.unit)")
-        }
-        
-        // Reject low confidence classifications
-        guard classification.productType.confidence >= 0.5 else {
-            print("⚠️ Classification confidence too low (\(classification.productType.confidence)) - need at least 0.5")
-            isListening = false  // Stop listening, let user try again
-            return
         }
         
         // Perform search with classification result
