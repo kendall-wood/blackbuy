@@ -120,7 +120,11 @@ struct ScanView: View {
             return "Searching..."
         case .results:
             let count = scanResults.count
-            return "See \(count)+ Result\(count == 1 ? "" : "s")"
+            if let productType = lastAnalysis?.productType {
+                return "Found \(count) \(productType) Result\(count == 1 ? "" : "s")"
+            } else {
+                return "Found \(count) Result\(count == 1 ? "" : "s")"
+            }
         }
     }
     
@@ -317,11 +321,9 @@ struct ScanView: View {
             
             await MainActor.run {
                 scanResults = filteredResults
-                scanState = filteredResults.isEmpty ? .initial : .results
-                
-                if filteredResults.isEmpty {
-                    searchError = "No high-confidence matches found. Try scanning again with better lighting."
-                }
+                // Show results even if filtered count is low
+                // User can see what was found and make their own judgment
+                scanState = .results
             }
             
         } catch {

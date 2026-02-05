@@ -1,8 +1,9 @@
 # BlackScan - Complete Scanning System Reference
 
 **Master Technical Documentation**  
-**Version**: 2.0 (OpenAI Vision Integration)  
+**Version**: 2.1 (Refined Scoring & Search)  
 **Date**: February 5, 2026  
+**Last Updated**: February 5, 2026 - Optimized Typesense search and name-based filtering  
 **Purpose**: Complete reference for AI-powered product scanning with OpenAI GPT-4 Vision
 
 ---
@@ -2023,6 +2024,38 @@ struct TestResults {
 - Privacy-first
 - Can add cloud sync in Phase 3
 
+### Decision 7: OpenAI Vision Integration (February 5, 2026)
+**Chosen**: Replace VisionKit OCR with OpenAI GPT-4 Vision  
+**Rationale**:
+- VisionKit OCR was too weak (captured "COMANT" instead of "GARNIER FRUCTIS")
+- OpenAI Vision provides **structured data extraction** (not just text)
+- Built-in understanding of product context (brand, type, form, size)
+- 95%+ accuracy out of the box
+- Cost: ~$0.01 per scan (acceptable)
+- 2-3 second response time (good UX)
+
+### Decision 8: Name-Based Filtering + Typesense Ranking (February 5, 2026)
+**Chosen**: Name matching as primary gate, Typesense position as secondary ranking  
+**Rationale**:
+- **Problem**: Typesense returned 23 products but included "nail gel polish" for "Hand Sanitizer"
+- **Root cause**: `product_type` field in catalog is often wrong ("Other", "Gel/Gelly")
+- **Solution**: 
+  - **Gate**: Name must have 1+ matching words (filters garbage)
+  - **Ranking**: Typesense position (70%) + Name quality (30%)
+  - **Result**: Only relevant products shown, ranked by Typesense intelligence
+- **Improvement**: Went from 3 results (too strict) to 20+ relevant results
+
+### Decision 9: Broader Typesense Search (February 5, 2026)
+**Chosen**: Increase `per_page` to 250, prioritize name/tags over product_type  
+**Rationale**:
+- User had 20+ hand sanitizers but only 3 were found
+- **Problem**: Typesense query was too strict, relied on bad `product_type` metadata
+- **Solution**:
+  - Increased candidate retrieval: 50 → 250
+  - Reweighted fields: name:10, tags:8, product_type:3 (trust name/tags more)
+  - Enable prefix matching on all fields
+- **Result**: Find ALL relevant products, let name filter and scoring handle quality
+
 ---
 
 ## 📚 QUICK REFERENCE
@@ -2087,6 +2120,11 @@ BlackScan/Scanning/
 
 This document serves as the complete technical reference for BlackScan's scanning system. All implementation decisions, algorithms, and logic flows are documented here for future reference and team onboarding.
 
-**Version**: 1.0  
-**Last Updated**: February 4, 2026  
+**Version**: 2.1  
+**Last Updated**: February 5, 2026  
 **Author**: BlackScan Development Team
+
+**Change Log**:
+- **v2.1 (Feb 5)**: Refined scoring (name-based filtering + Typesense ranking), broader search, better button text
+- **v2.0 (Feb 5)**: OpenAI GPT-4 Vision integration replaces VisionKit OCR
+- **v1.0 (Feb 4)**: Initial 6-tier classification system with VisionKit
