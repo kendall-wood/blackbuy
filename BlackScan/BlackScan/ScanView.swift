@@ -138,7 +138,7 @@ struct ScanView: View {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: Color(red: 0.26, green: 0.63, blue: 0.95)))
                             } else {
-                                Image(systemName: "camera.fill")
+                                Image(systemName: "barcode.viewfinder")
                                     .font(.system(size: 18))
                                     .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                             }
@@ -147,7 +147,8 @@ struct ScanView: View {
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
                         }
-                        .frame(width: min(320, geometry.size.width * 0.85), height: 50)
+                        .padding(.horizontal, 28)
+                        .padding(.vertical, 14)
                         .background(Color.white)
                         .cornerRadius(25)
                         .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
@@ -227,7 +228,7 @@ struct ScanView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.leading, 20)
-                        .padding(.bottom, 35)
+                        .padding(.bottom, 20)
                         
                         Spacer()
                     }
@@ -273,7 +274,7 @@ struct ScanView: View {
                         .buttonStyle(.plain)
                         .padding(.trailing, 20)
                     }
-                    .padding(.bottom, 35)
+                    .padding(.bottom, 20)
                 }
             }
         }
