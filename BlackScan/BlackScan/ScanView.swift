@@ -22,14 +22,20 @@ struct ScanView: View {
     
     var body: some View {
         ZStack {
-            // Camera Scanner Background
-            ScannerContainerView { recognizedText in
-                handleRecognizedText(recognizedText)
+            // Camera Scanner Background (only active when scanning)
+            if isSearching || lastClassification != nil {
+                ScannerContainerView { recognizedText in
+                    handleRecognizedText(recognizedText)
+                }
+                .ignoresSafeArea(.all)
+            } else {
+                // Black background when not scanning
+                Color.black
+                    .ignoresSafeArea(.all)
             }
-            .ignoresSafeArea(.all)
             
-            // Scanning Overlay UI
-            scanningOverlay
+            // Center Button UI
+            centerButton
         }
         .sheet(isPresented: $isShowingResults) {
             resultsSheet
@@ -37,93 +43,76 @@ struct ScanView: View {
         .navigationBarHidden(true)
     }
     
-    // MARK: - Overlay UI
+    // MARK: - Center Button UI
     
-    private var scanningOverlay: some View {
+    private var centerButton: some View {
         VStack {
-            // Top instruction area
-            VStack(spacing: 8) {
-                Text("Point camera at product")
-                    .font(.headline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-                
-                Text("Text and barcodes will be scanned automatically")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
-                    .multilineTextAlignment(.center)
-            }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(.ultraThinMaterial)
-            )
-            .padding(.top, 60) // Account for status bar
-            .padding(.horizontal, 20)
-            
             Spacer()
             
-            // Bottom status area
-            if isSearching {
-                searchingIndicator
-                    .padding(.bottom, 100)
-            } else if let lastClass = lastClassification {
-                lastSearchStatus(lastClass)
-                    .padding(.bottom, 100)
+            Button(action: handleButtonTap) {
+                HStack(spacing: 8) {
+                    if isSearching {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(0.9)
+                    }
+                    
+                    Text(buttonText)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                }
+                .frame(maxWidth: 280)
+                .padding(.vertical, 16)
+                .padding(.horizontal, 32)
+                .background(buttonBackgroundColor)
+                .foregroundColor(buttonTextColor)
+                .cornerRadius(12)
             }
+            .disabled(isSearching)
+            
+            Spacer()
         }
     }
     
-    private var searchingIndicator: some View {
-        HStack(spacing: 12) {
-            ProgressView()
-                .scaleEffect(0.8)
-                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-            
-            Text("Searching for products...")
-                .font(.subheadline)
-                .foregroundColor(.white)
+    // MARK: - Button State Computed Properties
+    
+    private var buttonText: String {
+        if isSearching {
+            return "Scanning"
+        } else if !scanResults.isEmpty {
+            return "See \(scanResults.count)+ Results"
+        } else {
+            return "Start Scanning"
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(.ultraThinMaterial)
-        )
     }
     
-    private func lastSearchStatus(_ classification: ScanClassification) -> some View {
-        VStack(spacing: 4) {
-            let productType = classification.productType.type
-            if !productType.isEmpty {
-                Text("Found: \(productType)")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-            } else {
-                Text("Scanning...")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-            }
-            
-            if scanResults.count > 0 {
-                Text("\(scanResults.count) Black-owned products")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.8))
-            }
+    private var buttonBackgroundColor: Color {
+        if isSearching {
+            return .green
+        } else if !scanResults.isEmpty {
+            return .blue
+        } else {
+            return .white
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(.ultraThinMaterial)
-        )
-        .onTapGesture {
-            if !scanResults.isEmpty {
-                isShowingResults = true
-            }
+    }
+    
+    private var buttonTextColor: Color {
+        if isSearching {
+            return .white
+        } else if !scanResults.isEmpty {
+            return .white
+        } else {
+            return .blue
+        }
+    }
+    
+    private func handleButtonTap() {
+        if !scanResults.isEmpty {
+            // Show results sheet
+            isShowingResults = true
+        } else {
+            // Start scanning - camera is already active in background
+            // Results will update automatically when scan completes
         }
     }
     
