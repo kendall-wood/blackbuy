@@ -375,8 +375,11 @@ struct ScanView: View {
     private func handleRecognizedText(_ recognizedText: String) {
         // Only process if we're in listening mode or already searching
         guard isListening || isSearching else {
+            print("⏸️ Ignoring text - not in scanning mode")
             return
         }
+        
+        print("📸 Camera detected text: \(recognizedText.prefix(100))...")
         
         // Classify the recognized text using Advanced Classifier
         let classification = AdvancedClassifier.shared.classify(recognizedText)
