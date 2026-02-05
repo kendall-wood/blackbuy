@@ -385,22 +385,25 @@ class TypesenseClient: ObservableObject {
             throw TypesenseError.invalidURL
         }
         
-        // Use standard search fields without boost for now (Typesense may not support ^ syntax)
-        let queryBy = "product_type,form,name,tags"
+        // Use product_type as the PRIMARY search field
+        let queryBy = "product_type,name,tags,form"
         
         var queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "q", value: query),
+            // Search ONLY for product type (not form) to avoid gel/spray confusion
+            URLQueryItem(name: "q", value: productType),
             URLQueryItem(name: "query_by", value: queryBy),
             URLQueryItem(name: "page", value: "1"),
             URLQueryItem(name: "per_page", value: String(candidateCount)),
             // Sort by relevance (Typesense default text match score)
             URLQueryItem(name: "sort_by", value: "_text_match:desc"),
             // Enable prefix matching for partial product type matches
-            URLQueryItem(name: "prefix", value: "true,true,true,true")
+            URLQueryItem(name: "prefix", value: "true,false,false,false"),
+            // Prioritize product_type field matches
+            URLQueryItem(name: "query_by_weights", value: "10,3,2,1")
         ]
         
-        // NO FILTER - let Typesense return all matches, we'll score locally
-        // Filtering by exact product type fails when "Hand Sanitizer" != "Hand Sanitizer Gel"
+        // NO STRICT FILTER - but query focuses on product type
+        // This way "Hand Sanitizer" matches "Hand Sanitizer Gel", "Hand Sanitizer Spray", etc.
         
         components.queryItems = queryItems
         
