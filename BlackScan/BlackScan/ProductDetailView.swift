@@ -116,7 +116,7 @@ struct ProductDetailView: View {
                         
                         // Product name
                         Text(product.name)
-                            .font(.system(size: 20, weight: .bold))
+                            .font(.system(size: 24, weight: .medium))
                             .tracking(-0.3)
                             .foregroundColor(.black)
                             .lineLimit(3)
@@ -125,7 +125,7 @@ struct ProductDetailView: View {
                         
                         // Price with tight kerning
                         Text(product.formattedPrice)
-                            .font(.system(size: 28, weight: .semibold))
+                            .font(.system(size: 32, weight: .regular))
                             .tracking(-0.5)
                             .foregroundColor(.black)
                             .padding(.top, 8)
@@ -299,7 +299,7 @@ struct CategoryChip: View {
         Text(text.uppercased())
             .font(.system(size: 11, weight: .bold))
             .tracking(0.8)
-            .foregroundColor(isPrimary ? .white : Color(.systemGray))
+            .foregroundColor(isPrimary ? .white : Color(.systemGray2))
             .lineLimit(1)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
@@ -317,10 +317,16 @@ struct CategoryChip: View {
 struct SimilarProductCardWrapper: View {
     let product: Product
     @State private var isNavigating = false
+    @EnvironmentObject var typesenseClient: TypesenseClient
+    @EnvironmentObject var savedProductsManager: SavedProductsManager
+    @EnvironmentObject var cartManager: CartManager
     
     var body: some View {
         ZStack {
-            NavigationLink(destination: ProductDetailView(product: product), isActive: $isNavigating) {
+            NavigationLink(destination: ProductDetailView(product: product)
+                .environmentObject(typesenseClient)
+                .environmentObject(savedProductsManager)
+                .environmentObject(cartManager), isActive: $isNavigating) {
                 EmptyView()
             }
             .opacity(0)
