@@ -29,7 +29,28 @@ class ConfidenceScorer {
         self.sizeExtractor = .shared
     }
     
-    // MARK: - Main Scoring Method
+    // MARK: - Singleton
+    
+    static let shared = ConfidenceScorer()
+    
+    // MARK: - Main Scoring Methods
+    
+    /// Score multiple products against scan classification and return sorted by confidence
+    /// - Parameters:
+    ///   - candidates: Array of products to score
+    ///   - classification: Scan classification
+    /// - Returns: Array of scored products sorted by confidence (highest first)
+    func scoreProducts(
+        candidates: [Product],
+        classification: ScanClassification
+    ) -> [ScoredProduct] {
+        let scored = candidates.map { product in
+            score(product: product, against: classification)
+        }
+        
+        // Sort by confidence score (highest first)
+        return scored.sorted { $0.confidenceScore > $1.confidenceScore }
+    }
     
     /// Score a product against scan classification
     /// - Parameters:

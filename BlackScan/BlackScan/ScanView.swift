@@ -8,8 +8,8 @@ struct ScanView: View {
     
     @StateObject private var typesenseClient = TypesenseClient()
     @State private var isShowingResults = false
-    @State private var searchResults: [Product] = []
-    @State private var lastClassificationResult: Classifier.ClassificationResult?
+    @State private var scanResults: [ScoredProduct] = []  // Changed from searchResults
+    @State private var lastClassification: ScanClassification?  // Changed from ClassificationResult
     @State private var isSearching = false
     @State private var searchError: String?
     
@@ -68,8 +68,8 @@ struct ScanView: View {
             if isSearching {
                 searchingIndicator
                     .padding(.bottom, 100)
-            } else if let lastResult = lastClassificationResult {
-                lastSearchStatus(lastResult)
+            } else if let lastClass = lastClassification {
+                lastSearchStatus(lastClass)
                     .padding(.bottom, 100)
             }
         }
@@ -93,15 +93,22 @@ struct ScanView: View {
         )
     }
     
-    private func lastSearchStatus(_ result: Classifier.ClassificationResult) -> some View {
+    private func lastSearchStatus(_ classification: ScanClassification) -> some View {
         VStack(spacing: 4) {
-            Text("Found: \(result.productType)")
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.white)
+            if let productType = classification.productType {
+                Text("Found: \(productType)")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+            } else {
+                Text("Scanning...")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+            }
             
-            if searchResults.count > 0 {
-                Text("\(searchResults.count) Black-owned products")
+            if scanResults.count > 0 {
+                Text("\(scanResults.count) Black-owned products")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.8))
             }
@@ -113,7 +120,7 @@ struct ScanView: View {
                 .fill(.ultraThinMaterial)
         )
         .onTapGesture {
-            if !searchResults.isEmpty {
+            if !scanResults.isEmpty {
                 isShowingResults = true
             }
         }
@@ -145,19 +152,31 @@ struct ScanView: View {
     }
     
     private var sheetHeader: some View {
-        VStack(spacing: 8) {
-            // Drag indicator (iOS will show this automatically, but we add visual context)
+        VStack(spacing: 12) {
+            // Classification info
             
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    if let lastResult = lastClassificationResult {
-                        Text("Found: \(lastResult.productType)")
+                    if let classification = lastClassification, let productType = classification.productType {
+                        Text("Found: \(productType)")
                             .font(.title2)
                             .fontWeight(.semibold)
                         
-                        Text("Black-owned products")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                        HStack(spacing: 4) {
+                            Text("Black-owned products")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            // Show confidence indicator
+                            if !scanResults.isEmpty, let topResult = scanResults.first {
+                                Text("•")
+                                    .foregroundColor(.secondary)
+                                Text("\(topResult.confidencePercentage)% match")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(confidenceColor(topResult.confidenceScore))
+                            }
+                        }
                     } else {
                         Text("Search Results")
                             .font(.title2)
@@ -192,8 +211,8 @@ struct ScanView: View {
                 .font(.headline)
                 .multilineTextAlignment(.center)
             
-            if let result = lastClassificationResult {
-                Text("Looking for: \(result.productType)")
+            if let classification = lastClassification, let productType = classification.productType {
+                Text("Looking for: \(productType)")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -259,26 +278,62 @@ struct ScanView: View {
     private var successResultsContent: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                // Results count
+                // Results count with confidence info
                 HStack {
-                    Text("\(searchResults.count) products found")
+                    Text("\(scanResults.count) products found")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
                     Spacer()
+                    
+                    // Show average confidence
+                    if !scanResults.isEmpty {
+                        let avgConfidence = scanResults.reduce(0.0) { $0 + $1.confidenceScore } / Double(scanResults.count)
+                        Text("Avg: \(Int(avgConfidence * 100))% match")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(confidenceColor(avgConfidence))
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
                 
-                // Product grid
+                // Product grid with confidence scores
                 ProductCard.createGrid {
-                    ForEach(searchResults) { product in
-                        ProductCard(
-                            product: product,
-                            onBuyTapped: {
-                                openProductURL(product.productUrl)
+                    ForEach(scanResults) { scanResult in
+                        VStack(alignment: .leading, spacing: 8) {
+                            ProductCard(
+                                product: scanResult.product,
+                                onBuyTapped: {
+                                    openProductURL(scanResult.product.productUrl)
+                                }
+                            )
+                            
+                            // Confidence badge
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(confidenceColor(scanResult.confidenceScore))
+                                    .frame(width: 6, height: 6)
+                                
+                                Text("\(scanResult.confidencePercentage)% match")
+                                    .font(.caption2)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(confidenceColor(scanResult.confidenceScore))
+                                
+                                Spacer()
+                                
+                                // Match breakdown on tap
+                                Button(action: {
+                                    // TODO: Show match details sheet
+                                }) {
+                                    Text("Details")
+                                        .font(.caption2)
+                                        .foregroundColor(.blue)
+                                }
                             }
-                        )
+                            .padding(.horizontal, 12)
+                            .padding(.bottom, 4)
+                        }
                     }
                 }
                 .padding(.bottom, 20)
@@ -290,26 +345,32 @@ struct ScanView: View {
     
     /// Handles OCR text recognition from the camera scanner
     private func handleRecognizedText(_ recognizedText: String) {
-        // Classify the recognized text
-        let classificationResult = Classifier.classify(recognizedText)
-        lastClassificationResult = classificationResult
+        // Classify the recognized text using Advanced Classifier
+        let classification = AdvancedClassifier.shared.classify(recognizedText)
+        lastClassification = classification
         
         if Env.isDebugMode {
             print("🔍 OCR Text: \(recognizedText)")
-            print("📋 Classification: \(classificationResult.productType) (confidence: \(classificationResult.confidence))")
-            print("🔎 Search Query: \(classificationResult.queryString)")
+            print("📋 Classification:")
+            print("   Product Type: \(classification.productType ?? "Unknown")")
+            print("   Form: \(classification.form ?? "Unknown")")
+            print("   Brand: \(classification.brand?.name ?? "None")")
+            print("   Ingredients: \(classification.ingredients.joined(separator: ", "))")
+            if let size = classification.size {
+                print("   Size: \(size.value) \(size.unit)")
+            }
         }
         
         // Perform search with classification result
-        performSearch(with: classificationResult)
+        performSearch(with: classification)
     }
     
-    /// Performs product search using classification result
-    private func performSearch(with result: Classifier.ClassificationResult) {
-        // Don't search for very low confidence results
-        guard result.confidence >= 0.2 else {
+    /// Performs advanced product search with confidence scoring
+    private func performSearch(with classification: ScanClassification) {
+        // Don't search if no product type was detected
+        guard classification.productType != nil else {
             if Env.isDebugMode {
-                print("⚠️ Skipping search due to low confidence: \(result.confidence)")
+                print("⚠️ Skipping search - no product type detected")
             }
             return
         }
@@ -319,23 +380,45 @@ struct ScanView: View {
         
         Task {
             do {
-                let products = try await typesenseClient.searchProducts(
-                    query: result.queryString,
-                    page: 1,
-                    perPage: 20
+                // Step 1: Get candidate products from Typesense (multi-pass search)
+                let candidates = try await typesenseClient.searchForScanMatches(
+                    classification: classification,
+                    candidateCount: 100
                 )
+                
+                if Env.isDebugMode {
+                    print("🔍 Retrieved \(candidates.count) candidates from Typesense")
+                }
+                
+                // Step 2: Score candidates locally with confidence scorer
+                let scoredResults = ConfidenceScorer.shared.scoreProducts(
+                    candidates: candidates,
+                    classification: classification
+                )
+                
+                // Step 3: Take top 20 results
+                let topResults = Array(scoredResults.prefix(20))
                 
                 await MainActor.run {
                     isSearching = false
-                    searchResults = products
+                    scanResults = topResults
                     
                     // Show results sheet if we found products
-                    if !products.isEmpty {
+                    if !topResults.isEmpty {
                         isShowingResults = true
                     }
                     
                     if Env.isDebugMode {
-                        print("✅ Search completed: \(products.count) products found")
+                        print("✅ Search completed: \(topResults.count) products matched")
+                        if let topMatch = topResults.first {
+                            print("   Top match: \(topMatch.product.name) (\(topMatch.confidencePercentage)%)")
+                            print("   Breakdown:")
+                            print("     Product Type: \(topMatch.breakdown.productTypeScore)")
+                            print("     Form: \(topMatch.breakdown.formScore)")
+                            print("     Brand: \(topMatch.breakdown.brandScore)")
+                            print("     Ingredients: \(topMatch.breakdown.ingredientScore)")
+                            print("     Size: \(topMatch.breakdown.sizeScore)")
+                        }
                     }
                 }
                 
@@ -349,6 +432,17 @@ struct ScanView: View {
                     }
                 }
             }
+        }
+    }
+    
+    /// Get color for confidence level
+    private func confidenceColor(_ confidence: Double) -> Color {
+        if confidence >= 0.8 {
+            return .green
+        } else if confidence >= 0.6 {
+            return .orange
+        } else {
+            return .red
         }
     }
     
