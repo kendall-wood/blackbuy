@@ -385,18 +385,17 @@ class TypesenseClient: ObservableObject {
             throw TypesenseError.invalidURL
         }
         
-        // USE THE FULL QUERY (product type + form if available)
-        // Examples:
-        // - "Hand Sanitizer gel" → finds hand sanitizers, boosts gel forms
-        // - "Setting Powder powder" → finds setting powders, filters out protein powder
-        // - "Body Wash liquid" → finds body washes, boosts liquid forms
+        // SEARCH WITH PRODUCT TYPE ONLY
+        // Adding form to query causes Typesense to match unrelated products
+        // Example: "Hand Sanitizer gel" matches nail gel polish products
+        // Better: Search "Hand Sanitizer", boost by form locally
         
         // Use product_type as the PRIMARY search field
         let queryBy = "name,tags,product_type,form"
         
         var queryItems: [URLQueryItem] = [
-            // Search with FULL query including form to improve relevance
-            URLQueryItem(name: "q", value: query),
+            // Search with product type ONLY (form used for local boosting)
+            URLQueryItem(name: "q", value: productType),
             URLQueryItem(name: "query_by", value: queryBy),
             URLQueryItem(name: "page", value: "1"),
             URLQueryItem(name: "per_page", value: String(min(candidateCount, 250))),  // Increased limit!
@@ -418,7 +417,7 @@ class TypesenseClient: ObservableObject {
         }
         
         if Env.isDebugMode {
-            print("🔗 Typesense Query: \"\(query)\" (product_type: \(productType), form: \(form ?? "none"))")
+            print("🔗 Typesense Query: \"\(productType)\" (form '\(form ?? "none")' used for local boosting)")
             print("🔗 Typesense URL: \(url.absoluteString)")
         }
         
