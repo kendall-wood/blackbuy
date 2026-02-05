@@ -234,11 +234,13 @@ struct ScanView: View {
             let targetLower = analysis.productType.lowercased()
             let targetWords = Set(targetLower.split(separator: " ").map(String.init))
             
+            // Also check tags for matches (e.g., "sanitizer" tag)
             let scoredResults = results.enumerated().compactMap { (index, product) -> ScoredProduct? in
                 let nameLower = product.name.lowercased()
                 let nameWords = Set(nameLower.split(separator: " ").map(String.init))
+                let tagsLower = (product.tags ?? "").lowercased()
                 
-                // GATE: Calculate name match score
+                // GATE: Calculate name/tag match score
                 let nameScore: Double
                 let overlap = targetWords.intersection(nameWords)
                 
@@ -246,15 +248,30 @@ struct ScanView: View {
                     // Perfect: name contains full target ("Hand Sanitizer")
                     nameScore = 1.0
                 } else if overlap.count >= 2 {
-                    // Good: at least 2 words match
-                    nameScore = 0.80
+                    // Good: at least 2 words match in name
+                    nameScore = 0.85
                 } else if overlap.count == 1 {
-                    // Weak: only 1 word matches
+                    // Check if the matched word is a KEY word (e.g., "sanitizer" is more important than "hand")
+                    let keyWords = Set(["sanitizer", "cleanser", "wash", "soap", "shampoo", "conditioner", "lotion", "cream", "gel", "oil", "serum"])
+                    let hasKeyWord = overlap.contains { keyWords.contains($0) }
+                    
+                    if hasKeyWord {
+                        // Important word matched (e.g., "sanitizer")
+                        nameScore = 0.60
+                    } else if targetWords.contains(where: { tagsLower.contains($0) }) {
+                        // Word found in tags instead
+                        nameScore = 0.50
+                    } else {
+                        // Generic word only (e.g., just "hand")
+                        nameScore = 0.30
+                    }
+                } else if targetWords.contains(where: { tagsLower.contains($0) }) {
+                    // No name match but found in tags
                     nameScore = 0.40
                 } else {
                     // No match: skip this product entirely
                     if Env.isDebugMode {
-                        print("   ❌ FILTERED OUT: '\(product.name)' - no name match")
+                        print("   ❌ FILTERED OUT: '\(product.name)' - no name/tag match")
                     }
                     return nil
                 }

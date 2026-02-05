@@ -385,25 +385,31 @@ class TypesenseClient: ObservableObject {
             throw TypesenseError.invalidURL
         }
         
+        // BROAD SEARCH: Split into words and search with OR logic
+        // "Hand Sanitizer" → search for products with "hand" OR "sanitizer"
+        // This catches: "Hand Sanitizer", "Antibacterial Hand Gel", "Sanitizing Wipes", etc.
+        let searchWords = productType.split(separator: " ").map(String.init)
+        let broadQuery = searchWords.joined(separator: " ")
+        
         // Use product_type as the PRIMARY search field
-        let queryBy = "product_type,name,tags,form"
+        let queryBy = "name,tags,product_type,form"
         
         var queryItems: [URLQueryItem] = [
-            // Search ONLY for product type (not form) to avoid gel/spray confusion
-            URLQueryItem(name: "q", value: productType),
+            // Search with broad query to catch all variations
+            URLQueryItem(name: "q", value: broadQuery),
             URLQueryItem(name: "query_by", value: queryBy),
             URLQueryItem(name: "page", value: "1"),
-            URLQueryItem(name: "per_page", value: String(candidateCount)),
+            URLQueryItem(name: "per_page", value: String(min(candidateCount, 250))),  // Increased limit!
             // Sort by relevance (Typesense default text match score)
             URLQueryItem(name: "sort_by", value: "_text_match:desc"),
-            // Enable prefix matching for partial product type matches
-            URLQueryItem(name: "prefix", value: "true,false,false,false"),
-            // Prioritize product_type field matches
-            URLQueryItem(name: "query_by_weights", value: "10,3,2,1")
+            // Enable prefix matching for all fields
+            URLQueryItem(name: "prefix", value: "true,true,true,false"),
+            // Prioritize NAME and TAGS over product_type (since product_type is often wrong)
+            URLQueryItem(name: "query_by_weights", value: "10,8,3,1")
         ]
         
-        // NO STRICT FILTER - but query focuses on product type
-        // This way "Hand Sanitizer" matches "Hand Sanitizer Gel", "Hand Sanitizer Spray", etc.
+        // NO STRICT FILTER - cast a wide net and let name matching filter later
+        // This way we find ALL products related to the search terms
         
         components.queryItems = queryItems
         
