@@ -862,6 +862,302 @@ class ProductTaxonomy {
                 typicalForms: ["other"],
                 keywords: ["gift", "card", "certificate"]
             ),
+            
+            // MARK: - Clothing & Apparel
+            
+            ProductType(
+                canonical: "Dress",
+                variations: ["dress", "maxi dress", "mini dress", "midi dress", "wedding dress", "gown", "evening gown", "kaftan", "kaftan dress", "shirt dress", "wrap dress", "strapless dress", "bandeau dress", "t-shirt dress", "jumpsuit dress", "romper", "playsuit"],
+                synonyms: ["Gown", "Frock", "Sundress"],
+                category: "Clothing",
+                subcategory: "Dresses",
+                typicalForms: ["other"],
+                keywords: ["dress", "gown", "maxi", "mini", "midi", "wedding", "evening", "kaftan", "romper"]
+            ),
+            
+            ProductType(
+                canonical: "T-Shirt",
+                variations: ["t-shirt", "tee", "tshirt", "top", "shirt", "tank top", "crop top", "baby tee", "athletic shirt", "blouse", "tunic"],
+                synonyms: ["Tee", "Top", "Shirt"],
+                category: "Clothing",
+                subcategory: "Tops",
+                typicalForms: ["other"],
+                keywords: ["shirt", "tee", "t-shirt", "top", "blouse", "tank", "crop"]
+            ),
+            
+            ProductType(
+                canonical: "Pants",
+                variations: ["pants", "trousers", "joggers", "sweatpants", "leggings", "wide-leg pants", "palazzo pants", "track pants"],
+                synonyms: ["Trousers", "Slacks", "Bottoms"],
+                category: "Clothing",
+                subcategory: "Bottoms",
+                typicalForms: ["other"],
+                keywords: ["pants", "trousers", "joggers", "sweatpants", "leggings"]
+            ),
+            
+            ProductType(
+                canonical: "Shorts",
+                variations: ["shorts", "biker shorts", "bike shorts", "athletic shorts", "booty shorts", "boxer shorts"],
+                synonyms: ["Short Pants", "Bottoms"],
+                category: "Clothing",
+                subcategory: "Bottoms",
+                typicalForms: ["other"],
+                keywords: ["shorts", "short", "biker", "athletic"]
+            ),
+            
+            ProductType(
+                canonical: "Swimwear",
+                variations: ["bikini", "swimsuit", "one-piece swimsuit", "bikini top", "bikini bottom", "bikini set", "monokini", "tankini", "swim trunks", "swim shorts"],
+                synonyms: ["Swimsuit", "Bathing Suit", "Bikini"],
+                category: "Clothing",
+                subcategory: "Swimwear",
+                typicalForms: ["other"],
+                keywords: ["bikini", "swimsuit", "swim", "bathing", "one-piece", "tankini", "monokini"]
+            ),
+            
+            ProductType(
+                canonical: "Jacket",
+                variations: ["jacket", "blazer", "hoodie", "sweatshirt", "bomber jacket", "coat", "cardigan", "kimono", "robe"],
+                synonyms: ["Coat", "Outerwear", "Blazer"],
+                category: "Clothing",
+                subcategory: "Outerwear",
+                typicalForms: ["other"],
+                keywords: ["jacket", "blazer", "hoodie", "sweatshirt", "coat", "bomber", "cardigan"]
+            ),
+            
+            ProductType(
+                canonical: "Underwear",
+                variations: ["underwear", "panties", "briefs", "thong", "boyshorts", "bikini panty", "bra", "bralette", "lingerie", "lingerie set", "bodysuit"],
+                synonyms: ["Lingerie", "Intimates", "Undergarments"],
+                category: "Clothing",
+                subcategory: "Intimates",
+                typicalForms: ["other"],
+                keywords: ["underwear", "panties", "bra", "lingerie", "thong", "briefs", "bralette"]
+            ),
+            
+            ProductType(
+                canonical: "Activewear",
+                variations: ["activewear", "sports bra", "athletic wear", "yoga pants", "gym shorts", "workout top", "leggings"],
+                synonyms: ["Athletic Wear", "Sportswear", "Gym Wear"],
+                category: "Clothing",
+                subcategory: "Activewear",
+                typicalForms: ["other"],
+                keywords: ["activewear", "sports", "athletic", "yoga", "workout", "gym"]
+            ),
+            
+            // MARK: - Accessories
+            
+            ProductType(
+                canonical: "Handbag",
+                variations: ["handbag", "bag", "purse", "tote bag", "shoulder bag", "clutch", "crossbody bag", "satchel", "backpack", "duffle bag", "messenger bag", "belt bag", "fanny pack", "bolo bag"],
+                synonyms: ["Purse", "Bag", "Tote"],
+                category: "Accessories",
+                subcategory: "Bags",
+                typicalForms: ["other"],
+                keywords: ["bag", "handbag", "purse", "tote", "clutch", "backpack", "crossbody", "shoulder"]
+            ),
+            
+            ProductType(
+                canonical: "Jewelry",
+                variations: ["necklace", "bracelet", "earrings", "ring", "anklet", "choker", "pendant", "charm", "brooch", "cufflinks"],
+                synonyms: ["Jewellery", "Accessory"],
+                category: "Accessories",
+                subcategory: "Jewelry",
+                typicalForms: ["other"],
+                keywords: ["necklace", "bracelet", "earrings", "ring", "jewelry", "jewellery", "pendant", "charm"]
+            ),
+            
+            ProductType(
+                canonical: "Hat",
+                variations: ["hat", "beanie", "cap", "baseball cap", "sun hat", "fedora", "bucket hat", "headwrap", "head wrap", "turban", "bonnet"],
+                synonyms: ["Cap", "Headwear", "Head Covering"],
+                category: "Accessories",
+                subcategory: "Headwear",
+                typicalForms: ["other"],
+                keywords: ["hat", "cap", "beanie", "headwrap", "bonnet", "turban"]
+            ),
+            
+            ProductType(
+                canonical: "Sunglasses",
+                variations: ["sunglasses", "shades", "eyewear", "sunnies"],
+                synonyms: ["Shades", "Eyewear"],
+                category: "Accessories",
+                subcategory: "Eyewear",
+                typicalForms: ["other"],
+                keywords: ["sunglasses", "shades", "eyewear", "glasses"]
+            ),
+            
+            ProductType(
+                canonical: "Scarf",
+                variations: ["scarf", "shawl", "wrap", "sarong", "pashmina"],
+                synonyms: ["Shawl", "Wrap"],
+                category: "Accessories",
+                subcategory: "Scarves",
+                typicalForms: ["other"],
+                keywords: ["scarf", "shawl", "wrap", "sarong"]
+            ),
+            
+            // MARK: - Baby & Kids
+            
+            ProductType(
+                canonical: "Baby Clothing",
+                variations: ["baby bodysuit", "baby romper", "baby dress", "baby shirt", "baby pants", "baby onesie", "baby bloomers", "baby bib", "baby hat"],
+                synonyms: ["Infant Clothing", "Baby Wear"],
+                category: "Baby & Kids",
+                subcategory: "Clothing",
+                typicalForms: ["other"],
+                keywords: ["baby", "infant", "bodysuit", "romper", "onesie", "bib"]
+            ),
+            
+            ProductType(
+                canonical: "Baby Skincare",
+                variations: ["baby lotion", "baby oil", "baby cream", "baby balm", "baby wash", "baby shampoo"],
+                synonyms: ["Infant Care", "Baby Care"],
+                category: "Baby & Kids",
+                subcategory: "Skincare",
+                typicalForms: ["cream", "oil", "liquid"],
+                keywords: ["baby", "infant", "lotion", "cream", "wash"]
+            ),
+            
+            // MARK: - Pet Products
+            
+            ProductType(
+                canonical: "Pet Accessories",
+                variations: ["dog collar", "pet collar", "dog leash", "pet leash", "dog bow tie", "pet bow tie", "dog bandana", "pet clothing"],
+                synonyms: ["Pet Gear", "Dog Accessories"],
+                category: "Pet Supplies",
+                subcategory: "Accessories",
+                typicalForms: ["other"],
+                keywords: ["dog", "pet", "collar", "leash", "bow tie", "bandana"]
+            ),
+            
+            ProductType(
+                canonical: "Pet Food",
+                variations: ["dog food", "pet food", "dog treats", "pet treats", "cat food", "pet snacks"],
+                synonyms: ["Dog Food", "Pet Nutrition"],
+                category: "Pet Supplies",
+                subcategory: "Food",
+                typicalForms: ["other"],
+                keywords: ["dog", "pet", "food", "treats", "cat"]
+            ),
+            
+            ProductType(
+                canonical: "Pet Toys",
+                variations: ["dog toy", "pet toy", "chew toy", "tennis ball", "pet chew"],
+                synonyms: ["Dog Toys", "Pet Entertainment"],
+                category: "Pet Supplies",
+                subcategory: "Toys",
+                typicalForms: ["other"],
+                keywords: ["dog", "pet", "toy", "ball", "chew"]
+            ),
+            
+            // MARK: - Home & Lifestyle
+            
+            ProductType(
+                canonical: "Book",
+                variations: ["book", "paperback", "hardcover", "ebook", "novel", "guide", "cookbook", "coloring book", "activity book"],
+                synonyms: ["Novel", "Publication", "Literature"],
+                category: "Home & Lifestyle",
+                subcategory: "Books",
+                typicalForms: ["other"],
+                keywords: ["book", "paperback", "hardcover", "novel", "guide"]
+            ),
+            
+            ProductType(
+                canonical: "Home Decor",
+                variations: ["wall art", "print", "poster", "picture frame", "mirror", "vase", "decorative item", "sculpture"],
+                synonyms: ["Decoration", "Wall Art"],
+                category: "Home & Lifestyle",
+                subcategory: "Decor",
+                typicalForms: ["other"],
+                keywords: ["art", "wall", "decor", "poster", "print", "frame"]
+            ),
+            
+            ProductType(
+                canonical: "Puzzle",
+                variations: ["jigsaw puzzle", "puzzle", "game"],
+                synonyms: ["Jigsaw", "Board Game"],
+                category: "Home & Lifestyle",
+                subcategory: "Games",
+                typicalForms: ["other"],
+                keywords: ["puzzle", "jigsaw", "game"]
+            ),
+            
+            ProductType(
+                canonical: "Water Bottle",
+                variations: ["water bottle", "bottle", "tumbler", "flask", "insulated bottle"],
+                synonyms: ["Tumbler", "Drinkware"],
+                category: "Home & Lifestyle",
+                subcategory: "Drinkware",
+                typicalForms: ["other"],
+                keywords: ["water", "bottle", "tumbler", "flask"]
+            ),
+            
+            // MARK: - Food & Supplements
+            
+            ProductType(
+                canonical: "Dietary Supplements",
+                variations: ["protein powder", "supplement powder", "meal replacement", "collagen powder", "gummy vitamins", "supplement capsules", "dietary supplement"],
+                synonyms: ["Supplements", "Nutrition Powder"],
+                category: "Health & Wellness",
+                subcategory: "Supplements",
+                typicalForms: ["powder", "other"],
+                keywords: ["protein", "supplement", "powder", "vitamins", "gummy", "collagen", "meal replacement"]
+            ),
+            
+            ProductType(
+                canonical: "Tea",
+                variations: ["tea", "herbal tea", "black tea", "green tea", "tea blend"],
+                synonyms: ["Herbal Tea", "Tea Blend"],
+                category: "Food & Beverage",
+                subcategory: "Beverages",
+                typicalForms: ["other"],
+                keywords: ["tea", "herbal", "blend", "beverage"]
+            ),
+            
+            // MARK: - Household & Cleaning
+            
+            ProductType(
+                canonical: "Cleaning Products",
+                variations: ["all-purpose cleaner", "spray cleaner", "dish soap", "laundry detergent", "fabric softener", "disinfectant", "multi-purpose cleaner"],
+                synonyms: ["Cleaner", "Household Cleaner"],
+                category: "Home Care",
+                subcategory: "Cleaning",
+                typicalForms: ["liquid", "spray", "gel"],
+                keywords: ["cleaner", "clean", "spray", "soap", "detergent", "disinfectant"]
+            ),
+            
+            ProductType(
+                canonical: "Batteries",
+                variations: ["battery", "batteries", "aa batteries", "aaa batteries", "rechargeable battery", "9v battery"],
+                synonyms: ["Power Cells", "Battery Pack"],
+                category: "Electronics",
+                subcategory: "Batteries",
+                typicalForms: ["other"],
+                keywords: ["battery", "batteries", "rechargeable", "power"]
+            ),
+            
+            ProductType(
+                canonical: "Toilet Paper",
+                variations: ["toilet paper", "tissue", "bath tissue"],
+                synonyms: ["Bath Tissue", "TP"],
+                category: "Home Care",
+                subcategory: "Paper Products",
+                typicalForms: ["other"],
+                keywords: ["toilet", "paper", "tissue", "bath"]
+            ),
+            
+            // MARK: - Electronics & Tech
+            
+            ProductType(
+                canonical: "Phone Accessories",
+                variations: ["phone case", "airpods case", "phone mount", "screen protector", "phone charger"],
+                synonyms: ["Mobile Accessories", "Phone Case"],
+                category: "Electronics",
+                subcategory: "Accessories",
+                typicalForms: ["other"],
+                keywords: ["phone", "case", "airpods", "mobile", "charger", "screen"]
+            ),
         ]
     }
 }
