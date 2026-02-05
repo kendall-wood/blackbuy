@@ -250,35 +250,110 @@ struct ScanView: View {
                 let nameLower = product.name.lowercased()
                 let nameWords = Set(nameLower.split(separator: " ").map(String.init))
                 let tagsLower = (product.tags?.joined(separator: " ") ?? "").lowercased()
+                let productTypeLower = product.productType.lowercased()
                 
-                // GATE: Calculate name/tag match score
+                // GATE 1: Filter out accessories when scanning core products
+                let accessoryKeywords = ["brush", "applicator", "sponge", "tool", "mirror", "bag", "case", "holder", "dispenser", "blender"]
+                let isAccessory = accessoryKeywords.contains { nameLower.contains($0) || productTypeLower.contains($0) }
+                let isConsumableProduct = !["accessory", "tool", "equipment"].contains(productTypeLower)
+                
+                if isAccessory && isConsumableProduct {
+                    // User scanned a product (e.g., foundation), not an accessory (e.g., foundation brush)
+                    if Env.isDebugMode {
+                        print("   ❌ FILTERED OUT: '\(product.name)' - accessory mismatch")
+                    }
+                    return nil
+                }
+                
+                // GATE 2: Filter out use-case mismatches (e.g., feminine wash != hand wash)
+                let useCaseMismatches: [(scanned: [String], wrong: [String])] = [
+                    (scanned: ["hand", "wash"], wrong: ["feminine", "vaginal", "intimate", "yoni"]),
+                    (scanned: ["hand", "sanitizer"], wrong: ["feminine", "vaginal", "intimate"]),
+                    (scanned: ["face", "facial"], wrong: ["vaginal", "intimate", "yoni"]),
+                    (scanned: ["body", "lotion"], wrong: ["facial", "face"]),
+                    (scanned: ["shampoo"], wrong: ["conditioner"]),
+                    (scanned: ["conditioner"], wrong: ["shampoo"])
+                ]
+                
+                for mismatch in useCaseMismatches {
+                    let hasScannedWords = mismatch.scanned.allSatisfy { targetLower.contains($0) }
+                    let hasWrongWords = mismatch.wrong.contains { nameLower.contains($0) || productTypeLower.contains($0) }
+                    
+                    if hasScannedWords && hasWrongWords {
+                        if Env.isDebugMode {
+                            print("   ❌ FILTERED OUT: '\(product.name)' - use-case mismatch")
+                        }
+                        return nil
+                    }
+                }
+                
+                // GATE 3: Filter out form type mismatches (e.g., towelettes != lotion)
+                if let targetForm = analysis.form?.lowercased() {
+                    let formMismatches: [String: [String]] = [
+                        "towelette": ["lotion", "cream", "serum", "oil", "gel"],
+                        "wipe": ["lotion", "cream", "serum", "oil", "gel"],
+                        "serum": ["lotion", "cream", "conditioner", "mask"],
+                        "powder": ["liquid", "cream", "gel", "lotion"],
+                        "bar": ["liquid", "gel", "cream", "lotion"],
+                        "spray": ["cream", "lotion", "gel", "bar"],
+                        "foam": ["cream", "lotion", "gel", "bar"]
+                    ]
+                    
+                    if let invalidForms = formMismatches[targetForm],
+                       let productForm = product.form?.lowercased(),
+                       invalidForms.contains(productForm) {
+                        if Env.isDebugMode {
+                            print("   ❌ FILTERED OUT: '\(product.name)' - form mismatch (\(targetForm) vs \(productForm))")
+                        }
+                        return nil
+                    }
+                }
+                
+                // GATE 4: Calculate name/tag match score (prioritize specificity)
                 let nameScore: Double
                 let overlap = targetWords.intersection(nameWords)
                 
+                // Identify specific product descriptor words (more important than generic modifiers)
+                let specificWords = Set(["sanitizer", "cleanser", "wash", "soap", "shampoo", "conditioner", 
+                                        "lotion", "cream", "serum", "oil", "gel", "balm", "butter", 
+                                        "mask", "scrub", "toner", "primer", "foundation", "concealer",
+                                        "powder", "spray", "foam", "bar", "wipe", "towelette"])
+                
+                let targetSpecificWords = targetWords.intersection(specificWords)
+                let productSpecificWords = nameWords.intersection(specificWords)
+                let specificOverlap = targetSpecificWords.intersection(productSpecificWords)
+                
                 if nameLower.contains(targetLower) {
-                    // Perfect: name contains full target ("Hand Sanitizer")
+                    // Perfect: name contains full target phrase ("Hand Sanitizer")
                     nameScore = 1.0
-                } else if overlap.count >= 2 {
-                    // Good: at least 2 words match in name
-                    nameScore = 0.85
-                } else if overlap.count == 1 {
-                    // Check if the matched word is a KEY word (e.g., "sanitizer" is more important than "hand")
-                    let keyWords = Set(["sanitizer", "cleanser", "wash", "soap", "shampoo", "conditioner", "lotion", "cream", "gel", "oil", "serum"])
-                    let hasKeyWord = overlap.contains { keyWords.contains($0) }
-                    
-                    if hasKeyWord {
-                        // Important word matched (e.g., "sanitizer")
-                        nameScore = 0.60
-                    } else if targetWords.contains(where: { tagsLower.contains($0) }) {
-                        // Word found in tags instead
-                        nameScore = 0.50
+                } else if specificOverlap.count >= 2 {
+                    // Excellent: Multiple specific words match (e.g., "leave-in serum" → "hydrating leave-in serum")
+                    nameScore = 0.95
+                } else if specificOverlap.count == 1 {
+                    // Good: The specific word matches (e.g., "serum" in "leave-in serum")
+                    // But penalize if other important words are missing
+                    if overlap.count >= targetWords.count - 1 {
+                        // Most words match (e.g., "leave-in serum" → "leave-in treatment")
+                        nameScore = 0.70
                     } else {
-                        // Generic word only (e.g., just "hand")
-                        nameScore = 0.30
+                        // Only the specific word matches (e.g., "serum" only)
+                        nameScore = 0.55
+                    }
+                } else if overlap.count >= 2 {
+                    // Fair: Multiple generic words match but no specific word
+                    // (e.g., "hand wash" → "hand cream" - generic "hand" matches)
+                    nameScore = 0.40
+                } else if overlap.count == 1 {
+                    // Check if the matched word is found in tags
+                    if targetWords.contains(where: { tagsLower.contains($0) }) {
+                        nameScore = 0.35
+                    } else {
+                        // Only one generic word matches (e.g., "hand" only)
+                        nameScore = 0.25
                     }
                 } else if targetWords.contains(where: { tagsLower.contains($0) }) {
                     // No name match but found in tags
-                    nameScore = 0.40
+                    nameScore = 0.30
                 } else {
                     // No match: skip this product entirely
                     if Env.isDebugMode {

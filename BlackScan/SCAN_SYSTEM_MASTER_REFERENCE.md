@@ -1,10 +1,10 @@
 # BlackScan - Complete Scanning System Reference
 
 **Master Technical Documentation**  
-**Version**: 2.1 (Refined Scoring & Search)  
+**Version**: 2.2 (Enhanced Filtering & Specificity)  
 **Date**: February 5, 2026  
-**Last Updated**: February 5, 2026 - Optimized Typesense search and name-based filtering  
-**Purpose**: Complete reference for AI-powered product scanning with OpenAI GPT-4 Vision
+**Last Updated**: February 5, 2026 - Added accessory filtering, use-case validation, and form mismatch detection  
+**Purpose**: Complete reference for AI-powered product scanning with OpenAI GPT-4 Vision + Hybrid OCR
 
 ---
 
@@ -1486,6 +1486,54 @@ class ScanLog: NSManagedObject {
 ---
 
 ## 8. SEARCH STRATEGY
+
+### Product Filtering Gates (NEW in v2.2)
+
+Before scoring, products go through **4 filtering gates** to ensure high accuracy:
+
+#### Gate 1: Accessory Filter
+**Problem**: User scans "Foundation" but gets "Foundation Brush" as top result  
+**Solution**: Filter out accessories when scanning consumable products
+
+Keywords: `brush`, `applicator`, `sponge`, `tool`, `mirror`, `bag`, `case`, `holder`, `dispenser`, `blender`
+
+#### Gate 2: Use-Case Validation
+**Problem**: "Hand Wash" returns "Feminine Wash" products  
+**Solution**: Block use-case mismatches
+- Hand/Face products ≠ Feminine products
+- Shampoo ≠ Conditioner
+- Body products ≠ Facial products
+
+#### Gate 3: Form Type Mismatch Detection
+**Problem**: "Facial Towelettes" returns facial lotions/creams  
+**Solution**: Block incompatible forms
+- Towelettes/Wipes ≠ Lotions/Creams/Serums
+- Serum ≠ Lotion/Conditioner
+- Powder ≠ Liquid/Cream
+- Bar ≠ Liquid/Gel
+- Spray ≠ Cream/Bar
+
+#### Gate 4: Specificity-Based Name Scoring
+**Problem**: "Leave-In Serum" matches "Leave-In Conditioner" equally  
+**Solution**: Prioritize specific descriptor words over generic modifiers
+
+**Specific words** (high priority): `sanitizer`, `cleanser`, `wash`, `soap`, `shampoo`, `conditioner`, `lotion`, `cream`, `serum`, `oil`, `gel`, `balm`, `butter`, `mask`, `scrub`, `toner`, `primer`, `foundation`, `powder`, `spray`, `foam`, `bar`, `wipe`, `towelette`
+
+**Scoring**:
+- Full phrase match: **100%**
+- Multiple specific words match: **95%**
+- One specific word + most other words: **70%**
+- One specific word only: **55%**
+- Multiple generic words: **40%**
+- One generic word or tags: **25-35%**
+- No match: **FILTER OUT**
+
+**Example**: "Leave-In Serum"
+- ✅ "Hydrating Leave-In Serum" → 95% (both "leave-in" and "serum" match)
+- ✅ "Leave-In Hair Serum" → 95% (both specific words)
+- ⚠️ "Leave-In Conditioner" → 70% ("leave-in" matches, "serum" missing)
+- ⚠️ "Hair Serum" → 55% ("serum" matches, "leave-in" missing)
+- ❌ "Leave-In Detangler" → 40% (only "leave-in" generic word)
 
 ### Typesense Query Structure
 
