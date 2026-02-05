@@ -207,7 +207,7 @@ struct ProductDetailView: View {
             }
             .background(Color.white)
             
-            // Custom Header (back button only)
+            // Custom Header (back button and logo)
             VStack(spacing: 0) {
                 HStack {
                     // Back Button - matching scan page style
@@ -228,6 +228,20 @@ struct ProductDetailView: View {
                     .buttonStyle(.plain)
                     
                     Spacer()
+                    
+                    // BlackBuy Logo
+                    Image("shop_logo")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 28)
+                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                    
+                    Spacer()
+                    
+                    // Spacer to balance the layout
+                    Color.clear
+                        .frame(width: 50, height: 50)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
