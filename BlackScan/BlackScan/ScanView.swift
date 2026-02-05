@@ -238,7 +238,7 @@ struct ScanView: View {
             let scoredResults = results.enumerated().compactMap { (index, product) -> ScoredProduct? in
                 let nameLower = product.name.lowercased()
                 let nameWords = Set(nameLower.split(separator: " ").map(String.init))
-                let tagsLower = (product.tags ?? "").lowercased()
+                let tagsLower = (product.tags?.joined(separator: " ") ?? "").lowercased()
                 
                 // GATE: Calculate name/tag match score
                 let nameScore: Double
