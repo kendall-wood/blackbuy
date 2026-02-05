@@ -135,31 +135,43 @@ class ConfidenceScorer {
         let normalizedProduct = productTaxonomy.normalize(productType) ?? productType
         let normalizedTarget = productTaxonomy.normalize(target.type) ?? target.type
         
+        let productLower = normalizedProduct.lowercased()
+        let targetLower = normalizedTarget.lowercased()
+        
         // Exact match
-        if normalizedProduct.lowercased() == normalizedTarget.lowercased() {
+        if productLower == targetLower {
             return 1.0
+        }
+        
+        // Strong partial match (one contains the other)
+        // e.g., "Hand Sanitizer" matches "Hand Sanitizer Gel"
+        if productLower.contains(targetLower) || targetLower.contains(productLower) {
+            // Higher score if the match is significant
+            let matchLength = min(productLower.count, targetLower.count)
+            let maxLength = max(productLower.count, targetLower.count)
+            let ratio = Double(matchLength) / Double(maxLength)
+            return 0.85 + (ratio * 0.15) // 0.85 to 1.0
         }
         
         // Synonym match
         if productTaxonomy.areSynonyms(normalizedProduct, normalizedTarget) {
-            return 0.9
+            return 0.80
         }
         
         // Same category
         if let productCat = productTaxonomy.getCategory(productType),
            let targetCat = productTaxonomy.getCategory(target.type),
            productCat.lowercased() == targetCat.lowercased() {
-            return 0.6
+            return 0.60
         }
         
-        // Partial keyword match
-        let productKeywords = Set(productType.lowercased().split(separator: " ").map(String.init))
-        let targetKeywords = Set(target.type.lowercased().split(separator: " ").map(String.init))
-        let overlap = productKeywords.intersection(targetKeywords)
-        
-        if !overlap.isEmpty {
-            let matchRatio = Double(overlap.count) / Double(max(productKeywords.count, targetKeywords.count))
-            return 0.3 + (matchRatio * 0.3)  // 0.3-0.6 range
+        // Weak partial match (word overlap)
+        let productWords = Set(productLower.split(separator: " ").map(String.init))
+        let targetWords = Set(targetLower.split(separator: " ").map(String.init))
+        let commonWords = productWords.intersection(targetWords)
+        if !commonWords.isEmpty {
+            let overlapRatio = Double(commonWords.count) / Double(max(productWords.count, targetWords.count))
+            return 0.3 + (overlapRatio * 0.3) // 0.3 to 0.6
         }
         
         return 0.0
