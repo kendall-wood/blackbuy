@@ -380,13 +380,13 @@ struct ShopView: View {
                     ForEach(gridProducts.prefix(32)) { product in
                         ShortFeatureCard(
                             product: product,
-                            isSaved: savedProductsManager.isSaved(product),
+                            isSaved: savedProductsManager.isProductSaved(product),
                             isInCart: cartManager.isInCart(product),
                             onSaveTapped: {
-                                if savedProductsManager.isSaved(product) {
+                                if savedProductsManager.isProductSaved(product) {
                                     savedProductsManager.removeSavedProduct(product)
                                 } else {
-                                    savedProductsManager.addSavedProduct(product)
+                                    savedProductsManager.saveProduct(product)
                                 }
                             },
                             onAddToCart: {
