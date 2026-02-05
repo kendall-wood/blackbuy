@@ -218,13 +218,13 @@ class ConfidenceScorer {
         }
         
         // Weak partial match (word overlap)
-        let productWords = Set(productLower.split(separator: " ").map(String.init))
-        let targetWords = Set(targetLower.split(separator: " ").map(String.init))
-        let commonWords = productWords.intersection(targetWords)
-        if !commonWords.isEmpty {
-            let overlapRatio = Double(commonWords.count) / Double(max(productWords.count, targetWords.count))
+        let productTypeWords = Set(productLower.split(separator: " ").map(String.init))
+        let typeTargetWords = Set(targetLower.split(separator: " ").map(String.init))
+        let typeCommonWords = productTypeWords.intersection(typeTargetWords)
+        if !typeCommonWords.isEmpty {
+            let overlapRatio = Double(typeCommonWords.count) / Double(max(productTypeWords.count, typeTargetWords.count))
             if Env.isDebugMode {
-                print("   🎯 Word overlap: \(commonWords) = \(0.3 + overlapRatio * 0.3)")
+                print("   🎯 Word overlap: \(typeCommonWords) = \(0.3 + overlapRatio * 0.3)")
             }
             return 0.3 + (overlapRatio * 0.3) // 0.3 to 0.6
         }
