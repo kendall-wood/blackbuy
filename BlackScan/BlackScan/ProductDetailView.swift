@@ -106,7 +106,7 @@ struct ProductDetailView: View {
                         .padding(16)
                     }
                     .padding(.horizontal, 24)
-                    .padding(.top, 80)
+                    .padding(.top, 90)
                     .padding(.bottom, 24)
                     
                     // Product Info Section
@@ -232,9 +232,8 @@ struct ProductDetailView: View {
                     
                     Spacer()
                 }
-                .frame(height: 44)
                 .padding(.horizontal, 24)
-                .padding(.vertical, 8)
+                .padding(.top, 16)
                 .background(Color.white)
                 
                 Spacer()
