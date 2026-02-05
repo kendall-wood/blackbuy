@@ -230,18 +230,43 @@ struct ScanView: View {
             
             print("✅ Found \(results.count) candidate products from Typesense")
             
-            // TRUST TYPESENSE: All results are relevant, just score them accurately
-            // No gates, no filters - just honest scoring and ranking
-            let scoredResults = scoreProductsSimple(
-                products: results,
-                targetType: analysis.productType,
-                targetForm: analysis.form
-            )
+            // GIVE TYPESENSE THE REINS: Use their ranking with minimal adjustments
+            // Score = 90% Typesense position + 10% name boost
+            let scoredResults = results.enumerated().map { (index, product) -> ScoredProduct in
+                // Typesense position score: earlier = better (100% → 70%)
+                let positionScore = 1.0 - (Double(index) / Double(results.count) * 0.30)
+                
+                // Small name boost if exact match (max 10%)
+                let nameLower = product.name.lowercased()
+                let targetLower = analysis.productType.lowercased()
+                let nameBoost = nameLower.contains(targetLower) ? 0.10 : 0.0
+                
+                let finalScore = min(positionScore + nameBoost, 1.0)
+                
+                if Env.isDebugMode {
+                    print("   #\(index + 1): \(product.name) = \(Int(finalScore * 100))% (position: \(Int(positionScore * 100))%, boost: \(Int(nameBoost * 100))%)")
+                }
+                
+                return ScoredProduct(
+                    id: product.id,
+                    product: product,
+                    confidenceScore: finalScore,
+                    breakdown: ScoreBreakdown(
+                        productTypeScore: positionScore,
+                        formScore: 0.85,
+                        brandScore: 0.85,
+                        ingredientScore: 0.85,
+                        sizeScore: 0.85,
+                        visualScore: 0.85
+                    ),
+                    explanation: "Typesense rank #\(index + 1), score: \(Int(finalScore * 100))%"
+                )
+            }
             
-            // Show top 20 results, no minimum threshold
-            let filteredResults = Array(scoredResults.prefix(20))
+            // Show top 20, in Typesense order with minimal re-ranking
+            let filteredResults = Array(scoredResults.sorted { $0.confidenceScore > $1.confidenceScore }.prefix(20))
             
-            print("📊 Showing top \(filteredResults.count) results (no filtering, just ranking)")
+            print("📊 Showing top \(filteredResults.count) results (Typesense order + name boost)")
             
             if Env.isDebugMode && !filteredResults.isEmpty {
                 print("🏆 Top 5 matches:")
