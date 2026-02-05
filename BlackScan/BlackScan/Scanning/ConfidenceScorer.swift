@@ -223,7 +223,7 @@ class ConfidenceScorer {
         against brand: BrandResult?
     ) -> Double {
         guard let brand = brand else {
-            return 0.5  // No brand detected = neutral
+            return 0.8  // No brand detected = neutral/positive (don't penalize)
         }
         
         let productCategory = product.mainCategory.lowercased()
@@ -247,11 +247,11 @@ class ConfidenceScorer {
         for (cat1, cat2) in relatedPairs {
             if (productCategory.contains(cat1) && brandCategories.contains(where: { $0.contains(cat2) })) ||
                (productCategory.contains(cat2) && brandCategories.contains(where: { $0.contains(cat1) })) {
-                return 0.7  // Related category
+                return 0.85  // Related category
             }
         }
         
-        return 0.5  // Different category but acceptable
+        return 0.7  // Different category but still decent (was too harsh at 0.5)
     }
     
     /// TIER 5: Score size compatibility
