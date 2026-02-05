@@ -85,7 +85,10 @@ struct ProductDetailView: View {
                         .frame(height: 320)
                         .background(Color.white)
                         .cornerRadius(16)
-                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color(red: 0.26, green: 0.63, blue: 0.95), lineWidth: 1)
+                        )
                         
                         // Heart Button (overlayed in top right)
                         Button(action: {
@@ -210,13 +213,20 @@ struct ProductDetailView: View {
             // Custom Header (back button only)
             VStack(spacing: 0) {
                 HStack {
-                    // Back Button
+                    // Back Button - matching scan page style
                     Button(action: {
                         dismiss()
                     }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(Color(.systemGray3))
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 50, height: 50)
+                                .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                        }
                     }
                     .buttonStyle(.plain)
                     
