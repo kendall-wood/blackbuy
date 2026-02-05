@@ -411,16 +411,15 @@ struct ScanView: View {
         let classification = AdvancedClassifier.shared.classify(recognizedText)
         lastClassification = classification
         
-        if Env.isDebugMode {
-            print("🔍 OCR Text: \(recognizedText)")
-            print("📋 Classification:")
-            print("   Product Type: \(classification.productType.type)")
-            print("   Form: \(classification.form?.form ?? "Unknown")")
-            print("   Brand: \(classification.brand?.name ?? "None")")
-            print("   Ingredients: \(classification.ingredients.joined(separator: ", "))")
-            if let size = classification.size {
-                print("   Size: \(size.value) \(size.unit)")
-            }
+        // ALWAYS log classification results for debugging
+        print("🔍 OCR Text: \(recognizedText)")
+        print("📋 Classification:")
+        print("   Product Type: '\(classification.productType.type)' (confidence: \(classification.productType.confidence))")
+        print("   Form: \(classification.form?.form ?? "Unknown")")
+        print("   Brand: \(classification.brand?.name ?? "None")")
+        print("   Ingredients: \(classification.ingredients.joined(separator: ", "))")
+        if let size = classification.size {
+            print("   Size: \(size.value) \(size.unit)")
         }
         
         // Perform search with classification result
@@ -431,11 +430,16 @@ struct ScanView: View {
     private func performSearch(with classification: ScanClassification) {
         // Don't search if no product type was detected
         guard !classification.productType.type.isEmpty else {
-            if Env.isDebugMode {
-                print("⚠️ Skipping search - no product type detected")
-            }
+            print("⚠️ Skipping search - no product type detected")
+            print("   Raw text was: \(classification.productType.type)")
+            
+            // Reset state so user can try again
+            isListening = false
+            searchError = "Could not identify product type. Please try scanning clearer text."
             return
         }
+        
+        print("✅ Starting search with product type: \(classification.productType.type)")
         
         isSearching = true
         isListening = false  // Clear listening state when search starts
