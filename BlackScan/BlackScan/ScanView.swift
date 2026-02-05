@@ -25,7 +25,8 @@ struct ScanView: View {
     var body: some View {
         ZStack {
             // Live Camera Feed with flashlight control - only active when listening
-            ScannerContainerView(isTorchOn: $flashlightOn, isActive: $isListening) { recognizedText in
+            // Increased debounce to 3.0s for better text capture
+            ScannerContainerView(isTorchOn: $flashlightOn, isActive: $isListening, debounceDelay: 3.0) { recognizedText in
                 handleRecognizedText(recognizedText)
             }
             .ignoresSafeArea()
@@ -172,9 +173,9 @@ struct ScanView: View {
             
             print("⏱️ Scanning timeout set for 10 seconds")
             
-            // Auto-stop after 10 seconds if no text detected
+            // Auto-stop after 15 seconds if no text detected (increased from 10s)
             Task {
-                try? await Task.sleep(nanoseconds: 10_000_000_000)
+                try? await Task.sleep(nanoseconds: 15_000_000_000)
                 await MainActor.run {
                     if isListening && scanResults.isEmpty && !isSearching {
                         print("⏰ Scanning timeout reached - stopping")
@@ -416,6 +417,13 @@ struct ScanView: View {
             return
         }
         
+        // Require minimum text length for quality scan
+        guard recognizedText.count >= 50 else {
+            print("⚠️ Text too short (\(recognizedText.count) chars) - need at least 50 chars for accurate classification")
+            isListening = false  // Stop listening, let user try again
+            return
+        }
+        
         print("📸 Camera detected text: \(recognizedText.prefix(100))...")
         
         // Classify the recognized text using Advanced Classifier
@@ -431,6 +439,13 @@ struct ScanView: View {
         print("   Ingredients: \(classification.ingredients.joined(separator: ", "))")
         if let size = classification.size {
             print("   Size: \(size.value) \(size.unit)")
+        }
+        
+        // Reject low confidence classifications
+        guard classification.productType.confidence >= 0.5 else {
+            print("⚠️ Classification confidence too low (\(classification.productType.confidence)) - need at least 0.5")
+            isListening = false  // Stop listening, let user try again
+            return
         }
         
         // Perform search with classification result

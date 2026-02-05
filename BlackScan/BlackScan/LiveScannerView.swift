@@ -289,14 +289,17 @@ struct ScannerContainerView: View {
     let onRecognized: (String) -> Void
     @Binding var isTorchOn: Bool
     @Binding var isActive: Bool
+    let debounceDelay: TimeInterval
     
     init(
         isTorchOn: Binding<Bool> = .constant(false),
         isActive: Binding<Bool> = .constant(true),
+        debounceDelay: TimeInterval = 3.0,
         onRecognized: @escaping (String) -> Void
     ) {
         self._isTorchOn = isTorchOn
         self._isActive = isActive
+        self.debounceDelay = debounceDelay
         self.onRecognized = onRecognized
     }
     
@@ -304,7 +307,7 @@ struct ScannerContainerView: View {
         Group {
             if #available(iOS 16.0, *) {
                 if LiveScannerView.isSupported {
-                    LiveScannerView(isTorchOn: $isTorchOn, isActive: $isActive, onRecognized: onRecognized)
+                    LiveScannerView(debounceDelay: debounceDelay, isTorchOn: $isTorchOn, isActive: $isActive, onRecognized: onRecognized)
                 } else {
                     ScannerUnavailableView(
                         message: "Camera scanning is not supported on this device. Please use a physical iPhone to scan products."
