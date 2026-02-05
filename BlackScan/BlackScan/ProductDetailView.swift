@@ -111,18 +111,18 @@ struct ProductDetailView: View {
                         // Company name
                         Text(product.company)
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color(.systemGray))
                         
                         // Product name
                         Text(product.name)
                             .font(.system(size: 24, weight: .semibold))
-                            .foregroundColor(.primary)
+                            .foregroundColor(.black)
                             .lineLimit(3)
                         
                         // Price
                         Text(product.formattedPrice)
                             .font(.system(size: 32, weight: .medium))
-                            .foregroundColor(.primary)
+                            .foregroundColor(.black)
                             .padding(.top, 4)
                         
                         // Categories label
@@ -323,7 +323,7 @@ struct SimilarProductCard: View {
                     
                     Image(systemName: "photo")
                         .font(.system(size: 24))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(.systemGray))
                 }
             }
             .aspectRatio(1, contentMode: .fill)
@@ -335,27 +335,27 @@ struct SimilarProductCard: View {
                 // Product Name (2 lines max)
                 Text(product.name)
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.black)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                 
                 // Company Name
                 Text(product.company)
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Color(.systemGray))
                     .lineLimit(1)
                 
                 // Price
                 Text(product.formattedPrice)
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.black)
                     .padding(.top, 2)
             }
             .padding(.horizontal, 8)
             .padding(.bottom, 8)
         }
         .frame(width: 140)
-        .background(Color(.systemBackground))
+        .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
