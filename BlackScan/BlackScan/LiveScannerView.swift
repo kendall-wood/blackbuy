@@ -177,10 +177,17 @@ struct LiveScannerView: UIViewControllerRepresentable {
             // Add to our set of recognized texts
             recognizedTexts.insert(cleanedText)
             
-            // Reset the debounce timer
-            debounceTimer?.invalidate()
-            debounceTimer = Timer.scheduledTimer(withTimeInterval: debounceDelay, repeats: false) { [weak self] _ in
-                self?.processAggregatedText()
+            print("📝 Added text to set (now have \(recognizedTexts.count) unique texts)")
+            
+            // Reset the debounce timer ON MAIN THREAD (required for RunLoop)
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                self.debounceTimer?.invalidate()
+                print("⏲️ Starting debounce timer (\(self.debounceDelay)s)")
+                self.debounceTimer = Timer.scheduledTimer(withTimeInterval: self.debounceDelay, repeats: false) { [weak self] _ in
+                    print("⏰ Debounce timer fired!")
+                    self?.processAggregatedText()
+                }
             }
         }
         
