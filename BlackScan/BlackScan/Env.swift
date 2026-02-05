@@ -56,6 +56,27 @@ struct Env {
         }
     }()
     
+    // MARK: - OpenAI Configuration
+    
+    /// OpenAI API key for GPT-4 Vision (from environment variable)
+    static let openAIAPIKey: String = {
+        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
+            fatalError("OPENAI_API_KEY environment variable not set. Please configure in Xcode scheme.")
+        }
+        
+        guard !apiKey.isEmpty else {
+            fatalError("OPENAI_API_KEY environment variable is empty. Please provide a valid OpenAI API key.")
+        }
+        
+        return apiKey
+    }()
+    
+    /// OpenAI Vision API endpoint
+    static let openAIVisionEndpoint = "https://api.openai.com/v1/chat/completions"
+    
+    /// OpenAI Vision model to use
+    static let openAIVisionModel = "gpt-4o" // Latest GPT-4 with vision (cheaper + faster than gpt-4-vision-preview)
+    
     // MARK: - API Configuration
     
     /// Default request timeout for network calls
@@ -121,6 +142,7 @@ struct Env {
             _ = typesenseHost
             _ = typesenseApiKey
             _ = backendURL
+            _ = openAIAPIKey
             return true
         } catch {
             print("❌ Environment validation failed: \(error)")
@@ -143,9 +165,11 @@ struct Env {
         return """
         BlackScan Environment Configuration:
         - Typesense Host: \(typesenseHost)
-        - API Key: \(String(repeating: "*", count: max(0, typesenseApiKey.count - 4)))\(typesenseApiKey.suffix(4))
+        - Typesense API Key: \(String(repeating: "*", count: max(0, typesenseApiKey.count - 4)))\(typesenseApiKey.suffix(4))
         - Collection: \(typesenseCollection)
         - Backend URL: \(backendURL)
+        - OpenAI API Key: \(String(repeating: "*", count: max(0, openAIAPIKey.count - 4)))\(openAIAPIKey.suffix(4))
+        - OpenAI Model: \(openAIVisionModel)
         - Debug Mode: \(isDebugMode)
         - Network Logging: \(shouldLogNetworkRequests)
         """

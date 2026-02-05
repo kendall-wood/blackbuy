@@ -1,9 +1,9 @@
 # BlackScan - Complete Scanning System Reference
 
 **Master Technical Documentation**  
-**Version**: 1.0  
-**Date**: February 4, 2026  
-**Purpose**: Complete reference for the 6-tier cumulative confidence scoring system
+**Version**: 2.0 (OpenAI Vision Integration)  
+**Date**: February 5, 2026  
+**Purpose**: Complete reference for AI-powered product scanning with OpenAI GPT-4 Vision
 
 ---
 
@@ -45,54 +45,54 @@ Product labels contain complex, multi-layered information:
 - Achieve **95%+ accuracy**
 
 ### Design Philosophy
-- **Fully local**: No ML cloud services (works offline)
+- **AI-Powered**: OpenAI GPT-4 Vision for 95%+ accuracy
 - **Cumulative scoring**: All criteria contribute to confidence, not pass/fail
 - **Transparent**: Users see why products matched
-- **Fast**: < 1 second from scan to results
-- **Privacy-first**: No external data collection
+- **Fast**: ~2-3 seconds from scan to results
+- **Cost-effective**: ~$0.01 per scan
 
 ---
 
 ## 2. ARCHITECTURE
 
-### High-Level Flow
+### High-Level Flow (OpenAI Vision)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         USER SCANS PRODUCT                      │
-│                   (CeraVe Foaming Facial Cleanser)              │
+│                   (Garnier Fructis Curl Gel)                    │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    LIVE CAMERA SCANNER                          │
-│                 (LiveScannerView.swift)                         │
-│  - VisionKit DataScannerViewController                          │
-│  - OCR text recognition                                         │
-│  - Debouncing (1 second)                                        │
+│                    CAMERA PREVIEW VIEW                          │
+│                 (CameraPreviewView.swift)                       │
+│  - AVCaptureSession                                             │
+│  - Single photo capture on button tap                           │
+│  - Flashlight control                                           │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                  ADVANCED CLASSIFIER                            │
-│              (AdvancedClassifier.swift)                         │
+│                  OPENAI GPT-4 VISION API                        │
+│              (OpenAIVisionService.swift)                        │
 │                                                                 │
-│  Extracts 6-tier classification:                                │
-│  ├─ Tier 1: Product Type                                        │
-│  ├─ Tier 2: Form/Dispensing Method                             │
-│  ├─ Tier 3: Brand Association                                  │
-│  ├─ Tier 4: Ingredient Detection                               │
-│  ├─ Tier 5: Size/Quantity                                      │
-│  └─ Tier 6: Visual (Phase 2)                                   │
+│  AI extracts structured data:                                   │
+│  ├─ Brand: "Garnier Fructis"                                   │
+│  ├─ Product Type: "Curl Defining Gel"                          │
+│  ├─ Form: "spray gel"                                          │
+│  ├─ Size: "8.5 fl oz"                                          │
+│  ├─ Ingredients: ["coconut water"]                             │
+│  ├─ Confidence: 0.95                                           │
+│  └─ Raw Text: "GARNIER FRUCTIS CURL SHAPE..."                  │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                   TYPESENSE SEARCH                              │
 │              (TypesenseClient.swift)                            │
-│  - Broad search query                                           │
-│  - Weighted fields (product_type^3, form^2, name^1, tags^1)    │
-│  - Retrieve 100+ candidate products                             │
+│  - Search by product type                                       │
+│  - Retrieve 20 candidate products                               │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
