@@ -525,17 +525,29 @@ struct ScanView: View {
     
     /// Toggle device flashlight/torch
     private func toggleFlashlight(_ on: Bool) {
-        guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else {
-            print("⚠️ Flashlight not available")
-            return
-        }
-        
-        do {
-            try device.lockForConfiguration()
-            device.torchMode = on ? .on : .off
-            device.unlockForConfiguration()
-        } catch {
-            print("❌ Error toggling flashlight: \(error)")
+        Task {
+            guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else {
+                print("⚠️ Flashlight not available")
+                return
+            }
+            
+            do {
+                try device.lockForConfiguration()
+                
+                if on {
+                    try device.setTorchModeOn(level: 1.0)
+                } else {
+                    device.torchMode = .off
+                }
+                
+                device.unlockForConfiguration()
+                print("✅ Flashlight: \(on ? "ON" : "OFF")")
+            } catch {
+                print("❌ Error toggling flashlight: \(error)")
+                await MainActor.run {
+                    flashlightOn = false  // Reset state on error
+                }
+            }
         }
     }
 }
