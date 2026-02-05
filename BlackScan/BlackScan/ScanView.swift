@@ -221,7 +221,6 @@ struct ScanView: View {
         do {
             // Build search query from analysis
             let searchQuery = analysis.productType
-            let form = analysis.form
             
             // Search Typesense
             let results = try await typesenseClient.searchProducts(
@@ -232,8 +231,14 @@ struct ScanView: View {
             
             print("✅ Found \(results.count) products from Typesense")
             
-            // Score results based on analysis
-            let scoredResults = scoreResults(products: results, analysis: analysis)
+            // Convert OpenAI analysis to ScanClassification format
+            let classification = convertToScanClassification(analysis: analysis)
+            
+            // Use existing ConfidenceScorer (already tested and working!)
+            let scoredResults = ConfidenceScorer.shared.scoreProducts(
+                candidates: results,
+                classification: classification
+            )
             
             // Filter to 90%+ confidence
             let filteredResults = scoredResults.filter { $0.confidenceScore >= 0.90 }
@@ -259,153 +264,40 @@ struct ScanView: View {
         }
     }
     
-    // MARK: - Scoring
+    // MARK: - Conversion
     
-    private func scoreResults(products: [Product], analysis: OpenAIVisionService.ProductAnalysis) -> [ScoredProduct] {
-        print("🎯 Scoring \(products.count) products...")
+    /// Convert OpenAI ProductAnalysis to ScanClassification
+    private func convertToScanClassification(analysis: OpenAIVisionService.ProductAnalysis) -> ScanClassification {
+        // Create ProductTypeResult
+        let productTypeResult = ProductTypeResult(
+            type: analysis.productType,
+            confidence: analysis.confidence,
+            matchedKeywords: [], // OpenAI doesn't provide this
+            category: nil, // Will be inferred
+            subcategory: nil
+        )
         
-        return products.compactMap { product in
-            var score: Double = 0.0
-            
-            // 1. Product Type Match (50% weight)
-            let productTypeScore = scoreProductType(
-                scanned: analysis.productType,
-                catalog: product.productType
-            )
-            score += productTypeScore * 0.50
-            
-            // 2. Form Match (20% weight)
-            let formScore: Double
-            if let scannedForm = analysis.form, let catalogForm = product.form {
-                formScore = scoreForm(scanned: scannedForm, catalog: catalogForm)
-                score += formScore * 0.20
-            } else {
-                formScore = 0.80
-                score += formScore * 0.20 // Neutral if missing
-            }
-            
-            // 3. Ingredients Match (15% weight)
-            let ingredientScore = scoreIngredients(
-                scannedIngredients: analysis.ingredients,
-                catalogTags: product.tags ?? []
-            )
-            score += ingredientScore * 0.15
-            
-            // 4. Size Match (10% weight)
-            let sizeScore: Double = 0.80 // For now, neutral score - size matching is complex
-            score += sizeScore * 0.10
-            
-            // 5. Brand Association (5% weight) - not applicable for Black-owned alternatives
-            let brandScore: Double = 0.70
-            score += brandScore * 0.05
-            
-            if Env.isDebugMode {
-                print("   \(product.name): \(Int(score * 100))% (type: \(Int(productTypeScore * 100))%)")
-            }
-            
-            // Create explanation
-            let explanation = "Product type: \(Int(productTypeScore * 100))%, Form: \(Int(formScore * 100))%"
-            
-            return ScoredProduct(
-                id: product.id,
-                product: product,
-                confidenceScore: score,
-                breakdown: ScoreBreakdown(
-                    productTypeScore: productTypeScore,
-                    formScore: formScore,
-                    brandScore: brandScore,
-                    ingredientScore: ingredientScore,
-                    sizeScore: sizeScore,
-                    visualScore: nil
-                ),
-                explanation: explanation
+        // Create FormResult if form exists
+        let formResult: FormResult? = analysis.form.map { formString in
+            FormResult(
+                form: formString,
+                confidence: 0.9,
+                source: .explicit
             )
         }
-        .sorted { $0.confidenceScore > $1.confidenceScore }
-    }
-    
-    private func scoreProductType(scanned: String, catalog: String) -> Double {
-        let scannedNorm = normalize(scanned)
-        let catalogNorm = normalize(catalog)
         
-        // Exact match
-        if scannedNorm == catalogNorm {
-            return 1.0
-        }
-        
-        // Substring match (one contains the other)
-        if scannedNorm.contains(catalogNorm) || catalogNorm.contains(scannedNorm) {
-            let shorter = min(scannedNorm.count, catalogNorm.count)
-            let longer = max(scannedNorm.count, catalogNorm.count)
-            let ratio = Double(shorter) / Double(longer)
-            return 0.85 + (ratio * 0.15) // 0.85-1.0
-        }
-        
-        // Word overlap
-        let scannedWords = Set(scannedNorm.split(separator: " ").map(String.init))
-        let catalogWords = Set(catalogNorm.split(separator: " ").map(String.init))
-        let overlap = scannedWords.intersection(catalogWords)
-        
-        if !overlap.isEmpty {
-            let ratio = Double(overlap.count) / Double(max(scannedWords.count, catalogWords.count))
-            return 0.3 + (ratio * 0.3) // 0.3-0.6
-        }
-        
-        return 0.0
-    }
-    
-    private func scoreForm(scanned: String, catalog: String) -> Double {
-        let scannedNorm = normalize(scanned)
-        let catalogNorm = normalize(catalog)
-        
-        if scannedNorm == catalogNorm {
-            return 1.0
-        }
-        
-        if scannedNorm.contains(catalogNorm) || catalogNorm.contains(scannedNorm) {
-            return 0.90
-        }
-        
-        // Compatible forms (e.g., "spray" and "mist")
-        let compatibleForms: [[String]] = [
-            ["spray", "mist", "spritz"],
-            ["gel", "jelly"],
-            ["cream", "lotion", "butter"],
-            ["oil", "serum"],
-            ["stick", "bar"]
-        ]
-        
-        for group in compatibleForms {
-            if group.contains(scannedNorm) && group.contains(catalogNorm) {
-                return 0.90
-            }
-        }
-        
-        return 0.75 // Mismatch but not penalized heavily
-    }
-    
-    private func scoreIngredients(scannedIngredients: [String], catalogTags: [String]) -> Double {
-        if scannedIngredients.isEmpty {
-            return 0.80 // Neutral
-        }
-        
-        let scannedSet = Set(scannedIngredients.map { normalize($0) })
-        let catalogSet = Set(catalogTags.map { normalize($0) })
-        
-        let overlap = scannedSet.intersection(catalogSet)
-        
-        if !overlap.isEmpty {
-            let ratio = Double(overlap.count) / Double(scannedSet.count)
-            return 0.80 + (ratio * 0.20) // 0.80-1.0
-        }
-        
-        return 0.80 // Neutral if no overlap
-    }
-    
-    private func normalize(_ text: String) -> String {
-        return text.lowercased()
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "[^a-z0-9 ]", with: "", options: .regularExpression)
+        // Create ScanClassification
+        return ScanClassification(
+            productType: productTypeResult,
+            form: formResult,
+            brand: nil, // We don't need brand matching for Black-owned alternatives
+            ingredients: analysis.ingredients,
+            ingredientClarity: analysis.ingredients.isEmpty ? 0.5 : 0.9,
+            size: nil, // Size parsing can be added later
+            rawText: analysis.rawText,
+            processedText: analysis.rawText.lowercased(),
+            timestamp: Date()
+        )
     }
     
     // MARK: - Results Sheet

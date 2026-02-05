@@ -259,26 +259,3 @@ struct SearchHistoryItem: Codable, Identifiable {
         return formatter.localizedString(for: timestamp, relativeTo: Date())
     }
 }
-
-// MARK: - Scan Results
-
-/// Match details for confidence scoring breakdown
-struct MatchDetails {
-    let productTypeMatch: Double
-    let formMatch: Double
-    let brandMatch: Double
-    let ingredientMatch: Double
-    let sizeMatch: Double
-    let visualMatch: Double?
-}
-
-/// Product with confidence score from scanning
-struct ScoredProduct {
-    let product: Product
-    let confidenceScore: Double
-    let matchDetails: MatchDetails
-    
-    var confidencePercentage: Int {
-        return Int(confidenceScore * 100)
-    }
-}
