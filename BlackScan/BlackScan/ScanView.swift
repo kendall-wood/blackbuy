@@ -309,20 +309,31 @@ struct ScanView: View {
                     }
                 }
                 
-                // GATE 4: Calculate name/tag match score (prioritize specificity)
+                // GATE 4: Strict name matching (MUST have specific descriptor match)
                 let nameScore: Double
                 let overlap = targetWords.intersection(nameWords)
                 
-                // Identify specific product descriptor words (more important than generic modifiers)
+                // Specific product descriptor words (REQUIRED to match for accuracy)
                 let specificWords = Set(["sanitizer", "cleanser", "wash", "soap", "shampoo", "conditioner", 
                                         "lotion", "cream", "serum", "oil", "gel", "balm", "butter", 
                                         "mask", "scrub", "toner", "primer", "foundation", "concealer",
-                                        "powder", "spray", "foam", "bar", "wipe", "towelette"])
+                                        "powder", "spray", "foam", "bar", "wipe", "towelette", "treatment"])
                 
                 let targetSpecificWords = targetWords.intersection(specificWords)
                 let productSpecificWords = nameWords.intersection(specificWords)
                 let specificOverlap = targetSpecificWords.intersection(productSpecificWords)
                 
+                // CRITICAL: If target has specific words, product MUST match at least one
+                if !targetSpecificWords.isEmpty && specificOverlap.isEmpty {
+                    // Target says "Facial Towelettes" but product is "Facial Wash"
+                    // → "towelettes" ≠ "wash" = MISMATCH
+                    if Env.isDebugMode {
+                        print("   ❌ FILTERED OUT: '\(product.name)' - specific descriptor mismatch (need: \(targetSpecificWords), has: \(productSpecificWords))")
+                    }
+                    return nil
+                }
+                
+                // Now score based on how well they match
                 if nameLower.contains(targetLower) {
                     // Perfect: name contains full target phrase ("Hand Sanitizer")
                     nameScore = 1.0
@@ -331,35 +342,27 @@ struct ScanView: View {
                     nameScore = 0.95
                 } else if specificOverlap.count == 1 {
                     // Good: The specific word matches (e.g., "serum" in "leave-in serum")
-                    // But penalize if other important words are missing
                     if overlap.count >= targetWords.count - 1 {
                         // Most words match (e.g., "leave-in serum" → "leave-in treatment")
+                        nameScore = 0.85
+                    } else {
+                        // Only the specific word matches (e.g., "hand sanitizer" → "sanitizer")
                         nameScore = 0.70
-                    } else {
-                        // Only the specific word matches (e.g., "serum" only)
-                        nameScore = 0.55
                     }
-                } else if overlap.count >= 2 {
-                    // Fair: Multiple generic words match but no specific word
-                    // (e.g., "hand wash" → "hand cream" - generic "hand" matches)
-                    nameScore = 0.40
-                } else if overlap.count == 1 {
-                    // Check if the matched word is found in tags
-                    if targetWords.contains(where: { tagsLower.contains($0) }) {
-                        nameScore = 0.35
-                    } else {
-                        // Only one generic word matches (e.g., "hand" only)
-                        nameScore = 0.25
-                    }
-                } else if targetWords.contains(where: { tagsLower.contains($0) }) {
-                    // No name match but found in tags
-                    nameScore = 0.30
                 } else {
-                    // No match: skip this product entirely
-                    if Env.isDebugMode {
-                        print("   ❌ FILTERED OUT: '\(product.name)' - no name/tag match")
+                    // No specific words matched, or target had no specific words (rare)
+                    // This should rarely happen due to gate above
+                    if overlap.count >= 2 {
+                        nameScore = 0.60
+                    } else if targetWords.contains(where: { tagsLower.contains($0) }) {
+                        nameScore = 0.50
+                    } else {
+                        // Not enough match
+                        if Env.isDebugMode {
+                            print("   ❌ FILTERED OUT: '\(product.name)' - insufficient match")
+                        }
+                        return nil
                     }
-                    return nil
                 }
                 
                 // Typesense position score (primary ranking signal - now includes form!)
