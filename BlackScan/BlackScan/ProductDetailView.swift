@@ -299,22 +299,16 @@ struct CategoryChip: View {
         Text(text.uppercased())
             .font(.system(size: 11, weight: .bold))
             .tracking(0.8)
-            .foregroundColor(.white)
+            .foregroundColor(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color(red: 1.0, green: 0.45, blue: 0.0))
             .lineLimit(1)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: isPrimary ? 
-                        [Color(red: 0.26, green: 0.63, blue: 0.95), Color(red: 0.20, green: 0.55, blue: 0.87)] :
-                        [Color(red: 0.45, green: 0.45, blue: 0.95), Color(red: 0.35, green: 0.35, blue: 0.85)]
-                    ),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
+            .background(Color.white)
             .cornerRadius(8)
-            .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color(red: 1.0, green: 0.45, blue: 0.0), lineWidth: 1.5)
+            )
     }
 }
 
