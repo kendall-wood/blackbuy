@@ -12,6 +12,7 @@ struct ScanView: View {
     @State private var lastClassification: ScanClassification?
     @State private var isSearching = false
     @State private var searchError: String?
+    @State private var isListening = false  // Shows user that camera is actively scanning
     
     // MARK: - UI Configuration
     
@@ -96,8 +97,10 @@ struct ScanView: View {
             return "Scanning"
         } else if !scanResults.isEmpty {
             return "See \(scanResults.count)+ Results"
+        } else if isListening {
+            return "Point at Product Label"
         } else {
-            return "Scan Product"
+            return "Start Scanning"
         }
     }
     
@@ -106,6 +109,8 @@ struct ScanView: View {
             return .green
         } else if !scanResults.isEmpty {
             return .blue
+        } else if isListening {
+            return Color.orange
         } else {
             return .white
         }
@@ -116,6 +121,8 @@ struct ScanView: View {
             return .white
         } else if !scanResults.isEmpty {
             return .white
+        } else if isListening {
+            return .white
         } else {
             return .blue
         }
@@ -125,8 +132,24 @@ struct ScanView: View {
         if !scanResults.isEmpty {
             // Show results sheet
             isShowingResults = true
+        } else {
+            // Toggle listening mode - gives visual feedback
+            isListening = true
+            
+            // Provide haptic feedback
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+            
+            // Auto-disable after 3 seconds if no results
+            Task {
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                if scanResults.isEmpty {
+                    await MainActor.run {
+                        isListening = false
+                    }
+                }
+            }
         }
-        // Camera is always active, scanning automatically in background
     }
     
     // MARK: - Results Sheet
@@ -381,6 +404,7 @@ struct ScanView: View {
         }
         
         isSearching = true
+        isListening = false  // Clear listening state when search starts
         searchError = nil
         
         Task {
