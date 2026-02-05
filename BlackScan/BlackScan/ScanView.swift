@@ -1,5 +1,4 @@
 import SwiftUI
-import AVFoundation
 
 /// Main scanning view that integrates camera scanning, classification, and product search
 /// Presents results in a bottom sheet with customizable detents
@@ -14,7 +13,6 @@ struct ScanView: View {
     @State private var isSearching = false
     @State private var searchError: String?
     @State private var isListening = false  // Shows user that camera is actively scanning
-    @State private var flashlightOn = false
     
     // MARK: - UI Configuration
     
@@ -30,32 +28,6 @@ struct ScanView: View {
                 handleRecognizedText(recognizedText)
             }
             .ignoresSafeArea()
-            
-            // Flashlight Button - top left
-            VStack {
-                HStack {
-                    Button(action: {
-                        flashlightOn.toggle()
-                        toggleFlashlight(flashlightOn)
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 50, height: 50)
-                            
-                            Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
-                                .font(.system(size: 22))
-                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
-                        }
-                    }
-                    .padding(.leading, 20)
-                    .padding(.top, 50)
-                    
-                    Spacer()
-                }
-                
-                Spacer()
-            }
             
             // Center Button UI
             VStack {
@@ -521,34 +493,6 @@ struct ScanView: View {
         }
         
         UIApplication.shared.open(url)
-    }
-    
-    /// Toggle device flashlight/torch
-    private func toggleFlashlight(_ on: Bool) {
-        Task {
-            guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else {
-                print("⚠️ Flashlight not available")
-                return
-            }
-            
-            do {
-                try device.lockForConfiguration()
-                
-                if on {
-                    try device.setTorchModeOn(level: 1.0)
-                } else {
-                    device.torchMode = .off
-                }
-                
-                device.unlockForConfiguration()
-                print("✅ Flashlight: \(on ? "ON" : "OFF")")
-            } catch {
-                print("❌ Error toggling flashlight: \(error)")
-                await MainActor.run {
-                    flashlightOn = false  // Reset state on error
-                }
-            }
-        }
     }
 }
 
