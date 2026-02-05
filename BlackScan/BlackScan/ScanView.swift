@@ -230,28 +230,22 @@ struct ScanView: View {
             
             print("✅ Found \(results.count) candidate products from Typesense")
             
-            // Use existing ConfidenceScorer (already tested and working!)
-            let scoredResults = ConfidenceScorer.shared.scoreProducts(
-                candidates: results,
-                classification: classification
+            // TRUST TYPESENSE: All results are relevant, just score them accurately
+            // No gates, no filters - just honest scoring and ranking
+            let scoredResults = scoreProductsSimple(
+                products: results,
+                targetType: analysis.productType,
+                targetForm: analysis.form
             )
             
-            // TWO-STAGE FILTERING:
-            // Stage 1: Product type must be at least 70% (gate)
-            let productTypeFiltered = scoredResults.filter { result in
-                result.breakdown.productTypeScore >= 0.70
-            }
+            // Show top 20 results, no minimum threshold
+            let filteredResults = Array(scoredResults.prefix(20))
             
-            print("📊 After product type filter (70%+): \(productTypeFiltered.count) products")
-            
-            // Stage 2: Overall score 60%+ (very loose)
-            let filteredResults = productTypeFiltered.filter { $0.confidenceScore >= 0.60 }
-            
-            print("📊 After overall confidence filter (60%+): \(filteredResults.count) products")
+            print("📊 Showing top \(filteredResults.count) results (no filtering, just ranking)")
             
             if Env.isDebugMode && !filteredResults.isEmpty {
-                print("🏆 Top 3 matches:")
-                for (index, result) in filteredResults.prefix(3).enumerated() {
+                print("🏆 Top 5 matches:")
+                for (index, result) in filteredResults.prefix(5).enumerated() {
                     print("   \(index + 1). \(result.product.name) - \(result.confidencePercentage)%")
                 }
             }
@@ -273,6 +267,131 @@ struct ScanView: View {
                 scanState = .initial
             }
         }
+    }
+    
+    // MARK: - Simple Accurate Scoring (Trust Typesense)
+    
+    /// Score products accurately based on what matters (no fake base scores)
+    /// Philosophy: Typesense found them, so they're relevant. Just rank them honestly.
+    private func scoreProductsSimple(
+        products: [Product],
+        targetType: String,
+        targetForm: String?
+    ) -> [ScoredProduct] {
+        print("🎯 Scoring \(products.count) products with simple accurate method...")
+        
+        let scored = products.map { product -> ScoredProduct in
+            var score: Double = 0.0
+            
+            let targetLower = targetType.lowercased()
+            let nameLower = product.name.lowercased()
+            
+            // TIER 1: Product NAME match (60% weight)
+            // Most reliable signal - if name says "Hand Sanitizer", it IS one
+            let nameScore: Double
+            if nameLower.contains(targetLower) {
+                // Name contains full target
+                nameScore = 1.0
+                if Env.isDebugMode {
+                    print("   ✅ NAME MATCH: '\(product.name)' contains '\(targetType)' = 100%")
+                }
+            } else {
+                // Check word overlap
+                let targetWords = Set(targetLower.split(separator: " ").map(String.init))
+                let nameWords = Set(nameLower.split(separator: " ").map(String.init))
+                let overlap = targetWords.intersection(nameWords)
+                
+                if overlap.count >= 2 {
+                    // At least 2 words match (e.g., "Hand" + "Sanitizer")
+                    nameScore = 0.80
+                    if Env.isDebugMode {
+                        print("   ✅ NAME PARTIAL: '\(product.name)' has \(overlap.count) words = 80%")
+                    }
+                } else if overlap.count == 1 {
+                    // Only 1 word matches
+                    nameScore = 0.40
+                    if Env.isDebugMode {
+                        print("   ⚠️ NAME WEAK: '\(product.name)' has 1 word = 40%")
+                    }
+                } else {
+                    // No match - but Typesense found it, so give some credit
+                    nameScore = 0.20
+                    if Env.isDebugMode {
+                        print("   ⚠️ NO NAME MATCH: '\(product.name)' = 20%")
+                    }
+                }
+            }
+            score += nameScore * 0.60
+            
+            // TIER 2: Form match (25% weight)
+            let formScore: Double
+            if let targetForm = targetForm, let productForm = product.form {
+                let targetFormLower = targetForm.lowercased()
+                let productFormLower = productForm.lowercased()
+                
+                if targetFormLower == productFormLower {
+                    formScore = 1.0  // Perfect match
+                } else if targetFormLower.contains(productFormLower) || productFormLower.contains(targetFormLower) {
+                    formScore = 0.80  // Partial match (e.g., "gel" in "spray gel")
+                } else if isFormCompatible(targetFormLower, productFormLower) {
+                    formScore = 0.60  // Compatible (e.g., spray/mist)
+                } else {
+                    formScore = 0.30  // Different but not a dealbreaker
+                }
+            } else {
+                formScore = 0.50  // Unknown form = neutral
+            }
+            score += formScore * 0.25
+            
+            // TIER 3: Typesense ranking (15% weight)
+            // Higher in search results = more relevant
+            // (We'd need search position for this, so approximate for now)
+            let searchRankScore = 0.80  // Assume good if Typesense found it
+            score += searchRankScore * 0.15
+            
+            // Final score
+            if Env.isDebugMode {
+                print("   📊 \(product.name): \(Int(score * 100))% (name:\(Int(nameScore * 100))% form:\(Int(formScore * 100))%)")
+            }
+            
+            return ScoredProduct(
+                id: product.id,
+                product: product,
+                confidenceScore: score,
+                breakdown: ScoreBreakdown(
+                    productTypeScore: nameScore,  // Use name score as "product type"
+                    formScore: formScore,
+                    brandScore: 0.80,  // Neutral
+                    ingredientScore: 0.80,  // Neutral
+                    sizeScore: 0.80,  // Neutral
+                    visualScore: 0.80
+                ),
+                explanation: "Name: \(Int(nameScore * 100))%, Form: \(Int(formScore * 100))%"
+            )
+        }
+        
+        // Sort by score (highest first)
+        return scored.sorted { $0.confidenceScore > $1.confidenceScore }
+    }
+    
+    /// Check if two forms are compatible (e.g., spray/mist)
+    private func isFormCompatible(_ form1: String, _ form2: String) -> Bool {
+        let compatibleGroups: [[String]] = [
+            ["spray", "mist", "spritz"],
+            ["gel", "jelly", "gelly"],
+            ["cream", "lotion", "butter"],
+            ["oil", "serum"],
+            ["foam", "mousse"],
+            ["stick", "bar"]
+        ]
+        
+        for group in compatibleGroups {
+            if group.contains(form1) && group.contains(form2) {
+                return true
+            }
+        }
+        
+        return false
     }
     
     // MARK: - Conversion
@@ -468,14 +587,14 @@ struct ScanView: View {
     }
     
     private func confidenceColor(_ confidence: Double) -> Color {
-        if confidence >= 0.80 {
-            return .green
-        } else if confidence >= 0.70 {
-            return Color(red: 0.6, green: 0.8, blue: 0.4) // Light green
+        if confidence >= 0.75 {
+            return .green  // Excellent match (name + form match)
         } else if confidence >= 0.60 {
-            return .orange
+            return Color(red: 0.6, green: 0.8, blue: 0.4) // Light green (name match, form mismatch)
+        } else if confidence >= 0.45 {
+            return .orange  // Decent match (partial name match)
         } else {
-            return .red
+            return .red  // Weak match
         }
     }
 }
