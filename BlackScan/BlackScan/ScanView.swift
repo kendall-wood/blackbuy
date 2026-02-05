@@ -259,11 +259,11 @@ struct ScanView: View {
                     return nil
                 }
                 
-                // Typesense position score (secondary)
+                // Typesense position score (primary ranking signal)
                 let positionScore = 1.0 - (Double(index) / Double(results.count) * 0.20)
                 
-                // Final score: 70% name + 30% position
-                let finalScore = (nameScore * 0.70) + (positionScore * 0.30)
+                // Final score: 30% name + 70% position (Typesense controls ranking!)
+                let finalScore = (nameScore * 0.30) + (positionScore * 0.70)
                 
                 if Env.isDebugMode {
                     print("   ✅ #\(index + 1): \(product.name) = \(Int(finalScore * 100))% (name: \(Int(nameScore * 100))%, position: \(Int(positionScore * 100))%)")
