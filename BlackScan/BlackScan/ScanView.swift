@@ -341,10 +341,10 @@ struct ScanView: View {
     
     private var successResultsContent: some View {
         ScrollView {
-            LazyVStack(spacing: 0) {
+            VStack(spacing: 0) {
                 // Results count with confidence info
                 HStack {
-                    Text("\(scanResults.count) products found")
+                    Text("Showing \(scanResults.count) of \(scanResults.count) products")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -354,50 +354,22 @@ struct ScanView: View {
                     if !scanResults.isEmpty {
                         let avgConfidence = scanResults.reduce(0.0) { $0 + $1.confidenceScore } / Double(scanResults.count)
                         Text("Avg: \(Int(avgConfidence * 100))% match")
-                            .font(.caption)
-                            .fontWeight(.medium)
+                            .font(.subheadline)
                             .foregroundColor(confidenceColor(avgConfidence))
                     }
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
                 
-                // Product grid with confidence scores
+                // Clean product grid - just like shop view
                 ProductCard.createGrid {
                     ForEach(scanResults) { scanResult in
-                        VStack(alignment: .leading, spacing: 8) {
-                            ProductCard(
-                                product: scanResult.product,
-                                onBuyTapped: {
-                                    openProductURL(scanResult.product.productUrl)
-                                }
-                            )
-                            
-                            // Confidence badge
-                            HStack(spacing: 4) {
-                                Circle()
-                                    .fill(confidenceColor(scanResult.confidenceScore))
-                                    .frame(width: 6, height: 6)
-                                
-                                Text("\(scanResult.confidencePercentage)% match")
-                                    .font(.caption2)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(confidenceColor(scanResult.confidenceScore))
-                                
-                                Spacer()
-                                
-                                // Match breakdown on tap
-                                Button(action: {
-                                    // TODO: Show match details sheet
-                                }) {
-                                    Text("Details")
-                                        .font(.caption2)
-                                        .foregroundColor(.blue)
-                                }
+                        ProductCard(
+                            product: scanResult.product,
+                            onBuyTapped: {
+                                openProductURL(scanResult.product.productUrl)
                             }
-                            .padding(.horizontal, 12)
-                            .padding(.bottom, 4)
-                        }
+                        )
                     }
                 }
                 .padding(.bottom, 20)
