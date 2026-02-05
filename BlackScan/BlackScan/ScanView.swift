@@ -230,21 +230,43 @@ struct ScanView: View {
             
             print("✅ Found \(results.count) candidate products from Typesense")
             
-            // GIVE TYPESENSE THE REINS: Use their ranking with minimal adjustments
-            // Score = 90% Typesense position + 10% name boost
-            let scoredResults = results.enumerated().map { (index, product) -> ScoredProduct in
-                // Typesense position score: earlier = better (100% → 70%)
-                let positionScore = 1.0 - (Double(index) / Double(results.count) * 0.30)
-                
-                // Small name boost if exact match (max 10%)
+            // NAME IS PRIMARY GATE: Filter by name first, then use Typesense ranking
+            let targetLower = analysis.productType.lowercased()
+            let targetWords = Set(targetLower.split(separator: " ").map(String.init))
+            
+            let scoredResults = results.enumerated().compactMap { (index, product) -> ScoredProduct? in
                 let nameLower = product.name.lowercased()
-                let targetLower = analysis.productType.lowercased()
-                let nameBoost = nameLower.contains(targetLower) ? 0.10 : 0.0
+                let nameWords = Set(nameLower.split(separator: " ").map(String.init))
                 
-                let finalScore = min(positionScore + nameBoost, 1.0)
+                // GATE: Calculate name match score
+                let nameScore: Double
+                let overlap = targetWords.intersection(nameWords)
+                
+                if nameLower.contains(targetLower) {
+                    // Perfect: name contains full target ("Hand Sanitizer")
+                    nameScore = 1.0
+                } else if overlap.count >= 2 {
+                    // Good: at least 2 words match
+                    nameScore = 0.80
+                } else if overlap.count == 1 {
+                    // Weak: only 1 word matches
+                    nameScore = 0.40
+                } else {
+                    // No match: skip this product entirely
+                    if Env.isDebugMode {
+                        print("   ❌ FILTERED OUT: '\(product.name)' - no name match")
+                    }
+                    return nil
+                }
+                
+                // Typesense position score (secondary)
+                let positionScore = 1.0 - (Double(index) / Double(results.count) * 0.20)
+                
+                // Final score: 70% name + 30% position
+                let finalScore = (nameScore * 0.70) + (positionScore * 0.30)
                 
                 if Env.isDebugMode {
-                    print("   #\(index + 1): \(product.name) = \(Int(finalScore * 100))% (position: \(Int(positionScore * 100))%, boost: \(Int(nameBoost * 100))%)")
+                    print("   ✅ #\(index + 1): \(product.name) = \(Int(finalScore * 100))% (name: \(Int(nameScore * 100))%, position: \(Int(positionScore * 100))%)")
                 }
                 
                 return ScoredProduct(
@@ -252,21 +274,22 @@ struct ScanView: View {
                     product: product,
                     confidenceScore: finalScore,
                     breakdown: ScoreBreakdown(
-                        productTypeScore: positionScore,
-                        formScore: 0.85,
+                        productTypeScore: nameScore,
+                        formScore: positionScore,
                         brandScore: 0.85,
                         ingredientScore: 0.85,
                         sizeScore: 0.85,
                         visualScore: 0.85
                     ),
-                    explanation: "Typesense rank #\(index + 1), score: \(Int(finalScore * 100))%"
+                    explanation: "Name: \(Int(nameScore * 100))%, Position: \(Int(positionScore * 100))%"
                 )
             }
             
-            // Show top 20, in Typesense order with minimal re-ranking
+            // Sort by score and show top 20
             let filteredResults = Array(scoredResults.sorted { $0.confidenceScore > $1.confidenceScore }.prefix(20))
             
-            print("📊 Showing top \(filteredResults.count) results (Typesense order + name boost)")
+            print("📊 After name filter: \(scoredResults.count) products (filtered from \(results.count))")
+            print("📊 Showing top \(filteredResults.count) results")
             
             if Env.isDebugMode && !filteredResults.isEmpty {
                 print("🏆 Top 5 matches:")
