@@ -165,10 +165,7 @@ struct ProductDetailView: View {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
                                     ForEach(similarProducts) { similarProduct in
-                                        NavigationLink(destination: ProductDetailView(product: similarProduct)) {
-                                            SimilarProductCard(product: similarProduct)
-                                        }
-                                        .buttonStyle(PlainButtonStyle())
+                                        SimilarProductCardWrapper(product: similarProduct)
                                     }
                                 }
                                 .padding(.horizontal, 24)
@@ -303,6 +300,29 @@ struct CategoryChip: View {
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(isPrimary ? Color.clear : Color.black.opacity(0.15), lineWidth: 0.5)
             )
+    }
+}
+
+// MARK: - Similar Product Card Wrapper
+
+struct SimilarProductCardWrapper: View {
+    let product: Product
+    @State private var isNavigating = false
+    
+    var body: some View {
+        ZStack {
+            NavigationLink(destination: ProductDetailView(product: product), isActive: $isNavigating) {
+                EmptyView()
+            }
+            .opacity(0)
+            
+            Button(action: {
+                isNavigating = true
+            }) {
+                SimilarProductCard(product: product)
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
     }
 }
 
