@@ -4,6 +4,10 @@ import Foundation
 /// Extracts product type, form, brand, ingredients, and size from OCR text
 class AdvancedClassifier {
     
+    // MARK: - Singleton
+    
+    static let shared = AdvancedClassifier()
+    
     // MARK: - Dependencies
     
     private let productTaxonomy: ProductTaxonomy

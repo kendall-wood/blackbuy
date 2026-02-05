@@ -140,7 +140,7 @@ struct ScanView: View {
                     searchingContent
                 } else if let error = searchError {
                     errorContent(error)
-                } else if searchResults.isEmpty {
+                } else if scanResults.isEmpty {
                     emptyResultsContent
                 } else {
                     successResultsContent
@@ -244,8 +244,8 @@ struct ScanView: View {
                 .padding(.horizontal)
             
             Button("Try Again") {
-                if let lastResult = lastClassificationResult {
-                    performSearch(with: lastResult)
+                if let lastClass = lastClassification {
+                    performSearch(with: lastClass)
                 }
             }
             .buttonStyle(.borderedProminent)
