@@ -107,23 +107,24 @@ struct ProductDetailView: View {
                     .padding(.bottom, 24)
                     
                     // Product Info Section
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 6) {
                         // Company name
                         Text(product.company)
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(Color(.systemGray))
                         
                         // Product name
                         Text(product.name)
-                            .font(.system(size: 24, weight: .semibold))
+                            .font(.system(size: 22, weight: .bold))
                             .foregroundColor(.black)
                             .lineLimit(3)
+                            .lineSpacing(2)
                         
                         // Price
                         Text(product.formattedPrice)
-                            .font(.system(size: 32, weight: .medium))
+                            .font(.system(size: 28, weight: .semibold))
                             .foregroundColor(.black)
-                            .padding(.top, 4)
+                            .padding(.top, 8)
                         
                         // Categories label
                         Text("Categories")
@@ -167,7 +168,7 @@ struct ProductDetailView: View {
                                         NavigationLink(destination: ProductDetailView(product: similarProduct)) {
                                             SimilarProductCard(product: similarProduct)
                                         }
-                                        .buttonStyle(.plain)
+                                        .buttonStyle(PlainButtonStyle())
                                     }
                                 }
                                 .padding(.horizontal, 24)
@@ -311,53 +312,67 @@ struct SimilarProductCard: View {
     let product: Product
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             // Product Image
-            AsyncImage(url: URL(string: product.imageUrl)) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                ZStack {
+            AsyncImage(url: URL(string: product.imageUrl)) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                case .failure(_):
+                    ZStack {
+                        Color(.systemGray6)
+                        Image(systemName: "photo")
+                            .font(.system(size: 24))
+                            .foregroundColor(Color(.systemGray))
+                    }
+                case .empty:
+                    ZStack {
+                        Color(.systemGray6)
+                        ProgressView()
+                    }
+                @unknown default:
                     Color(.systemGray6)
-                    
-                    Image(systemName: "photo")
-                        .font(.system(size: 24))
-                        .foregroundColor(Color(.systemGray))
                 }
             }
-            .aspectRatio(1, contentMode: .fill)
+            .frame(width: 140, height: 140)
             .clipped()
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .cornerRadius(12)
             
             // Product Details
             VStack(alignment: .leading, spacing: 4) {
                 // Product Name (2 lines max)
                 Text(product.name)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.black)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
                 
                 // Company Name
                 Text(product.company)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(Color(.systemGray))
                     .lineLimit(1)
                 
                 // Price
                 Text(product.formattedPrice)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 15, weight: .medium))
                     .foregroundColor(.black)
                     .padding(.top, 2)
             }
-            .padding(.horizontal, 8)
-            .padding(.bottom, 8)
+            .padding(.horizontal, 10)
+            .padding(.bottom, 10)
         }
         .frame(width: 140)
         .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.black.opacity(0.05), lineWidth: 0.5)
+        )
     }
 }
 
