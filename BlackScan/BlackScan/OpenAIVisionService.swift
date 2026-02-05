@@ -38,8 +38,9 @@ class OpenAIVisionService {
     /// - Parameter image: UIImage of the product label
     /// - Returns: ProductAnalysis with extracted data
     func analyzeProduct(image: UIImage) async throws -> ProductAnalysis {
-        // Compress image to base64
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        // Compress image to base64 (0.5 = good balance of quality vs speed)
+        // Lower quality = faster upload, cheaper API costs, still accurate for text
+        guard let imageData = image.jpegData(compressionQuality: 0.5) else {
             throw VisionError.imageCompressionFailed
         }
         
