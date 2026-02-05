@@ -108,21 +108,21 @@ struct ProductDetailView: View {
                     
                     // Product Info Section
                     VStack(alignment: .leading, spacing: 8) {
-                        // Company name (light grey)
+                        // Company name
                         Text(product.company)
-                            .font(.system(size: 15, weight: .regular))
-                            .foregroundColor(Color(.systemGray2))
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.secondary)
                         
-                        // Product name (black, prominent)
+                        // Product name
                         Text(product.name)
-                            .font(.system(size: 24, weight: .medium))
-                            .foregroundColor(.black)
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundColor(.primary)
                             .lineLimit(3)
                         
-                        // Price (black, large)
+                        // Price
                         Text(product.formattedPrice)
                             .font(.system(size: 32, weight: .medium))
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                             .padding(.top, 4)
                         
                         // Categories label
@@ -311,41 +311,53 @@ struct SimilarProductCard: View {
     let product: Product
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             // Product Image
-            CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
+            AsyncImage(url: URL(string: product.imageUrl)) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                Color(.systemGray6)
-                    .overlay(
-                        ProgressView()
-                            .tint(Color(.systemGray))
-                    )
+                ZStack {
+                    Color(.systemGray6)
+                    
+                    Image(systemName: "photo")
+                        .font(.system(size: 24))
+                        .foregroundColor(.secondary)
+                }
             }
-            .frame(width: 140, height: 140)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .aspectRatio(1, contentMode: .fill)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             
-            // Product Name
-            Text(product.name)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.black)
-                .lineLimit(2)
-                .frame(width: 140, alignment: .leading)
-            
-            // Company
-            Text(product.company)
-                .font(.system(size: 11, weight: .regular))
-                .foregroundColor(Color(.systemGray))
-                .lineLimit(1)
-            
-            // Price
-            Text(product.formattedPrice)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.black)
+            // Product Details
+            VStack(alignment: .leading, spacing: 4) {
+                // Product Name (2 lines max)
+                Text(product.name)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                
+                // Company Name
+                Text(product.company)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                
+                // Price
+                Text(product.formattedPrice)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.primary)
+                    .padding(.top, 2)
+            }
+            .padding(.horizontal, 8)
+            .padding(.bottom, 8)
         }
         .frame(width: 140)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
 }
 
