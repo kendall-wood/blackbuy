@@ -78,7 +78,6 @@ struct LiveScannerView: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator(
             debounceDelay: debounceDelay,
-            isActive: isActive,
             onRecognized: onRecognized
         )
     }
@@ -91,6 +90,7 @@ struct LiveScannerView: UIViewControllerRepresentable {
         
         var onRecognized: (String) -> Void
         var debounceDelay: TimeInterval
+        var isActive: Bool = true  // Only process when active (updated by parent)
         
         // Debouncing state
         private var recognizedTexts: Set<String> = []
