@@ -461,8 +461,21 @@ struct ScanView: View {
                     classification: classification
                 )
                 
-                // Step 3: Filter by minimum confidence (90%) and take top 20
-                let minConfidence = 0.90
+                if Env.isDebugMode {
+                    print("📊 Score Distribution:")
+                    for (index, result) in scoredResults.prefix(10).enumerated() {
+                        print("   \(index + 1). \(result.product.name.prefix(50))")
+                        print("      Total: \(result.confidencePercentage)%")
+                        print("      Product Type: \(Int(result.breakdown.productTypeScore * 100))%")
+                        print("      Form: \(Int(result.breakdown.formScore * 100))%")
+                        print("      Brand: \(Int(result.breakdown.brandScore * 100))%")
+                        print("      Ingredients: \(Int(result.breakdown.ingredientScore * 100))%")
+                        print("      Size: \(Int(result.breakdown.sizeScore * 100))%")
+                    }
+                }
+                
+                // Step 3: Filter by minimum confidence (85% for now) and take top 20
+                let minConfidence = 0.85
                 let qualityResults = scoredResults.filter { $0.confidenceScore >= minConfidence }
                 let topResults = Array(qualityResults.prefix(20))
                 
