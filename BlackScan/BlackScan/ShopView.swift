@@ -26,15 +26,18 @@ struct ShopView: View {
     @State private var showSearchDropdown = false
     
     private let categories = [
-        "Baby Accessories",
-        "Bags & Handbags",
-        "Bath & Body",
-        "Beauty Tools",
-        "Body Care",
-        "Fragrance",
         "Hair Care",
+        "Skincare",
+        "Body Care",
         "Makeup",
-        "Skincare"
+        "Fragrance",
+        "Lip Care",
+        "Men's Care",
+        "Accessories",
+        "Clothing",
+        "Baby & Kids",
+        "Home Care",
+        "Health & Wellness"
     ]
     
     var body: some View {
