@@ -188,7 +188,7 @@ class ConfidenceScorer {
         against target: FormResult?
     ) -> Double {
         guard let form = form, let target = target else {
-            return 0.5  // Unknown form = neutral score
+            return 0.85  // Unknown form = neutral/positive (don't penalize)
         }
         
         let normalizedForm = formTaxonomy.normalize(form) ?? form
@@ -201,16 +201,16 @@ class ConfidenceScorer {
         
         // Compatible forms
         if formTaxonomy.areCompatible(normalizedForm, normalizedTarget) {
-            return 0.7
+            return 0.90
         }
         
         // Generic/other
         if normalizedForm == "other" || normalizedTarget == "other" {
-            return 0.5
+            return 0.85
         }
         
-        // Incompatible
-        return 0.3
+        // Incompatible - still decent if product type matches
+        return 0.75
     }
     
     /// TIER 3: Score brand category association
@@ -264,17 +264,20 @@ class ConfidenceScorer {
         against size: ProductSize?
     ) -> Double {
         guard let scannedSize = size else {
-            return 0.5  // No size detected = neutral
+            return 0.8  // No size detected = neutral/positive (don't penalize)
         }
         
         // Try to extract size from product name
         let productSize = sizeExtractor.extractSize(product.name)
         
         guard let productSize = productSize else {
-            return 0.5  // Product has no size info
+            return 0.8  // Product has no size info = neutral/positive
         }
         
-        return sizeExtractor.scoreCompatibility(scannedSize, productSize)
+        // Get compatibility score from size extractor (should return 0.7-1.0 range)
+        let baseScore = sizeExtractor.scoreCompatibility(scannedSize, productSize)
+        // Ensure minimum of 0.7 even for mismatches
+        return max(baseScore, 0.7)
     }
     
     // MARK: - Explanation Builder
