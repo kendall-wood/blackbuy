@@ -213,10 +213,10 @@ struct ProductDetailView: View {
             }
             .background(DS.cardBackground)
             
-            // Custom Header (back button and logo)
+            // Fixed Header (pinned at top, background extends into safe area)
             VStack(spacing: 0) {
-                Spacer().frame(height: 10)
                 AppHeader(centerContent: .logo, onBack: { dismiss() })
+                    .background(DS.cardBackground.ignoresSafeArea(edges: .top))
                 Spacer()
             }
             
