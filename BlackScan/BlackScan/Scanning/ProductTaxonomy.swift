@@ -117,30 +117,47 @@ class ProductTaxonomy {
     }
     
     /// Find best match from OCR text using keyword detection
+    /// Uses word-boundary matching for single-word terms to prevent false positives
+    /// (e.g., "ring" inside "covering" no longer matches Jewelry)
     /// - Parameter text: OCR text to analyze
     /// - Returns: Tuple of (ProductType, confidence) or nil
     func findBestMatch(_ text: String) -> (type: ProductType, confidence: Double)? {
         let lowercased = text.lowercased()
+        // Build a set of individual words for boundary-safe single-word matching
+        let wordSet = Set(lowercased.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init))
         var bestMatch: (type: ProductType, score: Int)?
+        
+        /// Check if a term appears in the text using word-boundary-safe matching.
+        /// Single words must be standalone tokens; multi-word phrases use substring matching.
+        func textContains(_ term: String) -> Bool {
+            let termLower = term.lowercased()
+            if termLower.contains(" ") {
+                // Multi-word phrase — substring match is fine (low false-positive risk)
+                return lowercased.contains(termLower)
+            } else {
+                // Single word — must be a standalone word, not a substring of another
+                return wordSet.contains(termLower)
+            }
+        }
         
         for type in types {
             var score = 0
             
             // Check keywords
             for keyword in type.keywords {
-                if lowercased.contains(keyword.lowercased()) {
+                if textContains(keyword) {
                     score += 2  // Keyword match
                 }
             }
             
             // Check canonical name
-            if lowercased.contains(type.canonical.lowercased()) {
+            if textContains(type.canonical) {
                 score += 3  // Direct match
             }
             
             // Check variations
             for variation in type.variations {
-                if lowercased.contains(variation.lowercased()) {
+                if textContains(variation) {
                     score += 2
                 }
             }
@@ -443,12 +460,32 @@ class ProductTaxonomy {
             
             ProductType(
                 canonical: "Foundation",
-                variations: ["foundation", "liquid foundation", "foundation cream"],
-                synonyms: ["Liquid Foundation", "Face Foundation"],
+                variations: ["foundation", "liquid foundation", "foundation cream", "powder foundation", "foundation powder"],
+                synonyms: ["Liquid Foundation", "Face Foundation", "Powder Foundation"],
                 category: "Makeup",
                 subcategory: "Face",
                 typicalForms: ["liquid", "cream", "powder"],
                 keywords: ["foundation", "face", "base"]
+            ),
+            
+            ProductType(
+                canonical: "Face Powder",
+                variations: ["face powder", "setting powder", "pressed powder", "loose powder", "translucent powder", "finishing powder", "compact powder"],
+                synonyms: ["Setting Powder", "Pressed Powder", "Finishing Powder"],
+                category: "Makeup",
+                subcategory: "Face",
+                typicalForms: ["powder"],
+                keywords: ["powder", "setting", "pressed", "loose", "translucent", "finishing", "compact"]
+            ),
+            
+            ProductType(
+                canonical: "Concealer",
+                variations: ["concealer", "liquid concealer", "concealer stick", "color corrector"],
+                synonyms: ["Color Corrector", "Blemish Concealer"],
+                category: "Makeup",
+                subcategory: "Face",
+                typicalForms: ["liquid", "cream", "stick"],
+                keywords: ["concealer", "color", "corrector", "blemish"]
             ),
             
             ProductType(

@@ -224,13 +224,35 @@ class HybridScanService {
     
     // MARK: - Post-Analysis Validation
     
+    /// Map of broad/generic terms GPT might return to their actual taxonomy category names.
+    /// When GPT says "Makeup" we need to narrow within that category, not search globally.
+    private static let broadTermToCategory: [String: String] = [
+        "makeup": "Makeup",
+        "cosmetics": "Makeup",
+        "beauty": "Makeup",
+        "beauty products": "Makeup",
+        "skincare": "Skincare",
+        "skin care": "Skincare",
+        "hair care": "Hair Care",
+        "hair products": "Hair Care",
+        "body care": "Body Care",
+        "personal care": "Body Care",
+        "fragrance": "Fragrance",
+        "men's care": "Men's Care",
+        "men's grooming": "Men's Care",
+        "lip care": "Lip Care",
+        "home care": "Home Care",
+        "clothing": "Clothing",
+        "accessories": "Accessories",
+    ]
+    
     /// Validate and normalize GPT's product analysis against our ProductTaxonomy.
-    /// Catches cases where GPT returns ingredients, marketing terms, or non-standard types.
+    /// Catches cases where GPT returns ingredients, marketing terms, broad categories, or non-standard types.
     /// Non-destructive: only modifies the result if we find a better match.
     private func validateAndNormalizeAnalysis(_ analysis: ProductAnalysis) -> ProductAnalysis {
         let taxonomy = ProductTaxonomy.shared
         
-        // Check if GPT's product type already maps to a known taxonomy entry
+        // Step 1: Check if GPT's product type is already a valid taxonomy entry
         if let normalized = taxonomy.normalize(analysis.productType) {
             // Valid product type — apply canonical name if different
             if normalized.lowercased() != analysis.productType.lowercased() {
@@ -248,10 +270,35 @@ class HybridScanService {
             return analysis // Already canonical
         }
         
-        // GPT returned something not in our taxonomy — attempt correction
         Log.debug("Taxonomy: '\(analysis.productType)' not found, attempting correction", category: .scan)
         
-        // Strategy 1: Find best match from the full raw text (most context)
+        // Step 2: Check if GPT returned a broad CATEGORY instead of a specific product type
+        // (e.g., "Makeup" instead of "Foundation", "Skincare" instead of "Moisturizer")
+        if let categoryName = resolveBroadTermToCategory(analysis.productType) {
+            let typesInCategory = taxonomy.getTypesInCategory(categoryName)
+            if !typesInCategory.isEmpty {
+                Log.debug("Taxonomy: '\(analysis.productType)' is category '\(categoryName)', narrowing among \(typesInCategory.count) types", category: .scan)
+                
+                if let narrowed = narrowWithinCategory(
+                    types: typesInCategory,
+                    rawText: analysis.rawText,
+                    form: analysis.form
+                ) {
+                    Log.debug("Taxonomy category narrowed: '\(analysis.productType)' → '\(narrowed.canonical)' (form: \(analysis.form ?? "none"))", category: .scan)
+                    return ProductAnalysis(
+                        brand: analysis.brand,
+                        productType: narrowed.canonical,
+                        form: analysis.form ?? narrowed.typicalForms.first,
+                        size: analysis.size,
+                        ingredients: analysis.ingredients,
+                        confidence: analysis.confidence * 0.85,
+                        rawText: analysis.rawText
+                    )
+                }
+            }
+        }
+        
+        // Step 3: General fallback — find best match from the full raw text
         if let match = taxonomy.findBestMatch(analysis.rawText), match.confidence >= 0.4 {
             Log.debug("Taxonomy correction (raw text): '\(analysis.productType)' → '\(match.type.canonical)' (\(Int(match.confidence * 100))%)", category: .scan)
             return ProductAnalysis(
@@ -265,7 +312,7 @@ class HybridScanService {
             )
         }
         
-        // Strategy 2: Find match from just the product type string
+        // Step 4: Try from just the product type string itself
         if let match = taxonomy.findBestMatch(analysis.productType), match.confidence >= 0.3 {
             Log.debug("Taxonomy correction (type text): '\(analysis.productType)' → '\(match.type.canonical)'", category: .scan)
             return ProductAnalysis(
@@ -282,6 +329,79 @@ class HybridScanService {
         // No taxonomy match found — use GPT's output as-is
         Log.debug("Taxonomy: no match for '\(analysis.productType)', using as-is", category: .scan)
         return analysis
+    }
+    
+    /// Resolve a broad/generic term to an actual taxonomy category name
+    private func resolveBroadTermToCategory(_ input: String) -> String? {
+        let lower = input.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Check our mapping of broad terms
+        if let category = Self.broadTermToCategory[lower] {
+            return category
+        }
+        
+        // Also check if it directly matches a category that has types
+        let typesInCategory = ProductTaxonomy.shared.getTypesInCategory(input)
+        if !typesInCategory.isEmpty {
+            return input
+        }
+        
+        return nil
+    }
+    
+    /// Narrow down to a specific product type within a category using raw text and form info.
+    /// Uses word-boundary-safe matching (same approach as ProductTaxonomy.findBestMatch).
+    private func narrowWithinCategory(
+        types: [ProductType],
+        rawText: String,
+        form: String?
+    ) -> ProductType? {
+        let rawLower = rawText.lowercased()
+        let wordSet = Set(rawLower.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init))
+        
+        var bestType: ProductType?
+        var bestScore = 0
+        
+        /// Word-boundary-safe check: single words must be standalone tokens
+        func textContains(_ term: String) -> Bool {
+            let termLower = term.lowercased()
+            if termLower.contains(" ") {
+                return rawLower.contains(termLower)
+            } else {
+                return wordSet.contains(termLower)
+            }
+        }
+        
+        for type in types {
+            var score = 0
+            
+            // Keyword matches
+            for keyword in type.keywords {
+                if textContains(keyword) { score += 2 }
+            }
+            
+            // Canonical name match
+            if textContains(type.canonical) { score += 3 }
+            
+            // Variation matches
+            for variation in type.variations {
+                if textContains(variation) { score += 2 }
+            }
+            
+            // Form match bonus — if GPT detected a form and this type supports it, boost it
+            if let formLower = form?.lowercased(),
+               type.typicalForms.contains(formLower) {
+                score += 2
+            }
+            
+            if score > bestScore {
+                bestScore = score
+                bestType = type
+            }
+        }
+        
+        // Require at least one real match (score >= 2)
+        return bestScore >= 2 ? bestType : nil
     }
     
     // MARK: - Error Types

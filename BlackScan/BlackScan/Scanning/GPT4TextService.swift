@@ -120,17 +120,19 @@ class GPT4TextService {
         • Skin: Facial Cleanser, Face Serum, Face Cream, Face Mask, Face Oil, Toner, Eye Cream, Moisturizer, Facial Mist, Facial Scrub, Sunscreen
         • Body: Hand Sanitizer, Body Butter, Body Oil, Body Scrub, Body Wash, Body Lotion, Bar Soap, Deodorant, Body Balm, Hand Soap, Liquid Soap, Body Gloss, Sugar Scrub
         • Lips: Lip Balm, Lip Gloss, Lipstick, Lip Scrub, Liquid Lipstick
-        • Makeup: Foundation, Mascara, Eyeshadow, Eyeshadow Palette, Blush, Highlighter, Bronzer, Primer, Eyeliner, Brow Gel, Nail Polish, Gel Polish, Concealer, False Eyelashes
+        • Makeup: Foundation, Face Powder, Concealer, Mascara, Eyeshadow, Eyeshadow Palette, Blush, Highlighter, Bronzer, Primer, Eyeliner, Brow Gel, Nail Polish, Gel Polish, False Eyelashes
         • Fragrance: Perfume, Eau de Parfum, Perfume Oil
         • Men: Beard Oil, Beard Balm, Beard Conditioner
         • Other: Scented Candle, Vitamins, Dietary Supplements, Tea, Cleaning Products
         
         CRITICAL RULES:
-        1. "product_type" is the PRODUCT CATEGORY, never an ingredient or marketing claim.
+        1. "product_type" MUST be a SPECIFIC product type from the list above, never an ingredient or broad category.
            ✓ "Coconut Water Curl Gel" → product_type: "Hair Gel"
            ✓ "Shea Butter Hand Cream" → product_type: "Body Butter"  
            ✓ "Vitamin E Body Lotion" → product_type: "Body Lotion"
+           ✓ Foundation powder compact → product_type: "Foundation" or "Face Powder"
            ✗ NEVER return an ingredient (coconut water, shea butter, aloe vera) as product_type
+           ✗ NEVER return a broad category like "Makeup", "Skincare", "Hair Care", "Beauty" — always be specific
         
         2. OCR may have errors — use context to infer correct words.
            Example: "COMANT" → likely "GARNIER" based on surrounding text
