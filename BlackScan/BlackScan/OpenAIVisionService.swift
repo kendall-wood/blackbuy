@@ -133,7 +133,7 @@ class OpenAIVisionService {
         VALID PRODUCT TYPES — you MUST pick the closest match from this list:
         • Hair: Shampoo, Conditioner, Leave-In Conditioner, Co-Wash, Deep Conditioner, Protein Treatment, Detangler, Hair Rinse, Hair Oil, Castor Oil, Hair Mask, Hair Cream, Hair Gel, Hair Butter, Edge Control, Hair Serum, Curl Cream, Styling Gel, Hair Balm
         • Skin: Facial Cleanser, Micellar Water, Makeup Remover, Face Serum, Face Cream, Face Mask, Face Oil, Toner, Eye Cream, Moisturizer, Facial Mist, Facial Scrub, Sunscreen, Cleansing Wipes
-        • Body: Hand Sanitizer, Body Butter, Body Oil, Essential Oil, Body Mist, Body Scrub, Body Wash, Intimate Wash, Body Lotion, Bar Soap, Deodorant, Body Balm, Hand Soap, Liquid Soap, Body Gloss, Sugar Scrub, Body Powder
+        • Body: Hand Sanitizer, Body Butter, Body Oil, Essential Oil, Body Mist, Body Scrub, Body Wash, Intimate Wash, Body Lotion, Hand Lotion, Hand Cream, Bar Soap, Deodorant, Body Balm, Hand Soap, Liquid Soap, Body Gloss, Sugar Scrub, Body Powder
         • Lips: Lip Balm, Lip Gloss, Lipstick, Lip Scrub, Liquid Lipstick
         • Makeup: Foundation, Setting Powder, Face Powder, Concealer, Mascara, Eyeshadow, Eyeshadow Palette, Blush, Highlighter, Bronzer, Primer, Eyeliner, Brow Gel, Nail Polish, Gel Polish, False Eyelashes, Cuticle Oil
         • Fragrance: Perfume, Eau de Parfum, Perfume Oil
@@ -152,7 +152,15 @@ class OpenAIVisionService {
            ✗ NEVER return an ingredient (coconut water, shea butter, aloe vera) as product_type
            ✗ NEVER return a broad category like "Makeup", "Skincare", "Hair Care", "Beauty", "Cleaning Products", "Other" — always be specific
         
-        2. OIL PRODUCTS — distinguish between oils that ARE the product vs oils used as ingredients:
+        2. HAND vs BODY PRODUCTS — pay close attention to whether the label says "hand" or "body":
+           ✓ "Hand Lotion" or "Hand Cream" → product_type: "Hand Lotion" (specifically for hands)
+           ✓ "Body Lotion" or "Moisturizing Lotion" → product_type: "Body Lotion" (for full body)
+           ✓ "Hand Soap" or "Foaming Hand Soap" → product_type: "Hand Soap" (specifically for hands)
+           ✓ "Body Wash" or "Shower Gel" → product_type: "Body Wash" (for full body)
+           ✓ "Hand & Body Lotion" → product_type: "Hand Lotion" (hand is primary use)
+           Rule: If the label says "hand" anywhere, prefer the Hand-specific type. "Body" products are for full-body use. These are DIFFERENT product types and must NOT be confused.
+        
+        3. OIL PRODUCTS — distinguish between oils that ARE the product vs oils used as ingredients:
            ✓ "Jamaican Black Castor Oil" → product_type: "Castor Oil" (the oil itself IS the product)
            ✓ "Pure Tea Tree Oil" → product_type: "Essential Oil" (a standalone essential oil)
            ✓ "Hair Growth Oil with Castor Oil & Argan" → product_type: "Hair Oil" (a blended hair oil; castor/argan are just ingredients)
@@ -160,13 +168,13 @@ class OpenAIVisionService {
            ✓ "Argan Oil Face Serum" → product_type: "Face Oil" (argan is an ingredient, the product is a face oil)
            Rule: If the product is JUST a single named oil (castor, tea tree, argan, jojoba, etc.) with no other purpose, use "Castor Oil" or "Essential Oil". If it's a formulated product FOR hair/body/face that happens to contain oils, use "Hair Oil", "Body Oil", or "Face Oil".
         
-        3. "form" is how the product is physically dispensed — SEPARATE from product_type.
+        4. "form" is how the product is physically dispensed — SEPARATE from product_type.
         
-        4. "ingredients" are KEY ingredients listed (like "coconut water", "shea butter", "vitamin E")
+        5. "ingredients" are KEY ingredients listed (like "coconut water", "shea butter", "vitamin E")
         
-        5. "confidence" should be 0.0-1.0 based on label clarity and your certainty
+        6. "confidence" should be 0.0-1.0 based on label clarity and your certainty
         
-        6. Extract ALL visible text into "raw_text"
+        7. Extract ALL visible text into "raw_text"
         
         Return ONLY the JSON, no other text.
         """

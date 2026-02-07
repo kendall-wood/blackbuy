@@ -695,10 +695,15 @@ struct ScanView: View {
                 
                 // GATE 2: Filter out use-case mismatches (e.g., feminine wash != hand wash)
                 let useCaseMismatches: [(scanned: [String], wrong: [String])] = [
-                    (scanned: ["hand", "wash"], wrong: ["feminine", "vaginal", "intimate", "yoni"]),
+                    (scanned: ["hand", "wash"], wrong: ["feminine", "vaginal", "intimate", "yoni", "body"]),
+                    (scanned: ["hand", "soap"], wrong: ["feminine", "vaginal", "intimate", "yoni", "body"]),
                     (scanned: ["hand", "sanitizer"], wrong: ["feminine", "vaginal", "intimate"]),
+                    (scanned: ["hand", "lotion"], wrong: ["body", "feminine", "vaginal", "intimate"]),
+                    (scanned: ["hand", "cream"], wrong: ["body", "feminine", "vaginal", "intimate"]),
+                    (scanned: ["body", "wash"], wrong: ["hand", "facial", "face", "dish"]),
+                    (scanned: ["body", "lotion"], wrong: ["hand", "facial", "face"]),
+                    (scanned: ["body", "soap"], wrong: ["hand", "dish", "facial"]),
                     (scanned: ["face", "facial"], wrong: ["vaginal", "intimate", "yoni"]),
-                    (scanned: ["body", "lotion"], wrong: ["facial", "face"]),
                     (scanned: ["shampoo"], wrong: ["conditioner"]),
                     (scanned: ["conditioner"], wrong: ["shampoo"])
                 ]
@@ -710,6 +715,35 @@ struct ScanView: View {
                     if hasScannedWords && hasWrongWords {
                         Log.debug("FILTERED: '\(product.name)' - use-case mismatch", category: .scan)
                         return nil
+                    }
+                }
+                
+                // GATE 2B: Body-area qualifier mismatch (hand vs body vs face)
+                // If the scanned product explicitly says "hand" or "body", filter out products
+                // with the wrong area qualifier even if they share a descriptor like "lotion" or "soap"
+                let bodyAreaGroups: [[String]] = [
+                    ["hand"],
+                    ["body"],
+                    ["face", "facial"],
+                ]
+                let areaSharedDescriptors: Set<String> = ["lotion", "cream", "soap", "wash", "moisturizer", "scrub", "oil", "balm", "butter"]
+                
+                let targetHasAreaDescriptor = !areaSharedDescriptors.intersection(targetWords).isEmpty
+                if targetHasAreaDescriptor {
+                    for areaGroup in bodyAreaGroups {
+                        let targetHasArea = areaGroup.contains(where: { targetWords.contains($0) })
+                        if targetHasArea {
+                            // Target says e.g. "hand lotion" — reject products from other areas
+                            for otherGroup in bodyAreaGroups where otherGroup != areaGroup {
+                                let productHasOtherArea = otherGroup.contains(where: { nameWords.contains($0) || productTypeLower.contains($0) })
+                                let productHasSameArea = areaGroup.contains(where: { nameWords.contains($0) || productTypeLower.contains($0) })
+                                if productHasOtherArea && !productHasSameArea {
+                                    Log.debug("FILTERED: '\(product.name)' - body-area mismatch (target: \(areaGroup), product has: \(otherGroup))", category: .scan)
+                                    return nil
+                                }
+                            }
+                            break
+                        }
                     }
                 }
                 

@@ -516,12 +516,22 @@ class ProductTaxonomy {
             
             ProductType(
                 canonical: "Body Lotion",
-                variations: ["body lotion", "lotion", "moisturizing lotion"],
+                variations: ["body lotion", "moisturizing lotion", "moisturizing body lotion"],
                 synonyms: ["Moisturizing Lotion", "Body Moisturizer"],
                 category: "Body Care",
                 subcategory: "Moisturizers",
                 typicalForms: ["liquid", "cream"],
-                keywords: ["lotion", "body", "moisturizing"]
+                keywords: ["body", "lotion", "moisturizing"]
+            ),
+            
+            ProductType(
+                canonical: "Hand Lotion",
+                variations: ["hand lotion", "hand cream", "hand moisturizer", "hand and body lotion", "hand & body lotion", "moisturizing hand cream"],
+                synonyms: ["Hand Cream", "Hand Moisturizer", "Hand & Body Lotion"],
+                category: "Body Care",
+                subcategory: "Hand Care",
+                typicalForms: ["cream", "liquid"],
+                keywords: ["hand", "lotion", "cream", "moisturizer"]
             ),
             
             ProductType(
@@ -848,12 +858,12 @@ class ProductTaxonomy {
             
             ProductType(
                 canonical: "Hand Soap",
-                variations: ["hand soap", "foaming hand soap", "liquid hand soap"],
-                synonyms: ["Foaming Hand Soap", "Liquid Hand Soap"],
+                variations: ["hand soap", "foaming hand soap", "liquid hand soap", "hand wash", "foaming hand wash", "antibacterial hand soap"],
+                synonyms: ["Foaming Hand Soap", "Liquid Hand Soap", "Hand Wash", "Foaming Hand Wash"],
                 category: "Body Care",
-                subcategory: "Cleansers",
+                subcategory: "Hand Care",
                 typicalForms: ["liquid", "foam"],
-                keywords: ["hand", "soap", "foaming", "liquid"]
+                keywords: ["hand", "soap", "foaming", "wash", "antibacterial"]
             ),
             
             ProductType(

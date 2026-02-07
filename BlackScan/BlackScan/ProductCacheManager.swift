@@ -47,51 +47,73 @@ class ProductCacheManager: ObservableObject {
         loadError = nil
         
         do {
-            // Fetch from multiple random pages to get a diverse product pool
+            // Fetch from 3 random non-overlapping pages for a diverse product pool
             let perPage = Env.maxResultsPerPage
-            let randomPage1 = Int.random(in: 1...10)
-            var randomPage2 = Int.random(in: 1...10)
-            while randomPage2 == randomPage1 { randomPage2 = Int.random(in: 1...10) }
+            var pages: Set<Int> = []
+            while pages.count < 3 {
+                pages.insert(Int.random(in: 1...15))
+            }
+            let pageList = Array(pages)
             
             async let fetch1 = NetworkSecurity.withRetry(maxAttempts: 2) {
-                try await typesenseClient.searchProducts(
+                try await self.typesenseClient.searchProducts(
                     query: "*",
-                    page: randomPage1,
+                    page: pageList[0],
                     perPage: perPage
                 )
             }
             async let fetch2 = NetworkSecurity.withRetry(maxAttempts: 2) {
-                try await typesenseClient.searchProducts(
+                try await self.typesenseClient.searchProducts(
                     query: "*",
-                    page: randomPage2,
+                    page: pageList[1],
+                    perPage: perPage
+                )
+            }
+            async let fetch3 = NetworkSecurity.withRetry(maxAttempts: 2) {
+                try await self.typesenseClient.searchProducts(
+                    query: "*",
+                    page: pageList[2],
                     perPage: perPage
                 )
             }
             
-            let (page1, page2) = try await (fetch1, fetch2)
+            let (page1, page2, page3) = try await (fetch1, fetch2, fetch3)
             
-            // Combine and deduplicate
+            // Combine, shuffle, and deduplicate
             var seen = Set<String>()
             var allProducts: [Product] = []
-            for product in (page1 + page2) {
+            for product in (page1 + page2 + page3).shuffled() {
                 if seen.insert(product.id).inserted {
                     allProducts.append(product)
                 }
             }
             
-            let uniqueCompanies = Array(Set(allProducts.map { $0.company }))
-            let selectedCompanies = uniqueCompanies.shuffled().prefix(12)
+            // --- Carousel: 1 product per brand, pick 12 random brands ---
+            let uniqueCompanies = Array(Set(allProducts.map { $0.company })).shuffled()
+            let selectedCompanies = uniqueCompanies.prefix(12)
             var carousel: [Product] = []
             
             for company in selectedCompanies {
-                if let product = allProducts.first(where: { $0.company == company }) {
+                if let product = allProducts.filter({ $0.company == company }).randomElement() {
                     carousel.append(product)
                 }
             }
             
+            // --- Grid: max 2 products per brand, diverse selection ---
             let carouselIds = Set(carousel.map { $0.id })
-            let remainingProducts = allProducts.filter { !carouselIds.contains($0.id) }
-            let grid = Array(remainingProducts.shuffled().prefix(12))
+            let remainingProducts = allProducts.filter { !carouselIds.contains($0.id) }.shuffled()
+            
+            var grid: [Product] = []
+            var gridCompanyCount: [String: Int] = [:]
+            
+            for product in remainingProducts {
+                let count = gridCompanyCount[product.company, default: 0]
+                if count < 2 {
+                    grid.append(product)
+                    gridCompanyCount[product.company] = count + 1
+                }
+                if grid.count >= 24 { break }
+            }
             
             carouselProducts = carousel.shuffled()
             gridProducts = grid
@@ -99,7 +121,7 @@ class ProductCacheManager: ObservableObject {
             isLoading = false
             lastLoadTime = Date()
             
-            Log.debug("ProductCacheManager: Loaded \(carouselProducts.count) carousel + \(gridProducts.count) grid from pages \(randomPage1) & \(randomPage2)", category: .network)
+            Log.debug("ProductCacheManager: Loaded \(carouselProducts.count) carousel + \(gridProducts.count) grid from pages \(pageList)", category: .network)
         } catch {
             isLoading = false
             loadError = "Unable to load products. Please try again."
