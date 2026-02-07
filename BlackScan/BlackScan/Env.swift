@@ -7,6 +7,16 @@ struct Env {
     
     // MARK: - Private Helper
     
+    /// Whether all required configuration values are present
+    static let isConfigured: Bool = {
+        let keys = ["TYPESENSE_HOST", "TYPESENSE_API_KEY", "OPENAI_API_KEY", "BACKEND_URL"]
+        return keys.allSatisfy { key in
+            if let v = Bundle.main.infoDictionary?[key] as? String, !v.isEmpty, !v.hasPrefix("$(") { return true }
+            if let v = ProcessInfo.processInfo.environment[key], !v.isEmpty { return true }
+            return false
+        }
+    }()
+    
     /// Reads a required config value. Checks Info.plist first (xcconfig-injected),
     /// then falls back to process environment variables (Xcode scheme).
     private static func requiredValue(for key: String) -> String {
@@ -20,7 +30,13 @@ struct Env {
             return value
         }
         
+        // Never crash in release — return empty string and let the app show an error state
+        #if DEBUG
         fatalError("\(key) not configured. Set up Configuration/Secrets.xcconfig (see Secrets.xcconfig.template).")
+        #else
+        Log.error("Missing required config: \(key)", category: .general)
+        return ""
+        #endif
     }
     
     // MARK: - Typesense Configuration
