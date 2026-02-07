@@ -238,7 +238,7 @@ struct ScanView: View {
                     Spacer()
                     
                     VStack(spacing: 14) {
-                        // Checkout Manager (above shop)
+                        // Checkout Manager (above shop, aligned with shop button)
                         HStack {
                             Spacer()
                             
@@ -253,11 +253,12 @@ struct ScanView: View {
                                         .renderingMode(.template)
                                         .resizable()
                                         .scaledToFit()
-                                        .frame(width: 22, height: 22)
+                                        .frame(width: 26, height: 26)
                                         .foregroundColor(DS.brandBlue)
                                 }
                             }
                             .buttonStyle(.plain)
+                            .padding(.trailing, 20)
                         }
                         
                         // Heart and Shop row
