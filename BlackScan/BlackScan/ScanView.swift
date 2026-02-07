@@ -65,7 +65,7 @@ struct ScanView: View {
                                     .frame(width: 50, height: 50)
                                     .dsButtonShadow()
                                 
-                                Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                                Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill") // keep fill for flashlight state
                                     .font(.system(size: 20))
                                     .foregroundColor(DS.brandBlue)
                             }
@@ -94,7 +94,7 @@ struct ScanView: View {
                                     .frame(width: 50, height: 50)
                                     .dsButtonShadow()
                                 
-                                Image(systemName: "person.fill")
+                                Image(systemName: "person")
                                     .font(.system(size: 20))
                                     .foregroundColor(DS.brandBlue)
                             }
@@ -220,7 +220,7 @@ struct ScanView: View {
                                     .frame(width: 58, height: 58)
                                     .dsButtonShadow()
                                 
-                                Image(systemName: "clock.fill")
+                                Image(systemName: "clock.arrow.circlepath")
                                     .font(.system(size: 22))
                                     .foregroundColor(DS.brandBlue)
                             }
@@ -235,7 +235,7 @@ struct ScanView: View {
                                     .frame(width: 58, height: 58)
                                     .dsButtonShadow()
                                 
-                                Image(systemName: "heart.fill")
+                                Image(systemName: "heart")
                                     .font(.system(size: 22))
                                     .foregroundColor(DS.brandBlue)
                             }
@@ -250,7 +250,7 @@ struct ScanView: View {
                                     .frame(width: 58, height: 58)
                                     .dsButtonShadow()
                                 
-                                Image(systemName: "storefront.fill")
+                                Image(systemName: "storefront")
                                     .font(.system(size: 22))
                                     .foregroundColor(DS.brandBlue)
                             }
