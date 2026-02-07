@@ -106,10 +106,9 @@ struct ProductDetailView: View {
                     // Product Info Section
                     VStack(alignment: .leading, spacing: 8) {
                         // Company name
-                        Text(product.company.uppercased())
-                            .font(DS.label)
-                            .tracking(DS.labelTracking)
-                            .foregroundColor(Color(.systemGray))
+                        Text(product.company)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(DS.brandBlue)
                         
                         // Product name
                         Text(product.name)
@@ -251,18 +250,37 @@ struct ProductDetailView: View {
             }
             
             do {
+                // Try searching by product type first
                 let products = try await typesenseClient.searchProducts(
                     query: product.productType,
                     page: 1,
-                    perPage: 20
+                    perPage: 30
                 )
                 
-                let filtered = products
+                // Prefer same category, but fall back to any match
+                let sameCategory = products
                     .filter { $0.id != product.id && $0.mainCategory == product.mainCategory }
-                    .prefix(10)
+                
+                var results: [Product]
+                if sameCategory.count >= 3 {
+                    results = Array(sameCategory.prefix(10))
+                } else {
+                    // Fall back: exclude self, take whatever we found
+                    results = Array(products.filter { $0.id != product.id }.prefix(10))
+                }
+                
+                // If still empty, try broader search with main category
+                if results.isEmpty {
+                    let broader = try await typesenseClient.searchProducts(
+                        query: product.mainCategory,
+                        page: 1,
+                        perPage: 20
+                    )
+                    results = Array(broader.filter { $0.id != product.id }.prefix(10))
+                }
                 
                 await MainActor.run {
-                    similarProducts = Array(filtered)
+                    similarProducts = results
                     isLoadingSimilar = false
                 }
             } catch {
@@ -302,27 +320,23 @@ struct CategoryChip: View {
 
 struct SimilarProductCardWrapper: View {
     let product: Product
-    @State private var isNavigating = false
+    @State private var showingDetail = false
     @EnvironmentObject var typesenseClient: TypesenseClient
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var cartManager: CartManager
     
     var body: some View {
-        ZStack {
-            NavigationLink(destination: ProductDetailView(product: product)
+        Button(action: {
+            showingDetail = true
+        }) {
+            SimilarProductCard(product: product)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .sheet(isPresented: $showingDetail) {
+            ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
                 .environmentObject(savedProductsManager)
-                .environmentObject(cartManager), isActive: $isNavigating) {
-                EmptyView()
-            }
-            .opacity(0)
-            
-            Button(action: {
-                isNavigating = true
-            }) {
-                SimilarProductCard(product: product)
-            }
-            .buttonStyle(PlainButtonStyle())
+                .environmentObject(cartManager)
         }
     }
 }
