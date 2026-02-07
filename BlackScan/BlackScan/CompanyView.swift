@@ -114,6 +114,13 @@ struct CompanyView: View {
                         .padding(.horizontal, DS.horizontalPadding)
                         .padding(.top, 20)
                         
+                        Text("Showing \(searchResults.count) products")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .padding(.horizontal, DS.horizontalPadding)
+                            .padding(.top, 8)
+                            .padding(.bottom, 12)
+                        
                         // Products grid
                         LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
                             ForEach(sortedProducts) { product in

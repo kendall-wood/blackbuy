@@ -421,25 +421,19 @@ struct OfflineBannerOverlay: View {
 // MARK: - Toast Window (renders above all sheets/covers)
 
 /// A passthrough window that sits above everything but doesn't block touches.
-/// Only intercepts touches on interactive SwiftUI elements (buttons, etc.)
-/// by walking the hit view hierarchy looking for gesture recognizers.
+/// Intercepts touches on actual toast content; passes through transparent areas.
 class ToastWindow: UIWindow {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        guard let rootView = rootViewController?.view else { return nil }
         guard let hitView = super.hitTest(point, with: event) else { return nil }
         
-        // Walk up from the hit view to the root, looking for gesture recognizers
-        // (SwiftUI attaches these to interactive elements like Buttons)
-        var view: UIView? = hitView
-        while let current = view, current != rootView {
-            if let recognizers = current.gestureRecognizers, !recognizers.isEmpty {
-                return hitView
-            }
-            view = current.superview
+        // If the hit landed on the window itself or the root hosting view,
+        // it means the user tapped the transparent background — pass through.
+        // Any deeper subview means SwiftUI rendered actual content there (the toast pill).
+        if hitView === self || hitView === rootViewController?.view {
+            return nil
         }
         
-        // No interactive element found at this point — pass through
-        return nil
+        return hitView
     }
 }
 

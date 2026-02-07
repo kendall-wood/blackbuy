@@ -461,9 +461,11 @@ struct ShopView: View {
             
             // Showing count
             Text("Showing \(displayedSearchProducts.count) of \(searchGridProducts.count) products")
-                .font(.system(size: 13, weight: .regular))
+                .font(.system(size: 13, weight: .medium))
                 .foregroundColor(Color(.systemGray))
                 .padding(.horizontal, DS.horizontalPadding)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
             
             if isSearchLoading {
                 VStack(spacing: 16) {
@@ -566,9 +568,11 @@ struct ShopView: View {
             
             // Showing count
             Text("Showing \(displayedCategoryProducts.count) of \(categoryTotalFound) products")
-                .font(.system(size: 13, weight: .regular))
+                .font(.system(size: 13, weight: .medium))
                 .foregroundColor(Color(.systemGray))
                 .padding(.horizontal, DS.horizontalPadding)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
             
             if isCategoryLoading {
                 VStack(spacing: 16) {

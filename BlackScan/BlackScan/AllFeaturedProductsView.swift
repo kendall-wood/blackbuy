@@ -67,12 +67,6 @@ struct AllFeaturedProductsView: View {
                     }
                     .padding(.horizontal, DS.horizontalPadding)
                     
-                    // Showing count
-                    Text("Showing \(displayedProducts.count) of \(allProducts.count) products")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(Color(.systemGray))
-                        .padding(.top, 8)
-                    
                     // Load More Button
                     if displayedProducts.count < allProducts.count {
                         Button(action: loadMore) {
@@ -130,7 +124,13 @@ struct AllFeaturedProductsView: View {
                 Spacer()
             }
             .padding(.horizontal, DS.horizontalPadding)
-            .padding(.bottom, 12)
+            
+            Text("Showing \(allProducts.count) products")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(Color(.systemGray))
+                .padding(.horizontal, DS.horizontalPadding)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
         }
         .background(DS.cardBackground)
     }

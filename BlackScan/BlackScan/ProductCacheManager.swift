@@ -17,12 +17,21 @@ class ProductCacheManager: ObservableObject {
     // MARK: - Private Properties
     
     private let typesenseClient = TypesenseClient()
+    private var lastLoadTime: Date?
+    
+    /// How often to refresh featured products (in seconds)
+    private let refreshInterval: TimeInterval = 300 // 5 minutes
     
     // MARK: - Public Methods
     
-    /// Load featured products once. No-ops if already loaded or in progress.
+    /// Load featured products if not loaded yet or if stale (older than refreshInterval).
     func loadIfNeeded() async {
-        guard !isLoaded && !isLoading else { return }
+        guard !isLoading else { return }
+        
+        if isLoaded, let lastLoad = lastLoadTime, Date().timeIntervalSince(lastLoad) < refreshInterval {
+            return // Still fresh
+        }
+        
         await load()
     }
     
@@ -38,12 +47,36 @@ class ProductCacheManager: ObservableObject {
         loadError = nil
         
         do {
-            let allProducts = try await NetworkSecurity.withRetry(maxAttempts: 2) {
+            // Fetch from multiple random pages to get a diverse product pool
+            let perPage = Env.maxResultsPerPage
+            let randomPage1 = Int.random(in: 1...10)
+            var randomPage2 = Int.random(in: 1...10)
+            while randomPage2 == randomPage1 { randomPage2 = Int.random(in: 1...10) }
+            
+            async let fetch1 = NetworkSecurity.withRetry(maxAttempts: 2) {
                 try await typesenseClient.searchProducts(
                     query: "*",
-                    page: 1,
-                    perPage: Env.maxResultsPerPage
+                    page: randomPage1,
+                    perPage: perPage
                 )
+            }
+            async let fetch2 = NetworkSecurity.withRetry(maxAttempts: 2) {
+                try await typesenseClient.searchProducts(
+                    query: "*",
+                    page: randomPage2,
+                    perPage: perPage
+                )
+            }
+            
+            let (page1, page2) = try await (fetch1, fetch2)
+            
+            // Combine and deduplicate
+            var seen = Set<String>()
+            var allProducts: [Product] = []
+            for product in (page1 + page2) {
+                if seen.insert(product.id).inserted {
+                    allProducts.append(product)
+                }
             }
             
             let uniqueCompanies = Array(Set(allProducts.map { $0.company }))
@@ -64,8 +97,9 @@ class ProductCacheManager: ObservableObject {
             gridProducts = grid
             isLoaded = true
             isLoading = false
+            lastLoadTime = Date()
             
-            Log.debug("ProductCacheManager: Loaded \(carouselProducts.count) carousel + \(gridProducts.count) grid products", category: .network)
+            Log.debug("ProductCacheManager: Loaded \(carouselProducts.count) carousel + \(gridProducts.count) grid from pages \(randomPage1) & \(randomPage2)", category: .network)
         } catch {
             isLoading = false
             loadError = "Unable to load products. Please try again."
