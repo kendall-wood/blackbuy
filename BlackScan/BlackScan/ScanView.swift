@@ -218,6 +218,15 @@ struct ScanView: View {
                 )
                 .ignoresSafeArea()
                 
+                // Scanning glow effect (stays blue on results until dismissed)
+                if scanState == .capturing || scanState == .analyzing || scanState == .searching || scanState == .results {
+                    ScanGlowOverlay(isResults: scanState == .results, hasProducts: !scanResults.isEmpty)
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.4), value: scanState)
+                }
+                
                 // Top Left - Flashlight Button
                 VStack {
                     HStack {
@@ -329,6 +338,9 @@ struct ScanView: View {
                     // View Products button (appears after scan)
                     if scanState == .results && !scanResults.isEmpty {
                         Button(action: {
+                            withAnimation(.easeOut(duration: 0.3)) {
+                                scanState = .initial
+                            }
                             isShowingResults = true
                         }) {
                             HStack(spacing: 14) {
@@ -1303,5 +1315,103 @@ extension CameraPreviewUIView: AVCapturePhotoCaptureDelegate {
         }
         
         delegate?.didCaptureImage(image)
+    }
+}
+
+// MARK: - Scan Glow Overlay
+
+/// A pulsing edge glow that hugs the device's screen corners while scanning.
+/// Turns solid blue when results are found and stays until dismissed.
+struct ScanGlowOverlay: View {
+    var isResults: Bool = false
+    var hasProducts: Bool = false
+    @State private var pulse = false
+    
+    /// The device's display corner radius (reads from UIScreen private key, falls back to 44)
+    private var screenRadius: CGFloat {
+        UIScreen.main.value(forKey: "_displayCornerRadius") as? CGFloat ?? 44
+    }
+    
+    private var glowColor: Color {
+        isResults && hasProducts ? DS.brandBlue : DS.brandBlue
+    }
+    
+    private var secondaryColor: Color {
+        isResults && hasProducts ? DS.brandBlue : DS.brandGreen
+    }
+    
+    var body: some View {
+        let cr = screenRadius
+        
+        ZStack {
+            // Layer 1: Ultra-wide ambient glow (inset so blur bleeds inward)
+            RoundedRectangle(cornerRadius: cr)
+                .stroke(
+                    AngularGradient(
+                        colors: [
+                            glowColor.opacity(isResults ? 0.6 : (pulse ? 0.7 : 0.2)),
+                            secondaryColor.opacity(isResults ? 0.5 : (pulse ? 0.55 : 0.12)),
+                            glowColor.opacity(isResults ? 0.6 : (pulse ? 0.65 : 0.18)),
+                            secondaryColor.opacity(isResults ? 0.5 : (pulse ? 0.55 : 0.12)),
+                            glowColor.opacity(isResults ? 0.6 : (pulse ? 0.7 : 0.2))
+                        ],
+                        center: .center
+                    ),
+                    lineWidth: isResults ? 14 : (pulse ? 14 : 5)
+                )
+                .blur(radius: isResults ? 32 : (pulse ? 36 : 18))
+            
+            // Layer 2: Medium body glow
+            RoundedRectangle(cornerRadius: cr)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            glowColor.opacity(isResults ? 0.7 : (pulse ? 0.6 : 0.15)),
+                            secondaryColor.opacity(isResults ? 0.55 : (pulse ? 0.5 : 0.1)),
+                            glowColor.opacity(isResults ? 0.7 : (pulse ? 0.6 : 0.15))
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: isResults ? 8 : (pulse ? 9 : 3)
+                )
+                .blur(radius: isResults ? 16 : (pulse ? 18 : 8))
+            
+            // Layer 3: Tight inner glow
+            RoundedRectangle(cornerRadius: cr)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            glowColor.opacity(isResults ? 0.65 : (pulse ? 0.5 : 0.12)),
+                            secondaryColor.opacity(isResults ? 0.55 : (pulse ? 0.4 : 0.08)),
+                            glowColor.opacity(isResults ? 0.65 : (pulse ? 0.5 : 0.12))
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: isResults ? 4 : (pulse ? 5 : 2)
+                )
+                .blur(radius: isResults ? 6 : (pulse ? 6 : 3))
+            
+            // Layer 4: Crisp edge stroke aligned to screen rim
+            RoundedRectangle(cornerRadius: cr)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            glowColor.opacity(isResults ? 0.8 : (pulse ? 0.55 : 0.15)),
+                            secondaryColor.opacity(isResults ? 0.7 : (pulse ? 0.45 : 0.1)),
+                            glowColor.opacity(isResults ? 0.8 : (pulse ? 0.55 : 0.15))
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ),
+                    lineWidth: isResults ? 2.5 : (pulse ? 2.5 : 1)
+                )
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+                pulse = true
+            }
+        }
     }
 }
