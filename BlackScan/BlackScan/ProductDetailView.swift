@@ -167,7 +167,7 @@ struct ProductDetailView: View {
                                 .padding(.horizontal, DS.horizontalPadding)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
+                                HStack(spacing: DS.gridSpacing) {
                                     ForEach(similarProducts) { similarProduct in
                                         UnifiedProductCard(
                                             product: similarProduct,
@@ -181,7 +181,8 @@ struct ProductDetailView: View {
                                     }
                                 }
                                 .padding(.horizontal, DS.horizontalPadding)
-                                .padding(.vertical, 8) // Space for drop shadow
+                                .padding(.top, 4)
+                                .padding(.bottom, 12)
                             }
                         }
                         .padding(.top, 8)
@@ -218,7 +219,7 @@ struct ProductDetailView: View {
                 Spacer()
             }
             
-            // Blue Plus Button (bottom right, fixed position)
+            // Add to Cart Button (bottom right, fixed position)
             VStack {
                 Spacer()
                 
@@ -226,23 +227,21 @@ struct ProductDetailView: View {
                     Spacer()
                     
                     Button(action: {
-                        cartManager.addToCart(product)
+                        if cartManager.isInCart(product) {
+                            cartManager.removeFromCart(product)
+                        } else {
+                            cartManager.addToCart(product)
+                        }
                     }) {
                         Image(systemName: cartManager.isInCart(product) ? "checkmark" : "plus")
                             .font(.system(size: 24, weight: .medium))
-                            .foregroundColor(.white)
+                            .foregroundColor(cartManager.isInCart(product) ? .white : DS.brandBlue)
                             .frame(width: 56, height: 56)
                             .background(
-                                Group {
-                                    if cartManager.isInCart(product) {
-                                        Circle().fill(DS.brandGreen)
-                                    } else {
-                                        Circle().fill(DS.brandGradient)
-                                    }
-                                }
+                                Circle().fill(cartManager.isInCart(product) ? DS.brandBlue : Color.white)
                             )
                             .clipShape(Circle())
-                            .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+                            .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
                     }
                     .buttonStyle(.plain)
                     .padding(.trailing, 20)
