@@ -110,7 +110,7 @@ struct ScanView: View {
                 
                 // Top Center - Logo and Subtitle
                 VStack(spacing: 6) {
-                    Image("blackscan_2")
+                    Image("logo")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(height: 36)
