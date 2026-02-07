@@ -1225,6 +1225,10 @@ struct CameraPreviewView: UIViewRepresentable {
         }
     }
     
+    static func dismantleUIView(_ uiView: CameraPreviewUIView, coordinator: Coordinator) {
+        uiView.stopSession()
+    }
+    
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
@@ -1266,6 +1270,21 @@ class CameraPreviewUIView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        stopSession()
+    }
+    
+    func stopSession() {
+        captureSession?.stopRunning()
+    }
+    
+    func startSession() {
+        guard let session = captureSession, !session.isRunning else { return }
+        DispatchQueue.global(qos: .userInitiated).async {
+            session.startRunning()
+        }
     }
     
     private func setupCamera() {

@@ -244,8 +244,9 @@ struct ShopView: View {
                     }
                     
                     // Show dropdown suggestions while typing
+                    showSearchDropdown = true
                     searchTask = Task {
-                        try? await Task.sleep(nanoseconds: 300_000_000)
+                        try? await Task.sleep(nanoseconds: 250_000_000)
                         if !Task.isCancelled {
                             await performDropdownSearch(query: newValue)
                         }
@@ -265,6 +266,10 @@ struct ShopView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                isSearchFocused = true
+            }
             .background(
                 RoundedRectangle(cornerRadius: DS.radiusMedium)
                     .fill(Color.white)
@@ -282,26 +287,42 @@ struct ShopView: View {
     private var searchDropdown: some View {
         VStack(spacing: 0) {
             // Spacer to push dropdown below search bar
-            // Header (~56) + search bar (~60) + padding + gap
+            // Header (60 + 10pt top) + search bar (~62pt) + 2pt gap
             Color.clear
-                .frame(height: 118)
+                .frame(height: 134)
                 .contentShape(Rectangle())
                 .onTapGesture { showSearchDropdown = false }
             
             VStack(spacing: 0) {
-                // Close button
+                // Search label + Close button
                 HStack {
+                    Text("Search \"\(searchText)\"")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(Color(.systemGray))
+                        .lineLimit(1)
+                    
                     Spacer()
+                    
                     Button(action: { showSearchDropdown = false }) {
                         Text("Close")
-                            .font(.system(size: 12, weight: .regular))
+                            .font(.system(size: 12, weight: .medium))
                             .foregroundColor(Color(.systemGray))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 5)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white)
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(DS.strokeColor, lineWidth: 1)
+                                    )
+                            )
                     }
                     .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
-                .padding(.bottom, 2)
+                .padding(.bottom, 4)
                 
                 ForEach(Array(searchResults.prefix(3).enumerated()), id: \.element.id) { index, product in
                     Button(action: {
@@ -373,7 +394,11 @@ struct ShopView: View {
             }
             .background(Color.white)
             .cornerRadius(DS.radiusLarge)
-            .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 6)
+            .overlay(
+                RoundedRectangle(cornerRadius: DS.radiusLarge)
+                    .stroke(DS.strokeColor, lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
             .padding(.horizontal, DS.horizontalPadding)
             
             Spacer()
@@ -1027,21 +1052,19 @@ struct ShopView: View {
             let products = try await typesenseClient.searchProducts(
                 query: sanitizedQuery,
                 page: 1,
-                perPage: Env.defaultResultsPerPage
+                perPage: 5
             )
             
             await MainActor.run {
                 searchResults = products
-                withAnimation(.easeOut(duration: 0.2)) {
-                    showSearchDropdown = !products.isEmpty
+                if products.isEmpty {
+                    showSearchDropdown = false
                 }
             }
         } catch {
             await MainActor.run {
                 searchResults = []
-                withAnimation(.easeOut(duration: 0.2)) {
-                    showSearchDropdown = false
-                }
+                showSearchDropdown = false
             }
             Log.debug("Dropdown search failed", category: .network)
         }

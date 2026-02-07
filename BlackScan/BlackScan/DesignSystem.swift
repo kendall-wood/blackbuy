@@ -224,6 +224,7 @@ struct AppHeader: View {
                     .scaledToFit()
                     .frame(height: 28)
                     .foregroundColor(DS.brandBlue)
+                    .offset(y: 3)
             case .title(let text):
                 Text(text)
                     .font(.system(size: 20, weight: .bold))
@@ -242,6 +243,7 @@ struct AppHeader: View {
         }
         .frame(height: DS.headerHeight)
         .padding(.horizontal, DS.horizontalPadding)
+        .padding(.top, 10)
         .background(DS.cardBackground)
     }
 }

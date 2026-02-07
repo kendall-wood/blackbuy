@@ -85,11 +85,15 @@ struct ProfileView: View {
             // Avatar Circle
             ZStack {
                 Circle()
-                    .fill(DS.brandBlue.opacity(0.1))
+                    .fill(Color.white)
                     .frame(width: 96, height: 96)
+                    .overlay(
+                        Circle()
+                            .stroke(DS.strokeColor, lineWidth: 1)
+                    )
                 
                 Image(systemName: "person.fill")
-                    .font(.system(size: 40))
+                    .font(.system(size: 36, weight: .light))
                     .foregroundColor(DS.brandBlue)
             }
             
@@ -155,8 +159,8 @@ struct ProfileView: View {
                     }
                 }
             )
+            .signInWithAppleButtonStyle(.whiteOutline)
             .frame(height: 48)
-            .cornerRadius(DS.radiusMedium)
             .padding(.horizontal, 40)
         }
         .padding(.vertical, 20)
