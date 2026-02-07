@@ -80,6 +80,7 @@ struct CompanyView: View {
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, DS.horizontalPadding)
+                .padding(.top, 8)
                 .padding(.bottom, 16)
                 .background(DS.cardBackground)
             

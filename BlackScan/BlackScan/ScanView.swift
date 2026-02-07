@@ -18,6 +18,7 @@ struct ScanView: View {
     @State private var flashlightOn = false
     @State private var capturedImage: UIImage?
     @State private var shouldCapturePhoto = false
+    @State private var selectedDetailProduct: Product?
     
     // Default initializer for binding
     init(selectedTab: Binding<AppTab> = .constant(.scan)) {
@@ -975,9 +976,7 @@ struct ScanView: View {
                         product: scoredProduct.product,
                         showHeart: false,
                         onCardTapped: {
-                            if let url = URL(string: scoredProduct.product.productUrl) {
-                                UIApplication.shared.open(url)
-                            }
+                            selectedDetailProduct = scoredProduct.product
                         }
                     )
                 }
@@ -987,6 +986,10 @@ struct ScanView: View {
             .padding(.bottom, 100)
         }
         .background(DS.cardBackground)
+        .sheet(item: $selectedDetailProduct) { product in
+            ProductDetailView(product: product)
+                .environmentObject(typesenseClient)
+        }
     }
     
     private func confidenceColor(_ confidence: Double) -> Color {
