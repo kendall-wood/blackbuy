@@ -7,6 +7,7 @@ struct CompanyView: View {
     
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var savedProductsManager: SavedProductsManager
+    @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
     
     @State private var searchResults: [Product] = []
@@ -48,8 +49,39 @@ struct CompanyView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            AppHeader(centerContent: .title(companyName), onBack: { dismiss() })
+            // Header with back button and heart
+            HStack {
+                AppBackButton(action: { dismiss() })
+                
+                Spacer()
+                
+                // Save brand heart button
+                Button(action: {
+                    savedCompaniesManager.toggleSaveCompany(companyName)
+                }) {
+                    Image(systemName: savedCompaniesManager.isCompanySaved(companyName) ? "heart.fill" : "heart")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(savedCompaniesManager.isCompanySaved(companyName) ? DS.brandRed : .gray)
+                        .frame(width: 44, height: 44)
+                        .background(DS.cardBackground)
+                        .clipShape(Circle())
+                        .dsCardShadow()
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, DS.horizontalPadding)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+            .background(DS.cardBackground)
+            
+            // Company name below header
+            Text(companyName)
+                .font(DS.pageTitle)
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, DS.horizontalPadding)
+                .padding(.bottom, 16)
+                .background(DS.cardBackground)
             
             // Content
             ScrollView {
@@ -59,9 +91,9 @@ struct CompanyView: View {
                     emptyStateView
                 } else {
                     VStack(alignment: .leading, spacing: 16) {
-                        // Shop Section Header with Sort Button
+                        // Available Products header with Sort Button
                         HStack(alignment: .center) {
-                            Text("Shop")
+                            Text("Available Products")
                                 .font(.system(size: 20, weight: .medium))
                                 .foregroundColor(.black)
                             
@@ -190,5 +222,6 @@ struct CompanyView: View {
 #Preview {
     CompanyView(companyName: "SheaMoisture")
         .environmentObject(SavedProductsManager())
+        .environmentObject(SavedCompaniesManager())
         .environmentObject(CartManager())
 }
