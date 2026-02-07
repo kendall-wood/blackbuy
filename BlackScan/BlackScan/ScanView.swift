@@ -62,17 +62,17 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 60, height: 60)
+                                    .frame(width: 48, height: 48)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
-                                    .font(.system(size: 24))
+                                    .font(.system(size: 20))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
                         .padding(.leading, 20)
-                        .padding(.top, 80)
+                        .padding(.top, 40)
                         
                         Spacer()
                     }
@@ -91,17 +91,17 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 60, height: 60)
+                                    .frame(width: 48, height: 48)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "person.fill")
-                                    .font(.system(size: 24))
+                                    .font(.system(size: 20))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
                         .padding(.trailing, 20)
-                        .padding(.top, 80)
+                        .padding(.top, 40)
                     }
                     
                     Spacer()
