@@ -164,50 +164,6 @@ struct ScanView: View {
                     Spacer()
                 }
                 
-                // Bottom - Results Button
-                if scanState == .results && !scanResults.isEmpty {
-                    VStack {
-                        Spacer()
-                        
-                        Button(action: {
-                            isShowingResults = true
-                        }) {
-                            HStack(spacing: 0) {
-                                Image(systemName: "list.bullet")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.white)
-                                    .frame(width: 44)
-                                    .padding(.leading, 6)
-                                
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text("View \(scanResults.count)+ Products")
-                                        .font(.system(size: 18, weight: .bold))
-                                        .foregroundColor(.white)
-                                    
-                                    if let productType = lastAnalysis?.productType {
-                                        Text("Black-owned \(productType)")
-                                            .font(.system(size: 14, weight: .regular))
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "lock.fill")
-                                    .font(.system(size: 18))
-                                    .foregroundColor(.white)
-                                    .padding(.trailing, 18)
-                            }
-                            .frame(width: geometry.size.width * 0.88, height: 75)
-                            .background(DS.brandGradient)
-                            .cornerRadius(20)
-                            .dsButtonShadow()
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.bottom, 140)
-                    }
-                }
-                
                 // Bottom Left - History Button
                 VStack {
                     Spacer()
@@ -296,6 +252,51 @@ struct ScanView: View {
                         .padding(.trailing, 20)
                     }
                     .padding(.bottom, 80)
+                }
+                
+                // Results Button (renders last = on top of everything)
+                if scanState == .results && !scanResults.isEmpty {
+                    VStack {
+                        Spacer()
+                        
+                        Button(action: {
+                            isShowingResults = true
+                        }) {
+                            HStack(spacing: 0) {
+                                Image(systemName: "list.bullet")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(.white)
+                                    .frame(width: 44)
+                                    .padding(.leading, 6)
+                                
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("View \(scanResults.count)+ Products")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(.white)
+                                    
+                                    if let productType = lastAnalysis?.productType {
+                                        Text("Black-owned \(productType)")
+                                            .font(.system(size: 14, weight: .regular))
+                                            .foregroundColor(.white.opacity(0.9))
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .padding(.trailing, 18)
+                            }
+                            .frame(width: geometry.size.width * 0.88, height: 75)
+                            .background(DS.brandGradient)
+                            .cornerRadius(20)
+                            .dsButtonShadow()
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.bottom, 140)
+                    }
+                    .zIndex(10)
                 }
             }
         }
