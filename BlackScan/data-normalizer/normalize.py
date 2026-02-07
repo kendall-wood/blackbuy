@@ -197,6 +197,97 @@ def extract_tags(name, description="", categories=None):
     
     return list(tags)
 
+def _is_womens_care(name_and_type):
+    """Return True if the product text indicates feminine hygiene / intimate care."""
+    womens_care_kw = [
+        'yoni', 'feminine wash', 'feminine hygiene', 'feminine deodorant',
+        'feminine care', 'feminine spray', 'feminine oil', 'feminine foam',
+        'feminine soothing', 'feminine skin', 'foaming feminine',
+        'intimate wash', 'intimate spray', 'intimate oil', 'intimate gel',
+        'intimate flora', 'vaginal', 'vagina', 'menstrual', 'period underwear',
+        'period panty', 'reusable period', 'boric acid', 'v steam', 'vsteam',
+        'womb detox', 'womb matter', 'yoni steam', 'yoni oil', 'yoni wash',
+        'yoni egg', 'yoni toning', 'yoni elixir', 'yoni duo', 'kitty potion',
+        'cookie wash', 'cookie oil', 'cookie restore', 'ph balance',
+        'prenatal', 'postpartum', 'fertility supplement', 'ovulation',
+        'menstrual cup', 'feminine hygiene bundle', 'yin trifecta',
+    ]
+    return any(kw in name_and_type for kw in womens_care_kw)
+
+
+def refine_category(main_category, product, product_type):
+    """Post-process category for complex splits that keyword matching can't handle."""
+    name = product.get('Name', '').lower()
+    raw_subcat1 = product.get('Subcategory 1', '').lower()
+    raw_main_cat = product.get('Main Category', '').lower()
+    raw_combined = f"{raw_main_cat} {raw_subcat1}".lower()
+    pt_lower = product_type.lower() if product_type else ''
+    raw_pt = product.get('Product Type', '').lower()
+    name_and_type = f"{name} {pt_lower} {raw_pt}"
+
+    # --- Women's Care FIRST: highest priority so feminine products are never
+    #     swallowed by Clothing, Vitamins, or any other split ---
+    if _is_womens_care(name_and_type):
+        return "Women's Care"
+
+    # --- Clothing -> Men's Clothing / Women's Clothing ---
+    if main_category == "Clothing":
+        # Check raw subcategories for gender
+        # IMPORTANT: Check women's BEFORE men's because "men's" is a
+        # substring of "women's" — checking mens first would misclassify.
+        kids_indicators = ["girls' clothing", "baby", "toddler", "kids'", "pet supplies", "pet clothing", "pet apparel", "dog"]
+        womens_indicators = ["women's", "female", "bridal", "lingerie"]
+        
+        if any(kw in raw_combined for kw in kids_indicators):
+            return "Baby & Kids"
+        elif any(kw in raw_combined for kw in womens_indicators):
+            return "Women's Clothing"
+        elif "men's" in raw_combined and "women's" not in raw_combined:
+            # Catches men's apparel, men's accessories, men's clothing, etc.
+            return "Men's Clothing"
+        else:
+            # Default ambiguous clothing (hats, unisex) to Women's Clothing
+            return "Women's Clothing"
+
+    # --- Health & Wellness -> Vitamins & Supplements or redistribute ---
+    if main_category == "Health & Wellness":
+        vitamin_kw = ['vitamin', 'supplement', 'protein', 'collagen', 'probiotic',
+                       'gummies', 'gummy', 'creatine', 'elderberry', 'melatonin',
+                       'testosterone', 'multivitamin', 'capsule', 'tablet',
+                       'meal replacement', 'nutritional shake', 'weight gain',
+                       'pre-workout', 'energy supplement', 'superfood',
+                       'sea moss', 'herbal extract', 'herbal supplement']
+        if any(kw in name_and_type for kw in vitamin_kw):
+            return "Vitamins & Supplements"
+        
+        mens_kw = ['razor', 'beard', 'shav', 'grooming', 'shaver']
+        if any(kw in name_and_type for kw in mens_kw):
+            return "Men's Care"
+        
+        # Everything else (soap, bath, body, deodorant, toothbrush, etc.) -> Body Care
+        return "Body Care"
+
+    # --- Accessories -> Books & More or Home Care (batteries) ---
+    if main_category == "Accessories":
+        # Battery products -> Home Care
+        if 'battery' in name_and_type or 'batteries' in name_and_type or 'charger pack' in name_and_type or 'battery charger' in name_and_type:
+            if 'rechargeable' in name_and_type or 'battery' in name_and_type or 'charger' in name_and_type:
+                return "Home Care"
+        
+        # Books & More
+        books_kw = ['book', 'ebook', 'e-book', 'journal', 'planner', 'guide',
+                     'workbook', 'coloring', 'print', 'painting', 'postcard',
+                     'dice', 'play dough', 'affirmation cards', 'banner',
+                     'pencil', 'crayon', 'paint brush', 'stationery',
+                     'recipe book', 'digital download', 'digital workbook']
+        if any(kw in name_and_type for kw in books_kw):
+            return "Books & More"
+        
+        return "Accessories"
+
+    return main_category
+
+
 def normalize_product(product, main_category_map, product_type_synonyms):
     """Normalize a single product to clean schema"""
     
@@ -239,6 +330,10 @@ def normalize_product(product, main_category_map, product_type_synonyms):
     # Apply taxonomy mapping
     main_category = map_main_category(categories, subcategories, main_category_map)
     product_type = map_product_type(name, description, categories, product_type_synonyms, existing_product_type)
+    
+    # Refine category with post-processing (clothing gender split, H&W dissolution, etc.)
+    main_category = refine_category(main_category, product, product_type)
+    
     form = extract_form(name, description)
     set_bundle = detect_set_bundle(name, description)
     tags = extract_tags(name, description, categories)
@@ -327,6 +422,30 @@ def main():
                 print(f"⚠️  Error processing product {i}: {e}")
                 continue
         
+        # Deduplicate: keep first occurrence of each product ID
+        seen_ids = set()
+        deduped_products = []
+        for product in normalized_products:
+            pid = product['id']
+            if pid not in seen_ids:
+                seen_ids.add(pid)
+                deduped_products.append(product)
+        
+        dupes_removed = len(normalized_products) - len(deduped_products)
+        if dupes_removed > 0:
+            print(f"🔄 Removed {dupes_removed} duplicate products (by ID)")
+            # Recompute stats after dedup
+            stats['main_categories'] = Counter()
+            stats['product_types'] = Counter()
+            stats['forms'] = Counter()
+            stats['set_bundles'] = Counter()
+            for p in deduped_products:
+                stats['main_categories'][p['main_category']] += 1
+                stats['product_types'][p['product_type']] += 1
+                stats['forms'][p['form']] += 1
+                stats['set_bundles'][p['set_bundle']] += 1
+        normalized_products = deduped_products
+        
         # Save normalized output
         output_file = Path("normalized_products.json")
         with open(output_file, 'w') as f:
@@ -340,8 +459,8 @@ def main():
         print("📊 NORMALIZATION REPORT")
         print("="*50)
         
-        print(f"\n📈 TOP MAIN CATEGORIES:")
-        for category, count in stats['main_categories'].most_common(10):
+        print(f"\n📈 ALL MAIN CATEGORIES:")
+        for category, count in stats['main_categories'].most_common():
             print(f"  {category}: {count}")
         
         print(f"\n🏷️  TOP PRODUCT TYPES:")

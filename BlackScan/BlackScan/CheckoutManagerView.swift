@@ -203,7 +203,7 @@ struct CartProductRow: View {
                 // Complete button (left/green)
                 HStack(spacing: 0) {
                     Button(action: {
-                        withAnimation {
+                        withAnimation(.easeOut(duration: 0.2)) {
                             dragOffset = 0
                             isShowingActions = false
                         }
@@ -368,7 +368,7 @@ struct CartProductRow: View {
                         .background(DS.brandGradient)
                         .cornerRadius(DS.radiusSmall)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(DSButtonStyle())
             }
         }
         .padding(.horizontal, 10)
@@ -527,7 +527,7 @@ struct RecentScanRow: View {
             .cornerRadius(DS.radiusMedium)
             .dsCardShadow()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(DSButtonStyle())
     }
 }
 

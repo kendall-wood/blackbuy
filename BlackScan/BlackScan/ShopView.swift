@@ -57,14 +57,36 @@ struct ShopView: View {
         "Body Care",
         "Makeup",
         "Fragrance",
-        "Lip Care",
+        "Women's Care",
         "Men's Care",
-        "Accessories",
-        "Clothing",
-        "Baby & Kids",
+        "Women's Clothing",
+        "Men's Clothing",
+        "Vitamins & Supplements",
         "Home Care",
-        "Health & Wellness"
+        "Books & More",
+        "Accessories",
+        "Baby & Kids"
     ]
+    
+    private func categoryIcon(for category: String) -> String {
+        switch category {
+        case "Hair Care":                return "comb"
+        case "Skincare":                 return "drop"
+        case "Body Care":               return "hands.and.sparkles"
+        case "Makeup":                   return "wand.and.stars"
+        case "Fragrance":               return "aqi.medium"
+        case "Women's Care":            return "♀"
+        case "Men's Care":              return "♂"
+        case "Women's Clothing":        return "icon_dress"
+        case "Men's Clothing":          return "tshirt"
+        case "Vitamins & Supplements":  return "pill"
+        case "Home Care":               return "house"
+        case "Books & More":            return "book"
+        case "Accessories":             return "watch.analog"
+        case "Baby & Kids":             return "stroller"
+        default:                         return "tag"
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -190,7 +212,9 @@ struct ShopView: View {
                     
                     if newValue.isEmpty {
                         searchResults = []
-                        showSearchDropdown = false
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            showSearchDropdown = false
+                        }
                         return
                     }
                     
@@ -356,28 +380,50 @@ struct ShopView: View {
                             
                             if selectedCategory == category {
                                 // Deselect
-                                selectedCategory = nil
-                                categoryProducts = []
-                                displayedCategoryProducts = []
+                                withAnimation(.easeOut(duration: 0.25)) {
+                                    selectedCategory = nil
+                                    categoryProducts = []
+                                    displayedCategoryProducts = []
+                                }
                             } else {
-                                selectedCategory = category
+                                withAnimation(.easeOut(duration: 0.25)) {
+                                    selectedCategory = category
+                                }
                                 loadCategoryProducts(category)
                             }
                         }) {
-                            Text(category)
-                                .font(.system(size: 15, weight: selectedCategory == category ? .semibold : .medium))
-                                .foregroundColor(DS.brandBlue)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 10)
-                                .background(Color.white)
-                                .cornerRadius(DS.radiusMedium)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: DS.radiusMedium)
-                                        .stroke(DS.brandBlue, lineWidth: selectedCategory == category ? 2 : 0)
-                                )
-                                .dsCardShadow()
+                            HStack(spacing: 6) {
+                                let icon = categoryIcon(for: category)
+                                let isUnicode = icon.unicodeScalars.first.map { !$0.isASCII } ?? false
+                                let isAsset = icon.hasPrefix("icon_")
+                                if isUnicode {
+                                    Text(icon)
+                                        .font(.system(size: 14))
+                                } else if isAsset {
+                                    Image(icon)
+                                        .renderingMode(.template)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 14, height: 14)
+                                } else {
+                                    Image(systemName: icon)
+                                        .font(.system(size: 13, weight: .medium))
+                                }
+                                Text(category)
+                                    .font(.system(size: 15, weight: selectedCategory == category ? .semibold : .medium))
+                            }
+                            .foregroundColor(DS.brandBlue)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color.white)
+                            .cornerRadius(DS.radiusMedium)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: DS.radiusMedium)
+                                    .stroke(DS.brandBlue, lineWidth: selectedCategory == category ? 2 : 0)
+                            )
+                            .dsCardShadow()
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(DSButtonStyle())
                     }
                 }
                 .padding(.horizontal, DS.horizontalPadding)
@@ -484,7 +530,7 @@ struct ShopView: View {
                             .background(DS.brandGradient)
                             .cornerRadius(DS.radiusMedium)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(DSButtonStyle())
                     .padding(.horizontal, DS.horizontalPadding)
                     .padding(.top, 8)
                 }
@@ -596,7 +642,7 @@ struct ShopView: View {
                         .background(DS.brandGradient)
                         .cornerRadius(DS.radiusMedium)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(DSButtonStyle())
                     .disabled(isCategoryLoadingMore)
                     .padding(.horizontal, DS.horizontalPadding)
                     .padding(.top, 8)
@@ -703,7 +749,7 @@ struct ShopView: View {
                     .cornerRadius(DS.radiusLarge)
                     .dsCardShadow()
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(DSButtonStyle())
                 .padding(.horizontal, DS.horizontalPadding)
                 .padding(.top, 16)
             }
@@ -928,12 +974,16 @@ struct ShopView: View {
             
             await MainActor.run {
                 searchResults = products
-                showSearchDropdown = !products.isEmpty
+                withAnimation(.easeOut(duration: 0.2)) {
+                    showSearchDropdown = !products.isEmpty
+                }
             }
         } catch {
             await MainActor.run {
                 searchResults = []
-                showSearchDropdown = false
+                withAnimation(.easeOut(duration: 0.2)) {
+                    showSearchDropdown = false
+                }
             }
             Log.debug("Dropdown search failed", category: .network)
         }
@@ -1007,7 +1057,7 @@ struct FeaturedBrandCircleCard: View {
             .cornerRadius(DS.radiusMedium)
             .dsCardShadow()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(DSButtonStyle())
     }
 }
 

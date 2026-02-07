@@ -92,6 +92,19 @@ enum DS {
     static let headerHeight: CGFloat = 60
 }
 
+// MARK: - Button Styles
+
+/// Press-scale button style for primary interactive elements.
+/// Gives a subtle scale + opacity effect on press for tactile feedback.
+struct DSButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .opacity(configuration.isPressed ? 0.85 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
 // MARK: - Shadow Modifier
 
 struct ShadowModifier: ViewModifier {
@@ -407,12 +420,26 @@ struct OfflineBannerOverlay: View {
 
 // MARK: - Toast Window (renders above all sheets/covers)
 
-/// A passthrough window that sits above everything but doesn't block touches
+/// A passthrough window that sits above everything but doesn't block touches.
+/// Only intercepts touches on interactive SwiftUI elements (buttons, etc.)
+/// by walking the hit view hierarchy looking for gesture recognizers.
 class ToastWindow: UIWindow {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard let rootView = rootViewController?.view else { return nil }
         guard let hitView = super.hitTest(point, with: event) else { return nil }
-        // Only intercept touches on the toast itself, let everything else pass through
-        return rootViewController?.view == hitView ? nil : hitView
+        
+        // Walk up from the hit view to the root, looking for gesture recognizers
+        // (SwiftUI attaches these to interactive elements like Buttons)
+        var view: UIView? = hitView
+        while let current = view, current != rootView {
+            if let recognizers = current.gestureRecognizers, !recognizers.isEmpty {
+                return hitView
+            }
+            view = current.superview
+        }
+        
+        // No interactive element found at this point — pass through
+        return nil
     }
 }
 

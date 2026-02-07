@@ -300,23 +300,26 @@ struct ScanView: View {
                             if scanState == .capturing || scanState == .analyzing || scanState == .searching {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: DS.brandBlue))
+                                    .transition(.scale.combined(with: .opacity))
                             } else {
                                 Image(systemName: "barcode.viewfinder")
                                     .font(.system(size: 18))
                                     .foregroundColor(DS.brandBlue)
+                                    .transition(.scale.combined(with: .opacity))
                             }
                             
                             Text(scanButtonText)
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundColor(DS.brandBlue)
                         }
+                        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: scanState)
                         .padding(.horizontal, 28)
                         .padding(.vertical, 14)
                         .background(Color.white)
                         .cornerRadius(DS.radiusPill)
                         .dsButtonShadow()
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(DSButtonStyle())
                     .disabled(scanState == .capturing || scanState == .analyzing || scanState == .searching)
                     
                     Text("Shake to report issue")
@@ -351,7 +354,7 @@ struct ScanView: View {
                             .cornerRadius(DS.radiusPill)
                             .dsButtonShadow()
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(DSButtonStyle())
                         .padding(.top, 6)
                         .transition(.opacity)
                     }
@@ -359,7 +362,9 @@ struct ScanView: View {
                     // No results found - grey button to shop
                     if scanState == .results && scanResults.isEmpty {
                         Button(action: {
-                            scanState = .initial
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                scanState = .initial
+                            }
                             selectedTab = .shop
                         }) {
                             HStack(spacing: 14) {
@@ -383,7 +388,7 @@ struct ScanView: View {
                             .cornerRadius(DS.radiusPill)
                             .dsButtonShadow()
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(DSButtonStyle())
                         .padding(.top, 6)
                         .transition(.opacity)
                     }
@@ -575,13 +580,17 @@ struct ScanView: View {
         
         if scanState == .results {
             // Reset to scan again
-            scanState = .initial
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                scanState = .initial
+            }
             scanResults = []
             lastAnalysis = nil
             capturedImage = nil
         } else if scanState == .initial {
             // Trigger image capture
-            scanState = .capturing
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                scanState = .capturing
+            }
             
             // Provide haptic feedback
             let generator = UIImpactFeedbackGenerator(style: .medium)
@@ -605,7 +614,9 @@ struct ScanView: View {
     private func analyzeAndSearch(image: UIImage) async {
         // Step 1: Analyze with OpenAI Vision
         await MainActor.run {
-            scanState = .analyzing
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                scanState = .analyzing
+            }
         }
         
         Log.debug("Starting Hybrid Scan", category: .scan)
@@ -629,14 +640,18 @@ struct ScanView: View {
             
             await MainActor.run {
                 searchError = error.localizedDescription
-                scanState = .initial
+                withAnimation(.easeOut(duration: 0.3)) {
+                    scanState = .initial
+                }
             }
         }
     }
     
     private func searchForMatches(analysis: HybridScanService.ProductAnalysis) async {
         await MainActor.run {
-            scanState = .searching
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                scanState = .searching
+            }
         }
         
         Log.debug("Searching for: \(analysis.productType)", category: .scan)
@@ -823,7 +838,9 @@ struct ScanView: View {
             
             await MainActor.run {
                 scanResults = filteredResults
-                scanState = .results
+                withAnimation(.easeOut(duration: 0.3)) {
+                    scanState = .results
+                }
             }
             
         } catch {
@@ -831,7 +848,9 @@ struct ScanView: View {
             
             await MainActor.run {
                 searchError = error.localizedDescription
-                scanState = .initial
+                withAnimation(.easeOut(duration: 0.3)) {
+                    scanState = .initial
+                }
             }
         }
     }
