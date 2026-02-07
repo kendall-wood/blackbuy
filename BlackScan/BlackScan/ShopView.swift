@@ -235,7 +235,7 @@ struct ShopView: View {
                 .onTapGesture { showSearchDropdown = false }
             
             VStack(spacing: 0) {
-                ForEach(Array(searchResults.prefix(5).enumerated()), id: \.element.id) { index, product in
+                ForEach(Array(searchResults.prefix(3).enumerated()), id: \.element.id) { index, product in
                     Button(action: {
                         selectedProduct = product
                         showSearchDropdown = false
@@ -275,7 +275,7 @@ struct ShopView: View {
                     }
                     .buttonStyle(.plain)
                     
-                    if index < min(searchResults.count, 5) - 1 {
+                    if index < min(searchResults.count, 3) - 1 {
                         Divider()
                             .padding(.leading, 78)
                     }
