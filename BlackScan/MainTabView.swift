@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Main container view that manages navigation between all app screens
 struct MainTabView: View {
-    @State private var selectedTab: BottomNavBar.AppTab = .scan
+    @State private var selectedTab: AppTab = .scan
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager

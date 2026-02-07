@@ -52,7 +52,7 @@ struct FlowLayout: Layout {
     }
 }
 
-/// Simple product detail view
+/// Product detail view
 struct ProductDetailView: View {
     
     let product: Product
@@ -76,42 +76,39 @@ struct ProductDetailView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                         } placeholder: {
-                            Color.white
-                                .overlay(
-                                    ProgressView()
-                                )
+                            Color.white.overlay(ProgressView())
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 320)
                         .background(Color.white)
-                        .cornerRadius(16)
-                        .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                        .cornerRadius(DS.radiusLarge)
+                        .dsCardShadow()
                         
-                        // Heart Button (overlayed in top right)
+                        // Heart Button
                         Button(action: {
                             savedProductsManager.toggleSaveProduct(product)
                         }) {
                             Image(systemName: savedProductsManager.isProductSaved(product) ? "heart.fill" : "heart")
                                 .font(.system(size: 20, weight: .medium))
-                                .foregroundColor(savedProductsManager.isProductSaved(product) ? .red : .gray)
+                                .foregroundColor(savedProductsManager.isProductSaved(product) ? DS.brandRed : .gray)
                                 .frame(width: 40, height: 40)
                                 .background(Color.white.opacity(0.95))
                                 .clipShape(Circle())
-                                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                                .dsCardShadow()
                         }
                         .buttonStyle(.plain)
                         .padding(16)
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, DS.horizontalPadding)
                     .padding(.top, 90)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, DS.horizontalPadding)
                     
                     // Product Info Section
                     VStack(alignment: .leading, spacing: 8) {
                         // Company name
                         Text(product.company.uppercased())
-                            .font(.system(size: 11, weight: .bold))
-                            .tracking(1.2)
+                            .font(DS.label)
+                            .tracking(DS.labelTracking)
                             .foregroundColor(Color(.systemGray))
                         
                         // Product name
@@ -123,7 +120,7 @@ struct ProductDetailView: View {
                             .lineSpacing(2)
                             .padding(.top, 2)
                         
-                        // Price with tight kerning
+                        // Price
                         Text(product.formattedPrice)
                             .font(.system(size: 26, weight: .semibold))
                             .tracking(-0.5)
@@ -133,41 +130,38 @@ struct ProductDetailView: View {
                         
                         // Categories label
                         Text("CATEGORIES")
-                            .font(.system(size: 11, weight: .bold))
-                            .tracking(1.2)
+                            .font(DS.label)
+                            .tracking(DS.labelTracking)
                             .foregroundColor(Color(.systemGray))
                             .padding(.top, 16)
                         
-                        // Category chips from taxonomy
+                        // Category chips
                         FlowLayout(spacing: 8) {
-                            // Main Category chip
                             if !product.mainCategory.isEmpty && product.mainCategory != "Other" {
                                 CategoryChip(text: product.mainCategory, isPrimary: true)
                             }
                             
-                            // Product Type chip (subcategory)
                             if !product.productType.isEmpty && product.productType != "Other" {
                                 CategoryChip(text: product.productType, isPrimary: false)
                             }
                             
-                            // Form chip if available
                             if let form = product.form, !form.isEmpty && form != "other" {
                                 CategoryChip(text: form.capitalized, isPrimary: false)
                             }
                         }
                         .padding(.top, 6)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 24)
+                    .padding(.horizontal, DS.horizontalPadding)
+                    .padding(.bottom, DS.horizontalPadding)
                     
                     // Similar Products Section
                     if !similarProducts.isEmpty {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("SIMILAR PRODUCTS")
                                 .font(.system(size: 13, weight: .bold))
-                                .tracking(1.2)
+                                .tracking(DS.labelTracking)
                                 .foregroundColor(Color(.systemGray))
-                                .padding(.horizontal, 24)
+                                .padding(.horizontal, DS.horizontalPadding)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
@@ -178,7 +172,7 @@ struct ProductDetailView: View {
                                             .environmentObject(cartManager)
                                     }
                                 }
-                                .padding(.horizontal, 24)
+                                .padding(.horizontal, DS.horizontalPadding)
                             }
                         }
                         .padding(.bottom, 32)
@@ -186,18 +180,18 @@ struct ProductDetailView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("SIMILAR PRODUCTS")
                                 .font(.system(size: 13, weight: .bold))
-                                .tracking(1.2)
+                                .tracking(DS.labelTracking)
                                 .foregroundColor(Color(.systemGray))
-                                .padding(.horizontal, 24)
+                                .padding(.horizontal, DS.horizontalPadding)
                             
                             HStack(spacing: 16) {
                                 ForEach(0..<3, id: \.self) { _ in
-                                    RoundedRectangle(cornerRadius: 12)
+                                    RoundedRectangle(cornerRadius: DS.radiusMedium)
                                         .fill(Color(.systemGray6))
                                         .frame(width: 140, height: 200)
                                 }
                             }
-                            .padding(.horizontal, 24)
+                            .padding(.horizontal, DS.horizontalPadding)
                         }
                         .padding(.bottom, 32)
                     }
@@ -205,48 +199,11 @@ struct ProductDetailView: View {
                     Spacer(minLength: 100)
                 }
             }
-            .background(Color.white)
+            .background(DS.cardBackground)
             
             // Custom Header (back button and logo)
             VStack(spacing: 0) {
-                HStack {
-                    // Back Button - matching scan page style
-                    Button(action: {
-                        dismiss()
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 50, height: 50)
-                                .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
-
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    
-                    Spacer()
-                    
-                    // BlackBuy Logo
-                    Image("shop_logo")
-                        .renderingMode(.template)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 28)
-                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
-                    
-                    Spacer()
-                    
-                    // Spacer to balance the layout
-                    Color.clear
-                        .frame(width: 50, height: 50)
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 16)
-                .background(Color.white)
-                
+                AppHeader(centerContent: .logo, onBack: { dismiss() })
                 Spacer()
             }
             
@@ -264,7 +221,15 @@ struct ProductDetailView: View {
                             .font(.system(size: 24, weight: .medium))
                             .foregroundColor(.white)
                             .frame(width: 56, height: 56)
-                            .background(cartManager.isInCart(product) ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0.26, green: 0.63, blue: 0.95))
+                            .background(
+                                Group {
+                                    if cartManager.isInCart(product) {
+                                        Circle().fill(DS.brandGreen)
+                                    } else {
+                                        Circle().fill(DS.brandGradient)
+                                    }
+                                }
+                            )
                             .clipShape(Circle())
                             .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
                     }
@@ -286,14 +251,12 @@ struct ProductDetailView: View {
             }
             
             do {
-                // Search for products in the same category and product type
                 let products = try await typesenseClient.searchProducts(
                     query: product.productType,
                     page: 1,
                     perPage: 20
                 )
                 
-                // Filter to same main category, exclude current product, and limit to 10
                 let filtered = products
                     .filter { $0.id != product.id && $0.mainCategory == product.mainCategory }
                     .prefix(10)
@@ -320,17 +283,17 @@ struct CategoryChip: View {
     
     var body: some View {
         Text(text.uppercased())
-            .font(.system(size: 11, weight: .bold))
+            .font(DS.label)
             .tracking(0.8)
-            .foregroundColor(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color(.systemGray2))
+            .foregroundColor(isPrimary ? DS.brandBlue : Color(.systemGray2))
             .lineLimit(1)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
             .background(Color.white)
-            .cornerRadius(8)
+            .cornerRadius(DS.radiusSmall)
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(isPrimary ? Color(red: 0.26, green: 0.63, blue: 0.95) : Color(.systemGray5), lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: DS.radiusSmall)
+                    .stroke(isPrimary ? DS.brandBlue : Color(.systemGray5), lineWidth: 1.5)
             )
     }
 }
@@ -372,42 +335,28 @@ struct SimilarProductCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Product Image
-            AsyncImage(url: URL(string: product.imageUrl)) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                case .failure(_):
-                    ZStack {
-                        Color(.systemGray6)
-                        Image(systemName: "photo")
-                            .font(.system(size: 24))
-                            .foregroundColor(Color(.systemGray))
-                    }
-                case .empty:
-                    ZStack {
-                        Color(.systemGray6)
-                        ProgressView()
-                    }
-                @unknown default:
+            CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                ZStack {
                     Color(.systemGray6)
+                    ProgressView()
                 }
             }
             .frame(width: 140, height: 140)
             .clipped()
-            .cornerRadius(12)
+            .cornerRadius(DS.radiusMedium)
             
             // Product Details
             VStack(alignment: .leading, spacing: 4) {
-                // Company Name (uppercase with tracking)
                 Text(product.company.uppercased())
                     .font(.system(size: 10, weight: .bold))
                     .tracking(0.8)
                     .foregroundColor(Color(.systemGray))
                     .lineLimit(1)
                 
-                // Product Name (2 lines max)
                 Text(product.name)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.black)
@@ -416,7 +365,6 @@ struct SimilarProductCard: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .lineSpacing(2)
                 
-                // Price with tight tracking
                 Text(product.formattedPrice)
                     .font(.system(size: 16, weight: .semibold))
                     .tracking(-0.3)
@@ -427,11 +375,11 @@ struct SimilarProductCard: View {
             .padding(.bottom, 10)
         }
         .frame(width: 140)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+        .background(DS.cardBackground)
+        .cornerRadius(DS.radiusMedium)
+        .dsCardShadow()
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: DS.radiusMedium)
                 .stroke(Color.black.opacity(0.05), lineWidth: 0.5)
         )
     }

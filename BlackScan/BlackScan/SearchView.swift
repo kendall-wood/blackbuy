@@ -26,18 +26,10 @@ struct SearchView: View {
                 VStack(spacing: 16) {
                     // Back button row
                     HStack {
-                        Button(action: {
-                            dismiss()
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 22, weight: .medium))
-                                .foregroundColor(Color(.systemGray3))
-                        }
-                        .buttonStyle(.plain)
-                        
+                        AppBackButton(action: { dismiss() })
                         Spacer()
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, DS.horizontalPadding)
                     .padding(.top, 12)
                     
                     // BlackBuy Logo
@@ -46,7 +38,7 @@ struct SearchView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(height: 28)
-                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                        .foregroundColor(DS.brandBlue)
                     
                     // Search Bar
                     HStack(spacing: 12) {
@@ -57,7 +49,6 @@ struct SearchView: View {
                         TextField("Search for brands, products, or categories", text: $searchText)
                             .font(.system(size: 16))
                             .onChange(of: searchText) { oldValue, newValue in
-                                // Cancel previous search
                                 searchTask?.cancel()
                                 
                                 if newValue.isEmpty {
@@ -65,10 +56,8 @@ struct SearchView: View {
                                     return
                                 }
                                 
-                                // Debounce search
                                 searchTask = Task {
-                                    try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
-                                    
+                                    try? await Task.sleep(nanoseconds: 300_000_000)
                                     if !Task.isCancelled {
                                         await performSearch(query: newValue)
                                     }
@@ -91,12 +80,12 @@ struct SearchView: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
                     .background(
-                        RoundedRectangle(cornerRadius: 10)
+                        RoundedRectangle(cornerRadius: DS.radiusMedium)
                             .fill(Color(.systemGray6))
                     )
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, DS.horizontalPadding)
                 }
-                .background(Color.white)
+                .background(DS.cardBackground)
                 
                 // Results
                 if isSearching {
@@ -112,7 +101,7 @@ struct SearchView: View {
                             .foregroundColor(.gray)
                         
                         Text("Search for products")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(DS.sectionHeader)
                             .foregroundColor(.gray)
                     }
                     Spacer()
@@ -124,7 +113,7 @@ struct SearchView: View {
                             .foregroundColor(.gray)
                         
                         Text("No results found")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(DS.sectionHeader)
                         
                         Text("Try a different search term")
                             .font(.system(size: 14))
@@ -133,33 +122,23 @@ struct SearchView: View {
                     Spacer()
                 } else {
                     ScrollView {
-                        LazyVGrid(columns: [
-                            GridItem(.flexible(), spacing: 24),
-                            GridItem(.flexible(), spacing: 24)
-                        ], spacing: 24) {
+                        LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
                             ForEach(searchResults) { product in
-                                ShortFeatureCard(
+                                UnifiedProductCard(
                                     product: product,
                                     isSaved: savedProductsManager.isProductSaved(product),
                                     isInCart: cartManager.isInCart(product),
-                                    onSaveTapped: {
-                                        savedProductsManager.toggleSaveProduct(product)
-                                    },
-                                    onAddToCart: {
-                                        cartManager.addToCart(product)
-                                    },
-                                    onCardTapped: {
-                                        selectedProduct = product
-                                    },
-                                    onCompanyTapped: nil
+                                    onCardTapped: { selectedProduct = product },
+                                    onSaveTapped: { savedProductsManager.toggleSaveProduct(product) },
+                                    onAddToCart: { cartManager.addToCart(product) }
                                 )
                             }
                         }
-                        .padding(20)
+                        .padding(DS.gridSpacing)
                     }
                 }
             }
-            .background(Color.white)
+            .background(DS.cardBackground)
             .navigationBarHidden(true)
         }
         .sheet(item: $selectedProduct) { product in

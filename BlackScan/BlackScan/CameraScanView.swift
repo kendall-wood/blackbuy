@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Main camera scanning view - matches screenshots 6 & 7 exactly
+/// Main camera scanning view (legacy VisionKit-based scanner)
 struct CameraScanView: View {
     
     @StateObject private var typesenseClient = TypesenseClient()
@@ -22,19 +22,17 @@ struct CameraScanView: View {
             }
             .ignoresSafeArea()
             
-            // BlackScan Logo & Instructions Overlay (centered top area)
+            // BlackScan Logo & Instructions Overlay
             VStack {
                 Spacer()
                     .frame(height: 80)
                 
                 VStack(spacing: 8) {
-                    // Logo - smaller
                     Text("blackscan")
                         .font(.system(size: 32, weight: .thin))
                         .foregroundColor(.white)
                         .tracking(2)
                     
-                    // Simple instruction
                     Text("Scan any product to")
                         .font(.system(size: 16, weight: .regular))
                         .foregroundColor(.white.opacity(0.9))
@@ -47,13 +45,10 @@ struct CameraScanView: View {
                 Spacer()
             }
             
-            // Top Corner Button (flashlight only)
+            // Top Corner Button (flashlight)
             VStack {
                 HStack {
-                    // Flashlight Button - top left
-                    Button(action: {
-                        flashlightOn.toggle()
-                    }) {
+                    Button(action: { flashlightOn.toggle() }) {
                         ZStack {
                             Circle()
                                 .fill(Color.white)
@@ -61,7 +56,7 @@ struct CameraScanView: View {
                             
                             Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
                                 .font(.system(size: 22))
-                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                                .foregroundColor(DS.brandBlue)
                         }
                     }
                     .padding(.leading, 20)
@@ -73,13 +68,12 @@ struct CameraScanView: View {
                 Spacer()
             }
             
-            // Large Blue "View Products" Button (appears when scan finds results)
+            // Large Blue "View Products" Button
             if !searchResults.isEmpty && !isShowingResults {
                 VStack {
                     Spacer()
                     
                     VStack(spacing: 12) {
-                        // Scan Again Button
                         Button(action: {
                             searchResults = []
                             lastClassificationResult = nil
@@ -90,23 +84,19 @@ struct CameraScanView: View {
                                 Text("Scan Again")
                                     .font(.system(size: 18, weight: .bold))
                             }
-                            .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            .foregroundColor(DS.brandBlue)
                             .frame(width: 200, height: 50)
                             .background(
-                                RoundedRectangle(cornerRadius: 25)
+                                RoundedRectangle(cornerRadius: DS.radiusPill)
                                     .fill(Color.white)
                             )
                         }
                         
-                        // Shake to report text
                         Text("Shake to report issue")
                             .font(.system(size: 13, weight: .regular))
                             .foregroundColor(.white.opacity(0.7))
                         
-                        // View Products Button
-                        Button(action: {
-                            isShowingResults = true
-                        }) {
+                        Button(action: { isShowingResults = true }) {
                             HStack(spacing: 16) {
                                 Image(systemName: "list.bullet")
                                     .font(.system(size: 24, weight: .medium))
@@ -126,11 +116,11 @@ struct CameraScanView: View {
                                 
                                 Spacer()
                             }
-                            .padding(.horizontal, 24)
+                            .padding(.horizontal, DS.horizontalPadding)
                             .frame(height: 70)
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color(red: 0.26, green: 0.63, blue: 0.95))
+                                    .fill(DS.brandGradient)
                             )
                         }
                         .padding(.horizontal, 40)
@@ -139,7 +129,6 @@ struct CameraScanView: View {
                 }
             }
         }
-        // Scan Results Bottom Sheet
         .sheet(isPresented: $isShowingResults) {
             ScanResultsSheet(
                 results: searchResults,
@@ -161,13 +150,11 @@ struct CameraScanView: View {
         lastClassificationResult = classificationResult
         
         if Env.isDebugMode {
-            print("🔍 Recognized: \(recognizedText)")
-            print("📋 Classified as: \(classificationResult.productType) (\(classificationResult.confidence))")
+            print("Recognized: \(recognizedText)")
+            print("Classified as: \(classificationResult.productType) (\(classificationResult.confidence))")
         }
         
-        // Only search if confidence is reasonable
         guard classificationResult.confidence >= 0.2 else { return }
-        
         performSearch(with: classificationResult)
     }
     
@@ -225,7 +212,7 @@ struct ScanResultsSheet: View {
                     if let classification = classification {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Black-owned \(classification.productType)")
-                                .font(.system(size: 28, weight: .bold))
+                                .font(DS.pageTitle)
                             
                             Text("\(results.count) products found")
                                 .font(.system(size: 16, weight: .regular))
@@ -235,27 +222,17 @@ struct ScanResultsSheet: View {
                         .padding(.top, 20)
                     }
                     
-                    // Products Grid (2 columns with numbers)
-                    let columns = [
-                        GridItem(.flexible(), spacing: 16),
-                        GridItem(.flexible(), spacing: 16)
-                    ]
-                    
-                    LazyVGrid(columns: columns, spacing: 20) {
+                    // Products Grid using UnifiedProductCard
+                    LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
                         ForEach(Array(results.enumerated()), id: \.element.id) { index, product in
-                            ProductCardWithNumber(
+                            UnifiedProductCard(
                                 product: product,
-                                number: index + 1,
                                 isSaved: savedProductsManager.isProductSaved(product),
-                                onSaveTapped: {
-                                    savedProductsManager.toggleSaveProduct(product)
-                                },
-                                onAddToCart: {
-                                    cartManager.addToCart(product)
-                                },
-                                onCardTapped: {
-                                    selectedProduct = product
-                                }
+                                isInCart: cartManager.isInCart(product),
+                                numberBadge: index + 1,
+                                onCardTapped: { selectedProduct = product },
+                                onSaveTapped: { savedProductsManager.toggleSaveProduct(product) },
+                                onAddToCart: { cartManager.addToCart(product) }
                             )
                         }
                     }
@@ -263,7 +240,7 @@ struct ScanResultsSheet: View {
                     .padding(.bottom, 40)
                 }
             }
-            .background(Color.white)
+            .background(DS.cardBackground)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -274,9 +251,7 @@ struct ScanResultsSheet: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        dismiss()
-                    }) {
+                    Button(action: { dismiss() }) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 24))
                             .foregroundColor(Color(.systemGray))
@@ -287,80 +262,6 @@ struct ScanResultsSheet: View {
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
-        }
-    }
-}
-
-/// Product card with number badge (for scan results)
-struct ProductCardWithNumber: View {
-    let product: Product
-    let number: Int
-    let isSaved: Bool
-    let onSaveTapped: () -> Void
-    let onAddToCart: () -> Void
-    let onCardTapped: () -> Void
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Product Image with number badge
-            ZStack(alignment: .topLeading) {
-                AsyncImage(url: URL(string: product.imageUrl)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Color(.systemGray6)
-                        .overlay(
-                            ProgressView()
-                        )
-                }
-                .frame(height: 180)
-                .clipped()
-                
-                // Number Badge
-                Text("\(number)")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 28, height: 28)
-                    .background(Color(red: 0.26, green: 0.63, blue: 0.95))
-                    .clipShape(Circle())
-                    .padding(10)
-            }
-            
-            // Product Info
-            VStack(alignment: .leading, spacing: 6) {
-                Text(product.name)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
-                    .frame(height: 36, alignment: .top)
-                
-                Text(product.company)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                
-                HStack {
-                    Text(product.formattedPrice)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Button(action: onSaveTapped) {
-                        Image(systemName: isSaved ? "heart.fill" : "heart")
-                            .font(.system(size: 18))
-                            .foregroundColor(isSaved ? .red : .gray)
-                    }
-                }
-            }
-            .padding(12)
-        }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-        .onTapGesture {
-            onCardTapped()
         }
     }
 }

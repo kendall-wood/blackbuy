@@ -24,6 +24,7 @@ struct BlackScanApp: App {
                 .environmentObject(savedCompaniesManager)
                 .environmentObject(authManager)
                 .environmentObject(scanHistoryManager)
+                .preferredColorScheme(.light)
         }
     }
 }

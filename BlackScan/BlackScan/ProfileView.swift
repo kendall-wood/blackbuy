@@ -1,18 +1,18 @@
 import SwiftUI
 import AuthenticationServices
 
-/// Profile modal - matches screenshot 4 exactly
+/// Profile modal
 struct ProfileView: View {
     
-    @Binding var selectedTab: BottomNavBar.AppTab
+    @Binding var selectedTab: AppTab
     @EnvironmentObject var authManager: AppleAuthManager
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var cartManager: CartManager
     
     var body: some View {
         VStack(spacing: 0) {
-            // Custom Header
-            header
+            // Header
+            AppHeader(centerContent: .title("Profile"), onBack: { selectedTab = .scan })
             
             // Content
             ScrollView {
@@ -31,51 +31,12 @@ struct ProfileView: View {
                     // Legal Section
                     legalSection
                 }
-                .padding(.top, 24)
+                .padding(.top, DS.horizontalPadding)
                 .padding(.bottom, 40)
             }
-            .background(Color.white)
+            .background(DS.cardBackground)
         }
-        .background(Color.white)
-    }
-    
-    // MARK: - Header
-    
-    private var header: some View {
-        HStack {
-            // Back Button
-            Button(action: {
-                selectedTab = .scan
-            }) {
-                ZStack {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 50, height: 50)
-                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                    
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
-                }
-            }
-            .buttonStyle(.plain)
-            
-            Spacer()
-            
-            // Profile Title
-            Text("Profile")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.black)
-            
-            Spacer()
-            
-            // Spacer to balance the layout
-            Color.clear
-                .frame(width: 50, height: 50)
-        }
-        .frame(height: 60)
-        .padding(.horizontal, 20)
-        .background(Color.white)
+        .background(DS.cardBackground)
     }
     
     // MARK: - Welcome Section
@@ -85,7 +46,7 @@ struct ProfileView: View {
             // Avatar Circle
             ZStack {
                 Circle()
-                    .fill(Color(red: 0.26, green: 0.63, blue: 0.95))
+                    .fill(DS.brandBlue)
                     .frame(width: 120, height: 120)
                 
                 Image(systemName: "person.fill")
@@ -111,9 +72,9 @@ struct ProfileView: View {
     private var getStartedSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Get Started")
-                .font(.system(size: 18, weight: .bold))
+                .font(DS.sectionHeader)
                 .foregroundColor(.black)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, DS.horizontalPadding)
             
             // Save Your Favorites Card
             VStack(spacing: 20) {
@@ -126,9 +87,9 @@ struct ProfileView: View {
                         .font(.system(size: 14, weight: .regular))
                         .foregroundColor(Color(.systemGray))
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, DS.horizontalPadding)
                 }
-                .padding(.top, 24)
+                .padding(.top, DS.horizontalPadding)
                 
                 // Sign In Button
                 SignInWithAppleButton(
@@ -141,18 +102,18 @@ struct ProfileView: View {
                     }
                 )
                 .frame(height: 48)
-                .cornerRadius(12)
+                .cornerRadius(DS.radiusMedium)
                 .padding(.horizontal, 50)
-                .padding(.bottom, 24)
+                .padding(.bottom, DS.horizontalPadding)
                 .onTapGesture {
                     authManager.signIn()
                 }
             }
             .background(
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: DS.radiusLarge)
                     .fill(Color(red: 0.96, green: 0.96, blue: 0.96))
             )
-            .padding(.horizontal, 24)
+            .padding(.horizontal, DS.horizontalPadding)
         }
     }
     
@@ -161,9 +122,9 @@ struct ProfileView: View {
     private var savedProductsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Saved Products")
-                .font(.system(size: 18, weight: .bold))
+                .font(DS.sectionHeader)
                 .foregroundColor(.black)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, DS.horizontalPadding)
             
             VStack(spacing: 0) {
                 // Saved Items Row
@@ -183,7 +144,7 @@ struct ProfileView: View {
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(Color(.systemGray))
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, DS.horizontalPadding)
                 .padding(.vertical, 16)
                 
                 Divider()
@@ -196,26 +157,26 @@ struct ProfileView: View {
                     HStack {
                         Image(systemName: "trash")
                             .font(.system(size: 18))
-                            .foregroundColor(.red)
+                            .foregroundColor(DS.brandRed)
                             .frame(width: 40)
                         
                         Text("Clear All Saved")
                             .font(.system(size: 16, weight: .regular))
-                            .foregroundColor(.red)
+                            .foregroundColor(DS.brandRed)
                         
                         Spacer()
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, DS.horizontalPadding)
                     .padding(.vertical, 16)
                 }
                 .buttonStyle(.plain)
             }
             .background(
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: DS.radiusLarge)
                     .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
+                    .dsCardShadow()
             )
-            .padding(.horizontal, 24)
+            .padding(.horizontal, DS.horizontalPadding)
         }
     }
     
@@ -226,13 +187,13 @@ struct ProfileView: View {
             HStack(spacing: 12) {
                 Image(systemName: "doc.text.fill")
                     .font(.system(size: 22))
-                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                    .foregroundColor(DS.brandBlue)
                 
                 Text("Legal")
                     .font(.system(size: 20, weight: .medium))
                     .foregroundColor(.black)
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, DS.horizontalPadding)
             
             VStack(spacing: 0) {
                 // Privacy Policy Row
@@ -257,17 +218,17 @@ struct ProfileView: View {
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(Color(.systemGray3))
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, DS.horizontalPadding)
                     .padding(.vertical, 16)
                 }
                 .buttonStyle(.plain)
             }
             .background(
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: DS.radiusLarge)
                     .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
+                    .dsCardShadow()
             )
-            .padding(.horizontal, 24)
+            .padding(.horizontal, DS.horizontalPadding)
         }
     }
 }

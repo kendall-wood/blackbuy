@@ -7,7 +7,7 @@ struct ScanView: View {
     
     // MARK: - State Properties
     
-    @Binding var selectedTab: BottomNavBar.AppTab
+    @Binding var selectedTab: AppTab
     @StateObject private var typesenseClient = TypesenseClient()
     @State private var isShowingResults = false
     @State private var scanResults: [ScoredProduct] = []
@@ -20,7 +20,7 @@ struct ScanView: View {
     @State private var shouldCapturePhoto = false
     
     // Default initializer for binding
-    init(selectedTab: Binding<BottomNavBar.AppTab> = .constant(.scan)) {
+    init(selectedTab: Binding<AppTab> = .constant(.scan)) {
         self._selectedTab = selectedTab
     }
     
@@ -63,11 +63,11 @@ struct ScanView: View {
                                 Circle()
                                     .fill(Color.white)
                                     .frame(width: 50, height: 50)
-                                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                                    .dsButtonShadow()
                                 
                                 Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
                                     .font(.system(size: 20))
-                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                                    .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
@@ -92,11 +92,11 @@ struct ScanView: View {
                                 Circle()
                                     .fill(Color.white)
                                     .frame(width: 50, height: 50)
-                                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                                    .dsButtonShadow()
                                 
                                 Image(systemName: "person.fill")
                                     .font(.system(size: 20))
-                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                                    .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
@@ -136,29 +136,29 @@ struct ScanView: View {
                         HStack(spacing: 10) {
                             if scanState == .capturing || scanState == .analyzing || scanState == .searching {
                                 ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: Color(red: 0.26, green: 0.63, blue: 0.95)))
+                                    .progressViewStyle(CircularProgressViewStyle(tint: DS.brandBlue))
                             } else {
                                 Image(systemName: "barcode.viewfinder")
                                     .font(.system(size: 18))
-                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                                    .foregroundColor(DS.brandBlue)
                             }
                             
                             Text(scanButtonText)
                                 .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                                .foregroundColor(DS.brandBlue)
                         }
                         .padding(.horizontal, 28)
                         .padding(.vertical, 14)
                         .background(Color.white)
-                        .cornerRadius(25)
-                        .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                        .cornerRadius(DS.radiusPill)
+                        .dsButtonShadow()
                     }
                     .buttonStyle(.plain)
                     .disabled(scanState == .capturing || scanState == .analyzing || scanState == .searching)
                     
                     Text("Shake to report issue")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(red: 0.67, green: 0.67, blue: 0.67))
+                        .foregroundColor(Color(.systemGray))
                     
                     Spacer()
                 }
@@ -198,9 +198,9 @@ struct ScanView: View {
                                     .padding(.trailing, 18)
                             }
                             .frame(width: geometry.size.width * 0.88, height: 75)
-                            .background(Color(red: 0.26, green: 0.63, blue: 0.95))
+                            .background(DS.brandGradient)
                             .cornerRadius(20)
-                            .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                            .dsButtonShadow()
                         }
                         .buttonStyle(.plain)
                         .padding(.bottom, 140)
@@ -219,11 +219,11 @@ struct ScanView: View {
                                 Circle()
                                     .fill(Color.white)
                                     .frame(width: 55, height: 55)
-                                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                                    .dsButtonShadow()
                                 
                                 Image(systemName: "clock.fill")
                                     .font(.system(size: 22))
-                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                                    .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
@@ -248,11 +248,11 @@ struct ScanView: View {
                                 Circle()
                                     .fill(Color.white)
                                     .frame(width: 55, height: 55)
-                                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                                    .dsButtonShadow()
                                 
                                 Image(systemName: "heart.fill")
                                     .font(.system(size: 22))
-                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                                    .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
@@ -264,11 +264,11 @@ struct ScanView: View {
                                 Circle()
                                     .fill(Color.white)
                                     .frame(width: 55, height: 55)
-                                    .shadow(color: Color.black.opacity(0.25), radius: 4, x: 0, y: 2)
+                                    .dsButtonShadow()
                                 
                                 Image(systemName: "storefront.fill")
                                     .font(.system(size: 22))
-                                    .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
+                                    .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
@@ -332,14 +332,14 @@ struct ScanView: View {
         case .capturing, .analyzing, .searching:
             return .green
         case .results:
-            return Color(red: 0.26, green: 0.63, blue: 0.95) // Blue
+            return DS.brandBlue // Blue
         }
     }
     
     private var buttonTextColor: Color {
         switch scanState {
         case .initial:
-            return Color(red: 0.26, green: 0.63, blue: 0.95) // Blue
+            return DS.brandBlue // Blue
         case .capturing, .analyzing, .searching, .results:
             return .white
         }
@@ -825,7 +825,7 @@ struct ScanView: View {
                     successResultsContent
                 }
             }
-            .background(Color.white)
+            .background(DS.cardBackground)
             .navigationBarHidden(true)
         }
         .presentationDetents(resultSheetDetents)
@@ -881,7 +881,7 @@ struct ScanView: View {
             Divider()
                 .background(Color(.systemGray5))
         }
-        .background(Color.white)
+        .background(DS.cardBackground)
     }
     
     private func errorContent(_ error: String) -> some View {
@@ -897,7 +897,7 @@ struct ScanView: View {
                 .foregroundColor(.black)
             
             Text(error)
-                .font(.system(size: 15))
+                .font(DS.body)
                 .foregroundColor(Color(.systemGray))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
@@ -913,7 +913,7 @@ struct ScanView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
+        .background(DS.cardBackground)
     }
     
     private var emptyResultsContent: some View {
@@ -929,7 +929,7 @@ struct ScanView: View {
                 .foregroundColor(.black)
             
             Text("Try scanning again with better lighting or a clearer view of the product label.")
-                .font(.system(size: 15))
+                .font(DS.body)
                 .foregroundColor(Color(.systemGray))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
@@ -944,39 +944,36 @@ struct ScanView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
+        .background(DS.cardBackground)
     }
     
     private var successResultsContent: some View {
         ScrollView {
-            LazyVGrid(columns: [
-                GridItem(.flexible(), spacing: 20),
-                GridItem(.flexible(), spacing: 20)
-            ], spacing: 20) {
+            LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
                 ForEach(scanResults) { scoredProduct in
-                    NavigationLink(destination: ProductDetailView(product: scoredProduct.product)) {
-                        ProductCard(product: scoredProduct.product, onBuyTapped: {
-                            // Open product URL in Safari
+                    UnifiedProductCard(
+                        product: scoredProduct.product,
+                        showHeart: false,
+                        onCardTapped: {
                             if let url = URL(string: scoredProduct.product.productUrl) {
                                 UIApplication.shared.open(url)
                             }
-                        })
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                        }
+                    )
                 }
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, DS.horizontalPadding)
             .padding(.top, 20)
             .padding(.bottom, 100)
         }
-        .background(Color.white)
+        .background(DS.cardBackground)
     }
     
     private func confidenceColor(_ confidence: Double) -> Color {
         if confidence >= 0.75 {
             return .green  // Excellent match (name + form match)
         } else if confidence >= 0.60 {
-            return Color(red: 0.6, green: 0.8, blue: 0.4) // Light green (name match, form mismatch)
+            return Color(red: 0.6, green: 0.8, blue: 0.4) // light green for decent match // Light green (name match, form mismatch)
         } else if confidence >= 0.45 {
             return .orange  // Decent match (partial name match)
         } else {

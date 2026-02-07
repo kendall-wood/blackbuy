@@ -1,138 +1,194 @@
 import SwiftUI
 
-/// Reusable product card component matching PRD's clean aesthetic
-/// Displays product image, name, company, and price with "Buy" action
-struct ProductCard: View {
+// MARK: - Unified Product Card
+
+/// Single configurable product card used across the entire app.
+/// Replaces ShortFeatureCard, SavedProductCard, ProductCardWithNumber, and old ProductCard.
+struct UnifiedProductCard: View {
     let product: Product
-    let onBuyTapped: () -> Void
     
-    // MARK: - Layout Constants
+    // State flags
+    var isSaved: Bool = false
+    var isInCart: Bool = false
     
-    private let cardCornerRadius: CGFloat = 12
-    private let cardPadding: CGFloat = 12
-    private let spacing: CGFloat = 8
+    // Configuration
+    var showHeart: Bool = true
+    var showAddToCart: Bool = true
+    var heartAlwaysFilled: Bool = false
+    var numberBadge: Int? = nil
+    
+    // Callbacks
+    var onCardTapped: (() -> Void)? = nil
+    var onSaveTapped: (() -> Void)? = nil
+    var onAddToCart: (() -> Void)? = nil
+    var onCompanyTapped: (() -> Void)? = nil
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Product Image
-            productImage
+        VStack(alignment: .leading, spacing: 0) {
+            // Image area with optional badge and heart
+            ZStack {
+                // Number badge (top-left)
+                if let number = numberBadge {
+                    VStack {
+                        HStack {
+                            Text("\(number)")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 28, height: 28)
+                                .background(DS.brandBlue)
+                                .clipShape(Circle())
+                                .padding(10)
+                            Spacer()
+                        }
+                        Spacer()
+                    }
+                    .zIndex(2)
+                }
+                
+                // Heart button (top-right)
+                if showHeart {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Button(action: { onSaveTapped?() }) {
+                                Image(systemName: (heartAlwaysFilled || isSaved) ? "heart.fill" : "heart")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor((heartAlwaysFilled || isSaved) ? DS.brandRed : .gray)
+                                    .frame(width: 32, height: 32)
+                                    .background(Color.white.opacity(0.9))
+                                    .clipShape(Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .padding(10)
+                        }
+                        Spacer()
+                    }
+                    .zIndex(2)
+                }
+                
+                // Product image
+                CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    Color.white
+                        .overlay(ProgressView())
+                }
+                .frame(width: 150, height: 150)
+                .background(Color.white)
+                .cornerRadius(DS.radiusMedium)
+                .clipped()
+                .frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
+            .padding(.bottom, 6)
+            .contentShape(Rectangle())
+            .onTapGesture { onCardTapped?() }
             
-            // Product Details
+            // Product info
             VStack(alignment: .leading, spacing: 4) {
-                // Product Name (2 lines max)
+                // Company name
+                if let onCompanyTapped = onCompanyTapped {
+                    Button(action: onCompanyTapped) {
+                        Text(product.company)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(DS.brandBlue)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    Text(product.company)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(DS.brandBlue)
+                        .lineLimit(1)
+                }
+                
+                // Product name
                 Text(product.name)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.black)
                     .lineLimit(2)
-                    .multilineTextAlignment(.leading)
+                    .padding(.bottom, 4)
                 
-                // Company Name
-                Text(product.company)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                
-                // Price and Buy Button Row
+                // Price and add-to-cart button
                 HStack {
-                    // Price
                     Text(product.formattedPrice)
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.primary)
+                        .foregroundColor(.black)
                     
                     Spacer()
                     
-                    // Buy Button
-                    buyButton
+                    if showAddToCart {
+                        Button(action: { onAddToCart?() }) {
+                            Image(systemName: isInCart ? "checkmark" : "plus")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.white)
+                                .frame(width: 28, height: 28)
+                                .background(
+                                    Group {
+                                        if isInCart {
+                                            Circle().fill(DS.brandGreen)
+                                        } else {
+                                            Circle().fill(DS.brandGradient)
+                                        }
+                                    }
+                                )
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .padding(.top, 8)
             }
-            .padding(.horizontal, cardPadding)
-            .padding(.bottom, cardPadding)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
+            .padding(.top, 6)
         }
-        .background(Color(.systemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: cardCornerRadius))
-        .shadow(
-            color: Color.black.opacity(0.1),
-            radius: 4,
-            x: 0,
-            y: 2
-        )
-    }
-    
-    // MARK: - Subviews
-    
-    private var productImage: some View {
-        AsyncImage(url: URL(string: product.imageUrl)) { image in
-            image
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-        } placeholder: {
-            // Placeholder with subtle background and icon
-            ZStack {
-                Color(.systemGray6)
-                
-                Image(systemName: "photo")
-                    .font(.system(size: 24))
-                    .foregroundColor(.secondary)
-            }
-        }
-        .aspectRatio(1, contentMode: .fill)  // 1:1 SQUARE aspect ratio
-        .clipped()
-        .clipShape(
-            RoundedRectangle(
-                cornerRadius: cardCornerRadius,
-                style: .continuous
-            )
-        )
-        .overlay(
-            // Subtle overlay for better text readability if needed
-            RoundedRectangle(cornerRadius: cardCornerRadius)
-                .fill(Color.clear)
-        )
-    }
-    
-    private var buyButton: some View {
-        Button(action: onBuyTapped) {
-            Text("Buy")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.white)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.accentColor)
-                )
-        }
-        .buttonStyle(PlainButtonStyle())
+        .background(DS.cardBackground)
+        .cornerRadius(DS.radiusLarge)
+        .dsCardShadow()
     }
 }
 
 // MARK: - Grid Layout Helper
 
-extension ProductCard {
-    /// Creates a LazyVGrid for product cards with responsive columns
-    static func createGrid<Content: View>(
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        let columns = [
-            GridItem(.adaptive(minimum: 160, maximum: 200), spacing: 16)
+extension UnifiedProductCard {
+    /// Standard 2-column product grid columns used across the app.
+    static var gridColumns: [GridItem] {
+        [
+            GridItem(.flexible(), spacing: DS.gridSpacing),
+            GridItem(.flexible(), spacing: DS.gridSpacing)
         ]
-        
-        return LazyVGrid(columns: columns, spacing: 16) {
-            content()
-        }
-        .padding(.horizontal, 16)
     }
 }
 
 // MARK: - Preview and Sample Data
 
 #Preview("Single Card") {
-    ProductCard(
+    UnifiedProductCard(
         product: Product.sampleShampoo,
-        onBuyTapped: {
-            print("Buy tapped for sample product")
-        }
+        isSaved: false,
+        isInCart: false,
+        onCardTapped: { print("Card tapped") },
+        onSaveTapped: { print("Save tapped") },
+        onAddToCart: { print("Add to cart") },
+        onCompanyTapped: { print("Company tapped") }
+    )
+    .frame(width: 180)
+    .padding()
+}
+
+#Preview("Numbered Card") {
+    UnifiedProductCard(
+        product: Product.sampleShampoo,
+        isSaved: true,
+        isInCart: false,
+        numberBadge: 1,
+        onCardTapped: { print("Card tapped") },
+        onSaveTapped: { print("Save tapped") },
+        onAddToCart: { print("Add to cart") }
     )
     .frame(width: 180)
     .padding()
@@ -140,16 +196,17 @@ extension ProductCard {
 
 #Preview("Grid Layout") {
     ScrollView {
-        ProductCard.createGrid {
+        LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
             ForEach(Product.sampleProducts) { product in
-                ProductCard(
+                UnifiedProductCard(
                     product: product,
-                    onBuyTapped: {
-                        print("Buy tapped for \(product.name)")
-                    }
+                    onCardTapped: { print("Tapped \(product.name)") },
+                    onSaveTapped: { print("Save \(product.name)") },
+                    onAddToCart: { print("Cart \(product.name)") }
                 )
             }
         }
+        .padding(.horizontal, DS.horizontalPadding)
     }
     .background(Color(.systemGroupedBackground))
 }

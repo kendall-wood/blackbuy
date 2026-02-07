@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// Saved products and companies view - matches screenshot 2 exactly
+/// Saved products and companies view
 struct SavedView: View {
     
-    @Binding var selectedTab: BottomNavBar.AppTab
+    @Binding var selectedTab: AppTab
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
@@ -21,12 +21,12 @@ struct SavedView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Custom Header
-            header
+            // Header
+            AppHeader(centerContent: .logo, onBack: { selectedTab = .scan })
             
             // Content
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: DS.sectionSpacing) {
                     // Saved Companies Section
                     if !savedCompaniesManager.savedCompanies.isEmpty {
                         savedCompaniesSection
@@ -38,55 +38,13 @@ struct SavedView: View {
                 .padding(.top, 20)
                 .padding(.bottom, 40)
             }
-            .background(Color.white)
+            .background(DS.cardBackground)
         }
-        .background(Color.white)
+        .background(DS.cardBackground)
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
         }
-    }
-    
-    // MARK: - Header
-    
-    private var header: some View {
-        HStack {
-            // Back Button
-            Button(action: {
-                selectedTab = .scan
-            }) {
-                ZStack {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 50, height: 50)
-                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                    
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
-                }
-            }
-            .buttonStyle(.plain)
-            
-            Spacer()
-            
-            // BlackBuy Logo
-            Image("shop_logo")
-                .renderingMode(.template)
-                .resizable()
-                .scaledToFit()
-                .frame(height: 28)
-                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
-            
-            Spacer()
-            
-            // Spacer to balance the layout
-            Color.clear
-                .frame(width: 50, height: 50)
-        }
-        .frame(height: 60)
-        .padding(.horizontal, 20)
-        .background(Color.white)
     }
     
     // MARK: - Saved Companies Section
@@ -95,7 +53,7 @@ struct SavedView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .center) {
                 Text("Saved Brands")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(DS.sectionHeader)
                     .foregroundColor(.black)
                 
                 Text("\(savedCompaniesManager.savedCompanies.count)")
@@ -104,7 +62,7 @@ struct SavedView: View {
                 
                 Spacer()
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, DS.horizontalPadding)
             
             // Companies Horizontal Scroll
             ScrollView(.horizontal, showsIndicators: false) {
@@ -120,7 +78,7 @@ struct SavedView: View {
                         .frame(width: 140)
                     }
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, DS.horizontalPadding)
                 .padding(.top, 8)
                 .padding(.bottom, 12)
             }
@@ -133,7 +91,7 @@ struct SavedView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .center) {
                 Text("Saved Products")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(DS.sectionHeader)
                     .foregroundColor(.black)
                 
                 Text("\(savedProductsManager.savedProducts.count)")
@@ -142,39 +100,20 @@ struct SavedView: View {
                 
                 Spacer()
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, DS.horizontalPadding)
             
             // Sort Menu
             HStack {
-                Menu {
+                DSSortButton(label: sortOrderLabel) {
                     Button("Recently Saved") { sortOrder = .recentlySaved }
                     Button("Alphabetical") { sortOrder = .alphabetical }
                     Button("Price: High to Low") { sortOrder = .priceHighToLow }
                     Button("Price: Low to High") { sortOrder = .priceLowToHigh }
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.up.arrow.down")
-                            .font(.system(size: 13, weight: .medium))
-                        Text(sortOrderLabel)
-                            .font(.system(size: 14, weight: .medium))
-                    }
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color.white)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
-                            )
-                    )
                 }
-                .buttonStyle(.plain)
                 
                 Spacer()
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, DS.horizontalPadding)
             
             // Products Grid
             if savedProductsManager.savedProducts.isEmpty {
@@ -195,30 +134,21 @@ struct SavedView: View {
     }
     
     private var productsGrid: some View {
-        let columns = [
-            GridItem(.flexible(), spacing: 20),
-            GridItem(.flexible(), spacing: 20)
-        ]
-        
-        return LazyVGrid(columns: columns, spacing: 20) {
+        LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
             ForEach(sortedProducts) { product in
-                SavedProductCard(
+                UnifiedProductCard(
                     product: product,
+                    isSaved: true,
                     isInCart: cartManager.isInCart(product),
-                    onUnsave: {
-                        savedProductsManager.removeSavedProduct(product)
-                    },
-                    onAddToCart: {
-                        cartManager.addToCart(product)
-                    },
-                    onCardTapped: {
-                        selectedProduct = product
-                    }
+                    heartAlwaysFilled: true,
+                    onCardTapped: { selectedProduct = product },
+                    onSaveTapped: { savedProductsManager.removeSavedProduct(product) },
+                    onAddToCart: { cartManager.addToCart(product) }
                 )
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, 24)
+        .padding(.horizontal, DS.horizontalPadding)
     }
     
     private var sortedProducts: [Product] {
@@ -241,10 +171,10 @@ struct SavedView: View {
                 .foregroundColor(.secondary)
             
             Text("No Saved Products")
-                .font(.system(size: 18, weight: .semibold))
+                .font(DS.sectionHeader)
             
             Text("Tap the heart icon on products to save them here")
-                .font(.system(size: 15, weight: .regular))
+                .font(DS.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
@@ -253,7 +183,7 @@ struct SavedView: View {
     }
 }
 
-/// Company circle card with product image (matches ShopView style)
+/// Company circle card with product image (matches FeaturedBrandCircleCard style)
 struct CompanyCircleCard: View {
     let company: SavedCompaniesManager.SavedCompany
     let typesenseClient: TypesenseClient
@@ -265,44 +195,30 @@ struct CompanyCircleCard: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             VStack(spacing: 4) {
-                // Company Logo Circle (using random product image)
-                AsyncImage(url: productImage.flatMap { URL(string: $0) }) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    case .failure(_):
-                        ZStack {
-                            Circle()
-                                .fill(Color(red: 0.95, green: 0.97, blue: 1))
-                            
-                            Text(company.name.prefix(1).uppercased())
-                                .font(.system(size: 32, weight: .medium))
-                                .foregroundColor(Color(red: 0.26, green: 0.63, blue: 0.95))
-                        }
-                    case .empty:
-                        ZStack {
-                            Circle()
-                                .fill(Color(red: 0.95, green: 0.97, blue: 1))
-                            
-                            ProgressView()
-                                .tint(Color(red: 0.26, green: 0.63, blue: 0.95))
-                        }
-                    @unknown default:
+                // Company Logo Circle
+                CachedAsyncImage(url: productImage.flatMap { URL(string: $0) }) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    ZStack {
                         Circle()
-                            .fill(Color(red: 0.95, green: 0.97, blue: 1))
+                            .fill(DS.circleFallbackBg)
+                        
+                        Text(company.name.prefix(1).uppercased())
+                            .font(.system(size: 32, weight: .medium))
+                            .foregroundColor(DS.brandBlue)
                     }
                 }
                 .frame(width: 80, height: 80)
                 .clipShape(Circle())
                 .overlay(
                     Circle()
-                        .stroke(Color(red: 0.26, green: 0.63, blue: 0.95).opacity(0.2), lineWidth: 2)
+                        .stroke(DS.brandBlue.opacity(0.2), lineWidth: 2)
                 )
                 .padding(.top, 12)
                 
-                // Company Name with fixed height container
+                // Company Name
                 Text(company.name)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.black)
@@ -320,15 +236,15 @@ struct CompanyCircleCard: View {
                     .padding(.bottom, 12)
             }
             .frame(maxWidth: .infinity, minHeight: 170)
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+            .background(DS.cardBackground)
+            .cornerRadius(DS.radiusMedium)
+            .dsCardShadow()
             
             // Heart Button
             Button(action: onUnsave) {
                 Image(systemName: "heart.fill")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.red)
+                    .foregroundColor(DS.brandRed)
                     .frame(width: 28, height: 28)
                     .background(Color.white.opacity(0.9))
                     .clipShape(Circle())
@@ -360,97 +276,6 @@ struct CompanyCircleCard: View {
                 print("Error loading product image for \(company.name): \(error)")
             }
         }
-    }
-}
-
-/// Saved product card (matches ShopView style)
-struct SavedProductCard: View {
-    let product: Product
-    let isInCart: Bool
-    let onUnsave: () -> Void
-    let onAddToCart: () -> Void
-    let onCardTapped: () -> Void
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Image with Heart - 1:1 frame, aspect fit, white background, with padding
-            ZStack(alignment: .topTrailing) {
-                CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    Color.white
-                        .overlay(
-                            ProgressView()
-                        )
-                }
-                .frame(width: 150, height: 150)
-                .background(Color.white)
-                .cornerRadius(12)
-                .clipped()
-                .frame(maxWidth: .infinity)
-                
-                // Heart Button (filled red since it's saved)
-                Button(action: onUnsave) {
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.red)
-                        .frame(width: 32, height: 32)
-                        .background(Color.white.opacity(0.9))
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .padding(10)
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 12)
-            .padding(.bottom, 6)
-            .onTapGesture {
-                onCardTapped()
-            }
-            
-            // Product Info
-            VStack(alignment: .leading, spacing: 4) {
-                // Company name first (light grey)
-                    Text(product.company)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color(.systemGray2))
-                        .lineLimit(1)
-                
-                // Product name (black)
-                Text(product.name)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.black)
-                    .lineLimit(2)
-                    .padding(.bottom, 4)
-                
-                // Price and Add button
-                HStack {
-                    Text(product.formattedPrice)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.black)
-                    
-                    Spacer()
-                    
-                    Button(action: onAddToCart) {
-                        Image(systemName: isInCart ? "checkmark" : "plus")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(width: 28, height: 28)
-                            .background(isInCart ? Color(red: 0, green: 0.75, blue: 0.33) : Color(red: 0.26, green: 0.63, blue: 0.95))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.bottom, 12)
-            .padding(.top, 6)
-        }
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 4)
     }
 }
 
