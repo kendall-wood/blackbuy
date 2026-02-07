@@ -228,7 +228,7 @@ struct ScanView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.leading, 20)
-                        .padding(.bottom, 10)
+                        .padding(.bottom, 50)
                         
                         Spacer()
                     }
@@ -274,7 +274,7 @@ struct ScanView: View {
                         .buttonStyle(.plain)
                         .padding(.trailing, 20)
                     }
-                    .padding(.bottom, 10)
+                    .padding(.bottom, 50)
                 }
             }
         }
