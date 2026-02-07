@@ -6,6 +6,7 @@ struct AllFeaturedProductsView: View {
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var toastManager: ToastManager
     
     let excludedProductIds: Set<String>
     
@@ -43,28 +44,50 @@ struct AllFeaturedProductsView: View {
                                 isSaved: savedProductsManager.isProductSaved(product),
                                 isInCart: cartManager.isInCart(product),
                                 onCardTapped: { selectedProduct = product },
-                                onSaveTapped: { savedProductsManager.toggleSaveProduct(product) },
-                                onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) }
+                                onSaveTapped: {
+                                    if savedProductsManager.isProductSaved(product) {
+                                        savedProductsManager.removeSavedProduct(product)
+                                        toastManager.show(.unsaved)
+                                    } else {
+                                        savedProductsManager.saveProduct(product)
+                                        toastManager.show(.saved)
+                                    }
+                                },
+                                onAddToCart: {
+                                    if cartManager.isInCart(product) {
+                                        cartManager.removeFromCart(product)
+                                        toastManager.show(.removedFromCheckout)
+                                    } else {
+                                        cartManager.addToCart(product)
+                                        toastManager.show(.addedToCheckout)
+                                    }
+                                }
                             )
                         }
                     }
                     .padding(DS.gridSpacing)
                     
+                    // Showing count
+                    Text("Showing \(displayedProducts.count) of \(allProducts.count) products")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(Color(.systemGray))
+                        .padding(.top, 8)
+                    
                     // Load More Button
                     if displayedProducts.count < allProducts.count {
                         Button(action: loadMore) {
                             Text("Load More")
-                                .font(.system(size: 16, weight: .semibold))
+                                .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(DS.brandBlue)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 48)
-                                .background(
-                                    RoundedRectangle(cornerRadius: DS.radiusMedium)
-                                        .stroke(DS.brandBlue, lineWidth: 2)
-                                )
+                                .padding(.vertical, 14)
+                                .background(Color.white)
+                                .cornerRadius(DS.radiusLarge)
+                                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
                         }
                         .buttonStyle(.plain)
                         .padding(.horizontal, DS.horizontalPadding)
+                        .padding(.top, 8)
                         .padding(.bottom, 40)
                     }
                 }
@@ -84,43 +107,46 @@ struct AllFeaturedProductsView: View {
     // MARK: - Header
     
     private var header: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                AppBackButton(action: { dismiss() })
-                Spacer()
-            }
+        VStack(alignment: .leading, spacing: 0) {
+            AppHeader(centerContent: .title(""), onBack: { dismiss() })
             
             Text("Featured Products")
-                .font(DS.pageTitle)
+                .font(.system(size: 24, weight: .semibold))
                 .foregroundColor(.black)
+                .padding(.horizontal, DS.horizontalPadding)
+                .padding(.bottom, 12)
             
             // Sort Button
-            Menu {
-                ForEach(SortOrder.allCases, id: \.self) { order in
-                    Button(order.rawValue) {
-                        sortOrder = order
-                        sortProducts()
+            HStack {
+                Menu {
+                    ForEach(SortOrder.allCases, id: \.self) { order in
+                        Button(order.rawValue) {
+                            sortOrder = order
+                            sortProducts()
+                        }
                     }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.up.arrow.down")
+                            .font(.system(size: 13, weight: .medium))
+                        Text("Sort")
+                            .font(.system(size: 14, weight: .medium))
+                    }
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: DS.radiusSmall)
+                            .fill(Color.white)
+                            .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+                    )
                 }
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "arrow.up.arrow.down")
-                        .font(.system(size: 14, weight: .medium))
-                    Text(sortOrder.rawValue)
-                        .font(DS.body)
-                }
-                .foregroundColor(.primary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: DS.radiusLarge)
-                        .stroke(Color(.systemGray4), lineWidth: 1)
-                )
+                
+                Spacer()
             }
+            .padding(.horizontal, DS.horizontalPadding)
+            .padding(.bottom, 12)
         }
-        .padding(.horizontal, DS.horizontalPadding)
-        .padding(.top, 12)
-        .padding(.bottom, 16)
         .background(DS.cardBackground)
     }
     

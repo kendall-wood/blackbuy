@@ -9,6 +9,7 @@ struct CompanyView: View {
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var toastManager: ToastManager
     
     @State private var searchResults: [Product] = []
     @State private var isLoading = false
@@ -49,15 +50,24 @@ struct CompanyView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header with back button and heart
+            // Header with back button, logo, and heart
             HStack {
                 AppBackButton(action: { dismiss() })
                 
                 Spacer()
                 
+                Image("logo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 18)
+                
+                Spacer()
+                
                 // Save brand heart button
                 Button(action: {
+                    let wasSaved = savedCompaniesManager.isCompanySaved(companyName)
                     savedCompaniesManager.toggleSaveCompany(companyName)
+                    toastManager.show(wasSaved ? .unsaved : .saved)
                 }) {
                     Image(systemName: savedCompaniesManager.isCompanySaved(companyName) ? "heart.fill" : "heart")
                         .font(.system(size: 22, weight: .medium))
@@ -76,7 +86,7 @@ struct CompanyView: View {
             
             // Company name below header
             Text(companyName)
-                .font(DS.pageTitle)
+                .font(.system(size: 28, weight: .semibold))
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, DS.horizontalPadding)
@@ -126,8 +136,10 @@ struct CompanyView: View {
                                     onAddToCart: {
                                         if cartManager.isInCart(product) {
                                             cartManager.removeFromCart(product)
+                                            toastManager.show(.removedFromCheckout)
                                         } else {
                                             cartManager.addToCart(product)
+                                            toastManager.show(.addedToCheckout)
                                         }
                                     }
                                 )

@@ -9,6 +9,7 @@ struct SavedView: View {
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var toastManager: ToastManager
     
     @State private var selectedProduct: Product?
     @State private var sortOrder: SortOrder = .recentlySaved
@@ -143,8 +144,19 @@ struct SavedView: View {
                     isInCart: cartManager.isInCart(product),
                     heartAlwaysFilled: true,
                     onCardTapped: { selectedProduct = product },
-                    onSaveTapped: { savedProductsManager.removeSavedProduct(product) },
-                    onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) }
+                    onSaveTapped: {
+                        savedProductsManager.removeSavedProduct(product)
+                        toastManager.show(.unsaved)
+                    },
+                    onAddToCart: {
+                        if cartManager.isInCart(product) {
+                            cartManager.removeFromCart(product)
+                            toastManager.show(.removedFromCheckout)
+                        } else {
+                            cartManager.addToCart(product)
+                            toastManager.show(.addedToCheckout)
+                        }
+                    }
                 )
             }
         }

@@ -409,8 +409,16 @@ struct RecentScansView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            AppHeader(centerContent: .title("Recent Scans"), onBack: { dismiss() })
+            // Header with logo
+            AppHeader(centerContent: .logo, onBack: { dismiss() })
+            
+            // Page title
+            Text("Recent Scans")
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, DS.horizontalPadding)
+                .padding(.bottom, 16)
             
             // Content
             if scanHistoryManager.scanHistory.isEmpty {

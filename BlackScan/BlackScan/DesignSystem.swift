@@ -233,3 +233,162 @@ struct DSSortButton<Content: View>: View {
         .buttonStyle(.plain)
     }
 }
+
+// MARK: - Toast Notification System
+
+/// Types of toast notifications
+enum ToastType {
+    case addedToCheckout
+    case removedFromCheckout
+    case saved
+    case unsaved
+    
+    var icon: String {
+        switch self {
+        case .addedToCheckout: return "checkmark.circle.fill"
+        case .removedFromCheckout: return "minus.circle.fill"
+        case .saved: return "heart.fill"
+        case .unsaved: return "heart"
+        }
+    }
+    
+    var iconColor: Color {
+        switch self {
+        case .addedToCheckout: return DS.brandGreen
+        case .removedFromCheckout: return Color(.systemGray)
+        case .saved: return DS.brandRed
+        case .unsaved: return Color(.systemGray)
+        }
+    }
+    
+    var message: String {
+        switch self {
+        case .addedToCheckout: return "Added to Checkout!"
+        case .removedFromCheckout: return "Removed from Checkout"
+        case .saved: return "Saved!"
+        case .unsaved: return "Removed"
+        }
+    }
+    
+    var targetTab: AppTab {
+        switch self {
+        case .addedToCheckout, .removedFromCheckout: return .checkout
+        case .saved, .unsaved: return .saved
+        }
+    }
+}
+
+/// Global toast manager — inject as environmentObject at the app level
+@MainActor
+class ToastManager: ObservableObject {
+    @Published var currentToast: ToastType? = nil
+    @Published var isVisible: Bool = false
+    
+    private var dismissTask: Task<Void, Never>?
+    
+    func show(_ type: ToastType) {
+        dismissTask?.cancel()
+        
+        withAnimation(.easeOut(duration: 0.2)) {
+            currentToast = type
+            isVisible = true
+        }
+        
+        dismissTask = Task {
+            try? await Task.sleep(nanoseconds: 2_250_000_000) // 2.25 seconds
+            if !Task.isCancelled {
+                withAnimation(.easeIn(duration: 0.2)) {
+                    isVisible = false
+                }
+                try? await Task.sleep(nanoseconds: 250_000_000)
+                if !Task.isCancelled {
+                    currentToast = nil
+                }
+            }
+        }
+    }
+}
+
+/// Toast overlay view — place at the top of the view hierarchy
+struct ToastOverlay: View {
+    @EnvironmentObject var toastManager: ToastManager
+    var onNavigate: ((AppTab) -> Void)? = nil
+    
+    var body: some View {
+        VStack {
+            if toastManager.isVisible, let toast = toastManager.currentToast {
+                Button(action: {
+                    onNavigate?(toast.targetTab)
+                    withAnimation(.easeIn(duration: 0.15)) {
+                        toastManager.isVisible = false
+                    }
+                }) {
+                    HStack(spacing: 10) {
+                        Image(systemName: toast.icon)
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(toast.iconColor)
+                        
+                        Text(toast.message)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(.black)
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(Color(.systemGray3))
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: DS.radiusPill)
+                            .fill(Color.white)
+                            .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
+                    )
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 24)
+                .padding(.top, 56)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+            
+            Spacer()
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: toastManager.isVisible)
+    }
+}
+
+// MARK: - Toast Window (renders above all sheets/covers)
+
+/// A passthrough window that sits above everything but doesn't block touches
+class ToastWindow: UIWindow {
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard let hitView = super.hitTest(point, with: event) else { return nil }
+        // Only intercept touches on the toast itself, let everything else pass through
+        return rootViewController?.view == hitView ? nil : hitView
+    }
+}
+
+/// Manages a separate UIWindow for toast overlays so they appear above sheets/covers
+class ToastWindowManager {
+    static let shared = ToastWindowManager()
+    private var toastWindow: ToastWindow?
+    
+    func setup(toastManager: ToastManager, onNavigate: @escaping (AppTab) -> Void) {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+        
+        let toastView = ToastOverlay(onNavigate: onNavigate)
+            .environmentObject(toastManager)
+        
+        let hostingController = UIHostingController(rootView: toastView)
+        hostingController.view.backgroundColor = .clear
+        
+        let window = ToastWindow(windowScene: scene)
+        window.rootViewController = hostingController
+        window.isHidden = false
+        window.windowLevel = .alert + 1  // Above everything
+        window.backgroundColor = .clear
+        
+        self.toastWindow = window
+    }
+}

@@ -10,6 +10,7 @@ struct ShopView: View {
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var toastManager: ToastManager
     
     // State for different product sections
     @State private var carouselProducts: [Product] = []
@@ -465,11 +466,23 @@ struct ShopView: View {
                             isInCart: cartManager.isInCart(product),
                             onCardTapped: { selectedProduct = product },
                             onSaveTapped: {
-                                savedProductsManager.isProductSaved(product)
-                                    ? savedProductsManager.removeSavedProduct(product)
-                                    : savedProductsManager.saveProduct(product)
+                                if savedProductsManager.isProductSaved(product) {
+                                    savedProductsManager.removeSavedProduct(product)
+                                    toastManager.show(.unsaved)
+                                } else {
+                                    savedProductsManager.saveProduct(product)
+                                    toastManager.show(.saved)
+                                }
                             },
-                            onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) },
+                            onAddToCart: {
+                                if cartManager.isInCart(product) {
+                                    cartManager.removeFromCart(product)
+                                    toastManager.show(.removedFromCheckout)
+                                } else {
+                                    cartManager.addToCart(product)
+                                    toastManager.show(.addedToCheckout)
+                                }
+                            },
                             onCompanyTapped: { selectedCompany = product.company }
                         )
                     }
@@ -579,11 +592,23 @@ struct ShopView: View {
                             isInCart: cartManager.isInCart(product),
                             onCardTapped: { selectedProduct = product },
                             onSaveTapped: {
-                                savedProductsManager.isProductSaved(product)
-                                    ? savedProductsManager.removeSavedProduct(product)
-                                    : savedProductsManager.saveProduct(product)
+                                if savedProductsManager.isProductSaved(product) {
+                                    savedProductsManager.removeSavedProduct(product)
+                                    toastManager.show(.unsaved)
+                                } else {
+                                    savedProductsManager.saveProduct(product)
+                                    toastManager.show(.saved)
+                                }
                             },
-                            onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) },
+                            onAddToCart: {
+                                if cartManager.isInCart(product) {
+                                    cartManager.removeFromCart(product)
+                                    toastManager.show(.removedFromCheckout)
+                                } else {
+                                    cartManager.addToCart(product)
+                                    toastManager.show(.addedToCheckout)
+                                }
+                            },
                             onCompanyTapped: { selectedCompany = product.company }
                         )
                     }
@@ -626,19 +651,21 @@ struct ShopView: View {
                                 product: product,
                                 isSaved: savedCompaniesManager.isCompanySaved(product.company),
                                 onSaveTapped: {
+                                    let wasSaved = savedCompaniesManager.isCompanySaved(product.company)
                                     savedCompaniesManager.toggleSaveCompany(product.company)
+                                    toastManager.show(wasSaved ? .unsaved : .saved)
                                 },
                                 onCardTapped: {
                                     selectedCompany = product.company
                                 }
                             )
-                            .frame(width: 140)
                         }
                     }
                     .padding(.horizontal, DS.horizontalPadding)
                     .padding(.top, 8)
                     .padding(.bottom, 12)
                 }
+                
             }
         }
     }
@@ -661,16 +688,49 @@ struct ShopView: View {
                             isInCart: cartManager.isInCart(product),
                             onCardTapped: { selectedProduct = product },
                             onSaveTapped: {
-                                savedProductsManager.isProductSaved(product)
-                                    ? savedProductsManager.removeSavedProduct(product)
-                                    : savedProductsManager.saveProduct(product)
+                                if savedProductsManager.isProductSaved(product) {
+                                    savedProductsManager.removeSavedProduct(product)
+                                    toastManager.show(.unsaved)
+                                } else {
+                                    savedProductsManager.saveProduct(product)
+                                    toastManager.show(.saved)
+                                }
                             },
-                            onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) },
+                            onAddToCart: {
+                                if cartManager.isInCart(product) {
+                                    cartManager.removeFromCart(product)
+                                    toastManager.show(.removedFromCheckout)
+                                } else {
+                                    cartManager.addToCart(product)
+                                    toastManager.show(.addedToCheckout)
+                                }
+                            },
                             onCompanyTapped: { selectedCompany = product.company }
                         )
                     }
                 }
                 .padding(.horizontal, DS.horizontalPadding)
+                
+                // See All Products button
+                Button(action: { showingAllFeatured = true }) {
+                    HStack(spacing: 6) {
+                        Text("See All Featured Products")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(DS.brandBlue)
+                        
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(DS.brandBlue)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.white)
+                    .cornerRadius(DS.radiusLarge)
+                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, DS.horizontalPadding)
+                .padding(.top, 16)
             }
         }
     }
@@ -907,67 +967,63 @@ struct FeaturedBrandCircleCard: View {
     let onCardTapped: () -> Void
     
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            Button(action: onCardTapped) {
-                VStack(spacing: 4) {
-                    // Company Logo Circle
-                    CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        ZStack {
-                            Circle()
-                                .fill(DS.circleFallbackBg)
-                            
-                            ProgressView()
-                                .tint(DS.brandBlue)
-                        }
-                    }
-                    .frame(width: 80, height: 80)
-                    .clipShape(Circle())
-                    .overlay(
+        Button(action: onCardTapped) {
+            HStack(spacing: 14) {
+                // Company Logo Circle
+                CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    ZStack {
                         Circle()
-                            .stroke(DS.brandBlue.opacity(0.2), lineWidth: 2)
-                    )
-                    .padding(.top, 12)
-                    
-                    // Company Name
-                    Text(product.company)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.black)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .frame(height: 40, alignment: .top)
-                        .padding(.horizontal, 8)
-                    
-                    Spacer()
-                    
-                    // Category
-                    Text(product.mainCategory)
-                        .font(.system(size: 11, weight: .regular))
-                        .foregroundColor(Color(.systemGray))
-                        .padding(.bottom, 12)
+                            .fill(DS.circleFallbackBg)
+                        
+                        ProgressView()
+                            .tint(DS.brandBlue)
+                    }
                 }
-                .frame(maxWidth: .infinity, minHeight: 170)
-                .background(DS.cardBackground)
-                .cornerRadius(DS.radiusMedium)
-                .dsCardShadow()
+                .frame(width: 56, height: 56)
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(DS.brandBlue.opacity(0.2), lineWidth: 1.5)
+                )
+                
+                // Name and category
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(product.company)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.black)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                    
+                    Text(product.mainCategory)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(Color(.systemGray))
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                }
+                
+                // Heart Button
+                Button(action: onSaveTapped) {
+                    Image(systemName: isSaved ? "heart.fill" : "heart")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(isSaved ? DS.brandRed : .gray)
+                        .frame(width: 32, height: 32)
+                        .background(Color.white.opacity(0.9))
+                        .clipShape(Circle())
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
-            
-            // Heart Button
-            Button(action: onSaveTapped) {
-                Image(systemName: isSaved ? "heart.fill" : "heart")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(isSaved ? DS.brandRed : .gray)
-                    .frame(width: 28, height: 28)
-                    .background(Color.white.opacity(0.9))
-                    .clipShape(Circle())
-            }
-            .buttonStyle(.plain)
-            .padding(8)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(DS.cardBackground)
+            .cornerRadius(DS.radiusMedium)
+            .dsCardShadow()
         }
+        .buttonStyle(.plain)
     }
 }
 

@@ -57,6 +57,7 @@ struct UnifiedProductCard: View {
                                     .frame(width: 32, height: 32)
                                     .background(Color.white.opacity(0.9))
                                     .clipShape(Circle())
+                                    .contentShape(Circle())
                             }
                             .buttonStyle(.plain)
                             .padding(10)

@@ -62,6 +62,7 @@ struct ProductDetailView: View {
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var typesenseClient: TypesenseClient
+    @EnvironmentObject var toastManager: ToastManager
     
     @State private var similarProducts: [Product] = []
     @State private var isLoadingSimilar = false
@@ -229,8 +230,10 @@ struct ProductDetailView: View {
                     Button(action: {
                         if cartManager.isInCart(product) {
                             cartManager.removeFromCart(product)
+                            toastManager.show(.removedFromCheckout)
                         } else {
                             cartManager.addToCart(product)
+                            toastManager.show(.addedToCheckout)
                         }
                     }) {
                         Image(systemName: cartManager.isInCart(product) ? "checkmark" : "plus")

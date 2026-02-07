@@ -878,21 +878,21 @@ struct ScanView: View {
                         if let analysis = lastAnalysis {
                             HStack(spacing: 0) {
                                 Text("Found: ")
-                                    .font(.system(size: 18, weight: .semibold))
+                                    .font(.system(size: 20, weight: .semibold))
                                     .foregroundColor(.black)
                                 Text(analysis.productType)
-                                    .font(.system(size: 18, weight: .semibold))
+                                    .font(.system(size: 20, weight: .semibold))
                                     .foregroundColor(.black)
                             }
                             
                             if !scanResults.isEmpty, let topResult = scanResults.first {
-                                Text("\(topResult.confidencePercentage)% match confidence")
+                                Text("Confidence: \(String(format: "%.1f", topResult.confidenceScore * 100))%")
                                     .font(.system(size: 13, weight: .medium))
                                     .foregroundColor(confidenceColor(topResult.confidenceScore))
                             }
                             
                             Text("Black-owned alternatives to \(analysis.productType)")
-                                .font(.system(size: 13))
+                                .font(.system(size: 14))
                                 .foregroundColor(Color(.systemGray))
                                 .lineLimit(1)
                                 .truncationMode(.tail)

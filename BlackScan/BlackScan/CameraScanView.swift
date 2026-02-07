@@ -200,6 +200,7 @@ struct ScanResultsSheet: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var toastManager: ToastManager
     
     @State private var selectedProduct: Product?
     @StateObject private var typesenseClient = TypesenseClient()
@@ -231,8 +232,24 @@ struct ScanResultsSheet: View {
                                 isInCart: cartManager.isInCart(product),
                                 numberBadge: index + 1,
                                 onCardTapped: { selectedProduct = product },
-                                onSaveTapped: { savedProductsManager.toggleSaveProduct(product) },
-                                onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) }
+                                onSaveTapped: {
+                                    if savedProductsManager.isProductSaved(product) {
+                                        savedProductsManager.removeSavedProduct(product)
+                                        toastManager.show(.unsaved)
+                                    } else {
+                                        savedProductsManager.saveProduct(product)
+                                        toastManager.show(.saved)
+                                    }
+                                },
+                                onAddToCart: {
+                                    if cartManager.isInCart(product) {
+                                        cartManager.removeFromCart(product)
+                                        toastManager.show(.removedFromCheckout)
+                                    } else {
+                                        cartManager.addToCart(product)
+                                        toastManager.show(.addedToCheckout)
+                                    }
+                                }
                             )
                         }
                     }

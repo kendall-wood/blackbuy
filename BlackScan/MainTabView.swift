@@ -9,6 +9,7 @@ struct MainTabView: View {
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var authManager: AppleAuthManager
+    @EnvironmentObject var toastManager: ToastManager
     
     /// Navigate back: pop the stack and go to the previous tab
     private func goBack() {
@@ -21,7 +22,6 @@ struct MainTabView: View {
     }
     
     var body: some View {
-        // Content based on selected tab
         Group {
             switch selectedTab {
             case .profile:
@@ -37,6 +37,11 @@ struct MainTabView: View {
             }
         }
         .ignoresSafeArea(.all, edges: .bottom)
+        .onAppear {
+            ToastWindowManager.shared.setup(toastManager: toastManager) { tab in
+                selectedTab = tab
+            }
+        }
         .onChange(of: selectedTab) { oldValue, newValue in
             // Only push if it's a forward navigation (not a back)
             if tabHistory.last != newValue {

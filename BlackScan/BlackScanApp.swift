@@ -10,6 +10,7 @@ struct BlackScanApp: App {
     @StateObject private var savedCompaniesManager = SavedCompaniesManager()
     @StateObject private var authManager = AppleAuthManager()
     @StateObject private var scanHistoryManager = ScanHistoryManager()
+    @StateObject private var toastManager = ToastManager()
     
     init() {
         // Validate environment variables on startup
@@ -24,6 +25,7 @@ struct BlackScanApp: App {
                 .environmentObject(savedCompaniesManager)
                 .environmentObject(authManager)
                 .environmentObject(scanHistoryManager)
+                .environmentObject(toastManager)
                 .preferredColorScheme(.light)
         }
     }
