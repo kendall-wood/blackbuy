@@ -72,7 +72,7 @@ struct ScanView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.leading, 20)
-                        .padding(.top, 50)
+                        .padding(.top, 16)
                         
                         Spacer()
                     }
@@ -101,7 +101,7 @@ struct ScanView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.trailing, 20)
-                        .padding(.top, 50)
+                        .padding(.top, 16)
                     }
                     
                     Spacer()
@@ -214,60 +214,45 @@ struct ScanView: View {
                     HStack(spacing: 28) {
                         // Recent Scans
                         Button(action: { selectedTab = .saved }) {
-                            VStack(spacing: 6) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 58, height: 58)
-                                        .dsButtonShadow()
-                                    
-                                    Image(systemName: "clock.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundColor(DS.brandBlue)
-                                }
-                                Text("Recent")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.white)
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 58, height: 58)
+                                    .dsButtonShadow()
+                                
+                                Image(systemName: "clock.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
                         
                         // Saved
                         Button(action: { selectedTab = .saved }) {
-                            VStack(spacing: 6) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 58, height: 58)
-                                        .dsButtonShadow()
-                                    
-                                    Image(systemName: "heart.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundColor(DS.brandBlue)
-                                }
-                                Text("Saved")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.white)
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 58, height: 58)
+                                    .dsButtonShadow()
+                                
+                                Image(systemName: "heart.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
                         
                         // Shop
                         Button(action: { selectedTab = .shop }) {
-                            VStack(spacing: 6) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 58, height: 58)
-                                        .dsButtonShadow()
-                                    
-                                    Image(systemName: "storefront.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundColor(DS.brandBlue)
-                                }
-                                Text("Shop")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.white)
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 58, height: 58)
+                                    .dsButtonShadow()
+                                
+                                Image(systemName: "storefront.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
