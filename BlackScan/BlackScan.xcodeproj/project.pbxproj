@@ -56,6 +56,10 @@
 		F1ED561BA80746938AE9D89F /* CameraScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404E978B47FB4323B97047D4 /* CameraScanView.swift */; };
 		F5857BF10EB44C56B2197FBD /* AppleAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DFC7777280840E1BFF25C9A /* AppleAuthManager.swift */; };
 		F69815BE12C241C99C84CA36 /* Env.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE83DBF258F4E2EAAABBBD2 /* Env.swift */; };
+		EE8D08D3E5127E674A0E4573 /* SecureStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F92EB11302889829A9EF9D7 /* SecureStorage.swift */; };
+		30B399E6F7740EA656AFAEBF /* InputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD520B9334DB3D478D121CA /* InputValidator.swift */; };
+		91E3819F1DC5875A8A37EC88 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F47F55A3C55625C244BF152 /* LogManager.swift */; };
+		41EEC4A43FF078436E32D50A /* NetworkSecurity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B17401CF0FB11806CDFFA89C /* NetworkSecurity.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +99,10 @@
 		8364F9178AF7463E8CE2E2D7 /* SavedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedView.swift; sourceTree = "<group>"; };
 		8AA52B1C56284EA4A3BC80B9 /* UserAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAuthService.swift; sourceTree = "<group>"; };
 		8AE83DBF258F4E2EAAABBBD2 /* Env.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Env.swift; sourceTree = "<group>"; };
+		0F92EB11302889829A9EF9D7 /* SecureStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureStorage.swift; sourceTree = "<group>"; };
+		EDD520B9334DB3D478D121CA /* InputValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputValidator.swift; sourceTree = "<group>"; };
+		7F47F55A3C55625C244BF152 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
+		B17401CF0FB11806CDFFA89C /* NetworkSecurity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSecurity.swift; sourceTree = "<group>"; };
 		8DFC7777280840E1BFF25C9A /* AppleAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleAuthManager.swift; sourceTree = "<group>"; };
 		914FF8189FED445B8CEBBCD5 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		98171DA12E6D61A600A323C7 /* BlackScan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlackScan.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -183,6 +191,7 @@
 			children = (
 				9895136D2F34423F0093A83B /* OpenAIVisionService.swift */,
 				989513652F3433040093A83B /* Scanning */,
+				80C9C066F5CFAC696924F52C /* Security */,
 				98171DAA2E6D61A700A323C7 /* Assets.xcassets */,
 				98171DAC2E6D61A700A323C7 /* Preview Content */,
 				6A7B23A9180845D9A3B8750E /* UserAuthService.swift */,
@@ -261,6 +270,17 @@
 				989513642F3433040093A83B /* SizeExtractor.swift */,
 			);
 			path = Scanning;
+			sourceTree = "<group>";
+		};
+		80C9C066F5CFAC696924F52C /* Security */ = {
+			isa = PBXGroup;
+			children = (
+				0F92EB11302889829A9EF9D7 /* SecureStorage.swift */,
+				EDD520B9334DB3D478D121CA /* InputValidator.swift */,
+				7F47F55A3C55625C244BF152 /* LogManager.swift */,
+				B17401CF0FB11806CDFFA89C /* NetworkSecurity.swift */,
+			);
+			path = Security;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -410,6 +430,10 @@
 				9895136B2F3433040093A83B /* BrandDatabase.swift in Sources */,
 				9895136C2F3433040093A83B /* FormTaxonomy.swift in Sources */,
 				F69815BE12C241C99C84CA36 /* Env.swift in Sources */,
+				EE8D08D3E5127E674A0E4573 /* SecureStorage.swift in Sources */,
+				30B399E6F7740EA656AFAEBF /* InputValidator.swift in Sources */,
+				91E3819F1DC5875A8A37EC88 /* LogManager.swift in Sources */,
+				41EEC4A43FF078436E32D50A /* NetworkSecurity.swift in Sources */,
 				68C3C791DBA54F789650CF84 /* FeedbackManager.swift in Sources */,
 				ACC64E1E00CA44038FE01F24 /* Item.swift in Sources */,
 				582CC9A5239A414E83EE6558 /* LaunchScreenView.swift in Sources */,
