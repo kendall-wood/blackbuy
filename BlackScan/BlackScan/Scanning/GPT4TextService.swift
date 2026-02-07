@@ -116,14 +116,15 @@ class GPT4TextService {
         }
         
         VALID PRODUCT TYPES — you MUST pick the closest match from this list:
-        • Hair: Shampoo, Conditioner, Leave-In Conditioner, Hair Oil, Hair Mask, Hair Cream, Hair Gel, Hair Butter, Edge Control, Deep Conditioner, Hair Serum, Curl Cream, Styling Gel, Hair Balm
-        • Skin: Facial Cleanser, Face Serum, Face Cream, Face Mask, Face Oil, Toner, Eye Cream, Moisturizer, Facial Mist, Facial Scrub, Sunscreen, Cleansing Wipes
-        • Body: Hand Sanitizer, Body Butter, Body Oil, Body Mist, Body Scrub, Body Wash, Body Lotion, Bar Soap, Deodorant, Body Balm, Hand Soap, Liquid Soap, Body Gloss, Sugar Scrub
+        • Hair: Shampoo, Conditioner, Leave-In Conditioner, Co-Wash, Deep Conditioner, Protein Treatment, Detangler, Hair Rinse, Hair Oil, Castor Oil, Hair Mask, Hair Cream, Hair Gel, Hair Butter, Edge Control, Hair Serum, Curl Cream, Styling Gel, Hair Balm
+        • Skin: Facial Cleanser, Micellar Water, Makeup Remover, Face Serum, Face Cream, Face Mask, Face Oil, Toner, Eye Cream, Moisturizer, Facial Mist, Facial Scrub, Sunscreen, Cleansing Wipes
+        • Body: Hand Sanitizer, Body Butter, Body Oil, Essential Oil, Body Mist, Body Scrub, Body Wash, Intimate Wash, Body Lotion, Bar Soap, Deodorant, Body Balm, Hand Soap, Liquid Soap, Body Gloss, Sugar Scrub, Body Powder
         • Lips: Lip Balm, Lip Gloss, Lipstick, Lip Scrub, Liquid Lipstick
-        • Makeup: Foundation, Face Powder, Concealer, Mascara, Eyeshadow, Eyeshadow Palette, Blush, Highlighter, Bronzer, Primer, Eyeliner, Brow Gel, Nail Polish, Gel Polish, False Eyelashes
+        • Makeup: Foundation, Setting Powder, Face Powder, Concealer, Mascara, Eyeshadow, Eyeshadow Palette, Blush, Highlighter, Bronzer, Primer, Eyeliner, Brow Gel, Nail Polish, Gel Polish, False Eyelashes, Cuticle Oil
         • Fragrance: Perfume, Eau de Parfum, Perfume Oil
         • Men: Beard Oil, Beard Balm, Beard Conditioner
-        • Other: Scented Candle, Vitamins, Dietary Supplements, Tea, Cleaning Products
+        • Home: Multi-Purpose Cleaner, Glass Cleaner, Floor Cleaner, Dish Soap, Laundry Detergent, Fabric Softener, Disinfectant
+        • Other: Scented Candle, Vitamins, Dietary Supplements, Tea
         
         CRITICAL RULES:
         1. "product_type" MUST be a SPECIFIC product type from the list above, never an ingredient or broad category.
@@ -131,21 +132,30 @@ class GPT4TextService {
            ✓ "Shea Butter Hand Cream" → product_type: "Body Butter"  
            ✓ "Vitamin E Body Lotion" → product_type: "Body Lotion"
            ✓ Foundation powder compact → product_type: "Foundation" or "Face Powder"
+           ✓ Multi-purpose spray cleaner → product_type: "Multi-Purpose Cleaner"
            ✗ NEVER return an ingredient (coconut water, shea butter, aloe vera) as product_type
-           ✗ NEVER return a broad category like "Makeup", "Skincare", "Hair Care", "Beauty" — always be specific
+           ✗ NEVER return a broad category like "Makeup", "Skincare", "Hair Care", "Beauty", "Cleaning Products", "Other" — always be specific
         
-        2. OCR may have errors — use context to infer correct words.
+        2. OIL PRODUCTS — distinguish between oils that ARE the product vs oils used as ingredients:
+           ✓ "Jamaican Black Castor Oil" → product_type: "Castor Oil" (the oil itself IS the product)
+           ✓ "Pure Tea Tree Oil" → product_type: "Essential Oil" (a standalone essential oil)
+           ✓ "Hair Growth Oil with Castor Oil & Argan" → product_type: "Hair Oil" (a blended hair oil; castor/argan are just ingredients)
+           ✓ "Rosemary Mint Scalp Oil" → product_type: "Hair Oil" (a formulated scalp treatment oil)
+           ✓ "Argan Oil Face Serum" → product_type: "Face Oil" (argan is an ingredient, the product is a face oil)
+           Rule: If the product is JUST a single named oil (castor, tea tree, argan, jojoba, etc.) with no other purpose, use "Castor Oil" or "Essential Oil". If it's a formulated product FOR hair/body/face that happens to contain oils, use "Hair Oil", "Body Oil", or "Face Oil".
+        
+        3. OCR may have errors — use context to infer correct words.
            Example: "COMANT" → likely "GARNIER" based on surrounding text
         
-        3. "form" is how the product is physically dispensed (gel, spray, cream, etc.)
+        4. "form" is how the product is physically dispensed (gel, spray, cream, etc.)
            It is SEPARATE from product_type. Example: "Hand Sanitizer Gel" → product_type: "Hand Sanitizer", form: "gel"
         
-        4. "confidence" should reflect OCR quality and your certainty:
+        5. "confidence" should reflect OCR quality and your certainty:
            - Clear product info, matches a known type: 0.9-1.0
            - Some OCR errors but product is identifiable: 0.7-0.9
            - Many errors or unclear what the product is: <0.7
         
-        5. Common brands: Dove, Garnier, Purell, CeraVe, Neutrogena, L'Oréal, Revlon, Covergirl, Maybelline, Pantene, Olay, Aveeno, Nivea
+        6. Common brands: Dove, Garnier, Purell, CeraVe, Neutrogena, L'Oréal, Revlon, Covergirl, Maybelline, Pantene, Olay, Aveeno, Nivea
         
         Return ONLY the JSON, no other text.
         """

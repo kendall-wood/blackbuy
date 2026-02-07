@@ -219,14 +219,13 @@ struct ScanView: View {
                 )
                 .ignoresSafeArea()
                 
-                // Scanning glow effect (stays blue on results until dismissed)
-                if scanState == .capturing || scanState == .analyzing || scanState == .searching || scanState == .results {
-                    ScanGlowOverlay(isResults: scanState == .results, hasProducts: !scanResults.isEmpty)
-                        .ignoresSafeArea()
-                        .allowsHitTesting(false)
-                        .transition(.opacity)
-                        .animation(.easeInOut(duration: 0.4), value: scanState)
-                }
+                // Scanning glow effect — always rendered so pulse runs continuously;
+                // fades in/out via opacity to avoid insert/remove jolt
+                ScanGlowOverlay(isResults: scanState == .results, hasProducts: !scanResults.isEmpty)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+                    .opacity(scanState == .initial ? 0 : 1)
+                    .animation(.easeInOut(duration: 0.45), value: scanState)
                 
                 // Top Left - Flashlight Button
                 VStack {
@@ -307,22 +306,25 @@ struct ScanView: View {
                     
                     Button(action: handleButtonTap) {
                         HStack(spacing: 10) {
-                            if scanState == .capturing || scanState == .analyzing || scanState == .searching {
+                            ZStack {
+                                // Spinner (shown during scanning states)
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: DS.brandBlue))
-                                    .transition(.scale.combined(with: .opacity))
-                            } else {
-                                Image(systemName: "barcode.viewfinder")
+                                    .opacity(scanState == .capturing || scanState == .analyzing || scanState == .searching ? 1 : 0)
+                                
+                                // Icon (shown in idle/results states)
+                                Image(systemName: scanButtonIcon)
                                     .font(.system(size: 18))
                                     .foregroundColor(DS.brandBlue)
-                                    .transition(.scale.combined(with: .opacity))
+                                    .opacity(scanState == .capturing || scanState == .analyzing || scanState == .searching ? 0 : 1)
                             }
+                            .frame(width: 22, height: 22)
                             
                             Text(scanButtonText)
                                 .font(.system(size: 18, weight: .semibold))
                                 .foregroundColor(DS.brandBlue)
                         }
-                        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: scanState)
+                        .animation(.easeInOut(duration: 0.25), value: scanState)
                         .padding(.horizontal, 28)
                         .padding(.vertical, 14)
                         .background(Color.white)
@@ -379,7 +381,7 @@ struct ScanView: View {
                     // No results found - grey button to shop
                     if scanState == .results && scanResults.isEmpty {
                         Button(action: {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
                                 scanState = .initial
                             }
                             selectedTab = .shop
@@ -550,6 +552,17 @@ struct ScanView: View {
         }
     }
     
+    private var scanButtonIcon: String {
+        switch scanState {
+        case .initial:
+            return "barcode.viewfinder"
+        case .capturing, .analyzing, .searching:
+            return "barcode.viewfinder" // Hidden by opacity, but keeps layout stable
+        case .results:
+            return "arrow.counterclockwise"
+        }
+    }
+    
     private var buttonText: String {
         switch scanState {
         case .initial:
@@ -597,7 +610,7 @@ struct ScanView: View {
         
         if scanState == .results {
             // Reset to scan again
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            withAnimation(.easeInOut(duration: 0.3)) {
                 scanState = .initial
             }
             scanResults = []
@@ -605,7 +618,7 @@ struct ScanView: View {
             capturedImage = nil
         } else if scanState == .initial {
             // Trigger image capture
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            withAnimation(.easeInOut(duration: 0.25)) {
                 scanState = .capturing
             }
             
@@ -631,7 +644,7 @@ struct ScanView: View {
     private func analyzeAndSearch(image: UIImage) async {
         // Step 1: Analyze with OpenAI Vision
         await MainActor.run {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            withAnimation(.easeInOut(duration: 0.25)) {
                 scanState = .analyzing
             }
         }
@@ -666,7 +679,7 @@ struct ScanView: View {
     
     private func searchForMatches(analysis: HybridScanService.ProductAnalysis) async {
         await MainActor.run {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            withAnimation(.easeInOut(duration: 0.25)) {
                 scanState = .searching
             }
         }

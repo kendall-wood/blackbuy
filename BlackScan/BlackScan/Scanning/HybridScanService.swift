@@ -242,6 +242,10 @@ class HybridScanService {
         "men's grooming": "Men's Care",
         "lip care": "Lip Care",
         "home care": "Home Care",
+        "cleaning products": "Home Care",
+        "cleaning": "Home Care",
+        "household": "Home Care",
+        "household cleaning": "Home Care",
         "clothing": "Clothing",
         "accessories": "Accessories",
     ]
@@ -272,6 +276,15 @@ class HybridScanService {
         
         Log.debug("Taxonomy: '\(analysis.productType)' not found, attempting correction", category: .scan)
         
+        // Step 1.5: Detect if GPT gave a useless "cop-out" answer like "Other", "Product", etc.
+        // These mean GPT couldn't identify the product — raw-text fallback needs a MUCH higher bar
+        // to prevent matching completely unrelated categories.
+        let copOutTerms: Set<String> = ["other", "product", "unknown", "general", "item", "n/a", "none"]
+        let isCopOut = copOutTerms.contains(analysis.productType.lowercased().trimmingCharacters(in: .whitespaces))
+        if isCopOut {
+            Log.debug("Taxonomy: GPT returned cop-out '\(analysis.productType)' — requiring high-confidence fallback", category: .scan)
+        }
+        
         // Step 2: Check if GPT returned a broad CATEGORY instead of a specific product type
         // (e.g., "Makeup" instead of "Foundation", "Skincare" instead of "Moisturizer")
         if let categoryName = resolveBroadTermToCategory(analysis.productType) {
@@ -300,7 +313,9 @@ class HybridScanService {
         
         // Step 3: General fallback — find best match from the full raw text
         // BUT: reject corrections where the detected form conflicts with the candidate's typical forms
-        if let match = taxonomy.findBestMatch(analysis.rawText), match.confidence >= 0.4 {
+        // When GPT gave a cop-out answer, require much higher confidence (0.65 vs 0.4)
+        let rawTextThreshold: Double = isCopOut ? 0.65 : 0.4
+        if let match = taxonomy.findBestMatch(analysis.rawText), match.confidence >= rawTextThreshold {
             if isFormCompatibleWithType(detectedForm: analysis.form, candidateType: match.type) {
                 Log.debug("Taxonomy correction (raw text): '\(analysis.productType)' → '\(match.type.canonical)' (\(Int(match.confidence * 100))%)", category: .scan)
                 return ProductAnalysis(
@@ -309,7 +324,7 @@ class HybridScanService {
                     form: analysis.form ?? match.type.typicalForms.first,
                     size: analysis.size,
                     ingredients: analysis.ingredients,
-                    confidence: min(analysis.confidence, max(match.confidence, 0.7)),
+                    confidence: isCopOut ? analysis.confidence * 0.6 : min(analysis.confidence, max(match.confidence, 0.7)),
                     rawText: analysis.rawText
                 )
             } else {
@@ -317,8 +332,8 @@ class HybridScanService {
             }
         }
         
-        // Step 4: Try from just the product type string itself
-        if let match = taxonomy.findBestMatch(analysis.productType), match.confidence >= 0.3 {
+        // Step 4: Try from just the product type string itself (skip for cop-out answers — "Other" won't match anything useful)
+        if !isCopOut, let match = taxonomy.findBestMatch(analysis.productType), match.confidence >= 0.3 {
             if isFormCompatibleWithType(detectedForm: analysis.form, candidateType: match.type) {
                 Log.debug("Taxonomy correction (type text): '\(analysis.productType)' → '\(match.type.canonical)'", category: .scan)
                 return ProductAnalysis(

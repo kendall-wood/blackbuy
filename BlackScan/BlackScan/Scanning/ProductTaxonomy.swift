@@ -192,42 +192,102 @@ class ProductTaxonomy {
             
             ProductType(
                 canonical: "Shampoo",
-                variations: ["shampoo", "hair shampoo", "cleansing shampoo"],
-                synonyms: ["Hair Cleanser", "Hair Wash"],
+                variations: ["shampoo", "hair shampoo", "cleansing shampoo", "clarifying shampoo", "moisturizing shampoo", "sulfate-free shampoo", "sulfate free shampoo", "color safe shampoo", "volumizing shampoo", "anti-dandruff shampoo", "dandruff shampoo", "dry shampoo"],
+                synonyms: ["Hair Cleanser", "Hair Wash", "Clarifying Shampoo", "Dry Shampoo"],
                 category: "Hair Care",
                 subcategory: "Cleansers",
-                typicalForms: ["liquid", "cream", "bar"],
-                keywords: ["shampoo", "cleanser", "wash", "cleansing"]
+                typicalForms: ["liquid", "cream", "bar", "powder"],
+                keywords: ["shampoo", "cleanser", "wash", "cleansing", "clarifying"]
             ),
             
             ProductType(
                 canonical: "Conditioner",
-                variations: ["conditioner", "hair conditioner", "rinse out conditioner"],
-                synonyms: ["Hair Conditioner", "Rinse-Out Conditioner"],
+                variations: ["conditioner", "hair conditioner", "rinse out conditioner", "rinse-out conditioner", "daily conditioner", "moisturizing conditioner", "hydrating conditioner", "detangling conditioner"],
+                synonyms: ["Hair Conditioner", "Rinse-Out Conditioner", "Daily Conditioner"],
                 category: "Hair Care",
                 subcategory: "Conditioners",
                 typicalForms: ["cream", "liquid"],
-                keywords: ["conditioner", "conditioning", "rinse"]
+                keywords: ["conditioner", "conditioning", "rinse", "detangling"]
             ),
             
             ProductType(
                 canonical: "Leave-In Conditioner",
-                variations: ["leave-in conditioner", "leave in conditioner", "leave-in", "leavein"],
-                synonyms: ["Leave-In Treatment", "Daily Leave-In"],
+                variations: ["leave-in conditioner", "leave in conditioner", "leave-in", "leavein", "leave-in spray", "leave-in milk", "hair milk", "moisturizing leave-in", "detangling leave-in"],
+                synonyms: ["Leave-In Treatment", "Daily Leave-In", "Hair Milk", "Conditioning Milk"],
                 category: "Hair Care",
                 subcategory: "Conditioners",
                 typicalForms: ["liquid", "cream", "spray"],
-                keywords: ["leave", "in", "conditioner", "leave-in", "leavein"]
+                keywords: ["leave", "in", "conditioner", "leave-in", "leavein", "milk"]
+            ),
+            
+            ProductType(
+                canonical: "Co-Wash",
+                variations: ["co-wash", "co wash", "cowash", "cleansing conditioner", "conditioning cleanser", "no-poo", "no poo"],
+                synonyms: ["Cleansing Conditioner", "Conditioning Cleanser", "No-Poo"],
+                category: "Hair Care",
+                subcategory: "Conditioners",
+                typicalForms: ["cream", "liquid"],
+                keywords: ["co-wash", "cowash", "cleansing", "conditioner", "no-poo"]
+            ),
+            
+            ProductType(
+                canonical: "Protein Treatment",
+                variations: ["protein treatment", "protein conditioner", "protein mask", "reconstructor", "keratin treatment", "bond repair", "bond builder"],
+                synonyms: ["Reconstructor", "Keratin Treatment", "Bond Repair", "Bond Builder"],
+                category: "Hair Care",
+                subcategory: "Treatments",
+                typicalForms: ["cream", "liquid"],
+                keywords: ["protein", "reconstructor", "keratin", "bond", "repair", "strengthen"]
+            ),
+            
+            ProductType(
+                canonical: "Detangler",
+                variations: ["detangler", "detangling spray", "detangling cream", "knot remover", "tangle free"],
+                synonyms: ["Detangling Spray", "Knot Remover", "Detangling Cream"],
+                category: "Hair Care",
+                subcategory: "Conditioners",
+                typicalForms: ["spray", "cream", "liquid"],
+                keywords: ["detangle", "detangler", "detangling", "knot", "tangle"]
+            ),
+            
+            ProductType(
+                canonical: "Hair Rinse",
+                variations: ["hair rinse", "apple cider vinegar rinse", "acv rinse", "tea rinse", "herbal rinse", "clarifying rinse"],
+                synonyms: ["ACV Rinse", "Apple Cider Vinegar Rinse", "Herbal Rinse"],
+                category: "Hair Care",
+                subcategory: "Treatments",
+                typicalForms: ["liquid"],
+                keywords: ["rinse", "acv", "vinegar", "herbal", "clarifying"]
             ),
             
             ProductType(
                 canonical: "Hair Oil",
-                variations: ["hair oil", "oil", "hair serum", "treatment oil"],
-                synonyms: ["Hair Serum", "Growth Oil", "Scalp Oil"],
+                variations: ["hair oil", "hair growth oil", "growth oil", "scalp oil", "hot oil", "treatment oil", "hair serum oil", "moisture oil", "nourishing hair oil", "lightweight hair oil"],
+                synonyms: ["Growth Oil", "Scalp Oil", "Hot Oil", "Treatment Oil"],
                 category: "Hair Care",
                 subcategory: "Treatments",
                 typicalForms: ["oil"],
-                keywords: ["oil", "serum", "treatment", "growth"]
+                keywords: ["hair", "growth", "scalp", "treatment", "nourishing"]
+            ),
+            
+            ProductType(
+                canonical: "Castor Oil",
+                variations: ["castor oil", "jamaican black castor oil", "jbco", "black castor oil", "haitian castor oil", "pure castor oil", "cold pressed castor oil", "organic castor oil"],
+                synonyms: ["Jamaican Black Castor Oil", "JBCO", "Black Castor Oil", "Haitian Castor Oil"],
+                category: "Hair Care",
+                subcategory: "Oils",
+                typicalForms: ["oil"],
+                keywords: ["castor", "jbco", "jamaican", "haitian"]
+            ),
+            
+            ProductType(
+                canonical: "Essential Oil",
+                variations: ["essential oil", "essential oils", "tea tree oil", "lavender oil", "peppermint oil", "rosemary oil", "eucalyptus oil", "lemongrass oil", "frankincense oil"],
+                synonyms: ["Tea Tree Oil", "Lavender Oil", "Peppermint Oil", "Rosemary Oil", "Aromatherapy Oil"],
+                category: "Body Care",
+                subcategory: "Oils",
+                typicalForms: ["oil"],
+                keywords: ["essential", "tea tree", "lavender", "peppermint", "rosemary", "eucalyptus", "aromatherapy"]
             ),
             
             ProductType(
@@ -284,12 +344,32 @@ class ProductTaxonomy {
             
             ProductType(
                 canonical: "Facial Cleanser",
-                variations: ["facial cleanser", "face cleanser", "face wash", "facial wash"],
-                synonyms: ["Face Wash", "Cleansing Gel", "Face Soap"],
+                variations: ["facial cleanser", "face cleanser", "face wash", "facial wash", "foaming cleanser", "gel cleanser", "cream cleanser", "cleansing gel", "cleansing foam", "facial bar"],
+                synonyms: ["Face Wash", "Cleansing Gel", "Face Soap", "Foaming Cleanser", "Facial Bar"],
                 category: "Skincare",
                 subcategory: "Cleansers",
-                typicalForms: ["foam", "gel", "liquid", "cream"],
-                keywords: ["facial", "face", "cleanser", "wash", "cleansing"]
+                typicalForms: ["foam", "gel", "liquid", "cream", "bar"],
+                keywords: ["facial", "face", "cleanser", "wash", "cleansing", "foaming"]
+            ),
+            
+            ProductType(
+                canonical: "Micellar Water",
+                variations: ["micellar water", "micellar cleansing water", "micellar cleanser", "micellar solution"],
+                synonyms: ["Micellar Cleanser", "Cleansing Water"],
+                category: "Skincare",
+                subcategory: "Cleansers",
+                typicalForms: ["liquid"],
+                keywords: ["micellar", "water", "cleansing"]
+            ),
+            
+            ProductType(
+                canonical: "Makeup Remover",
+                variations: ["makeup remover", "make up remover", "eye makeup remover", "makeup removing", "makeup eraser"],
+                synonyms: ["Eye Makeup Remover", "Makeup Eraser"],
+                category: "Skincare",
+                subcategory: "Cleansers",
+                typicalForms: ["liquid", "wipe", "oil"],
+                keywords: ["makeup", "remover", "removing", "eraser"]
             ),
             
             ProductType(
@@ -324,12 +404,12 @@ class ProductTaxonomy {
             
             ProductType(
                 canonical: "Face Oil",
-                variations: ["face oil", "facial oil"],
-                synonyms: ["Facial Oil", "Beauty Oil"],
+                variations: ["face oil", "facial oil", "beauty oil", "glow oil", "face serum oil", "radiance oil", "complexion oil"],
+                synonyms: ["Facial Oil", "Beauty Oil", "Glow Oil", "Radiance Oil"],
                 category: "Skincare",
                 subcategory: "Treatments",
                 typicalForms: ["oil"],
-                keywords: ["oil", "facial", "face", "beauty"]
+                keywords: ["face", "facial", "beauty", "glow", "radiance", "complexion"]
             ),
             
             ProductType(
@@ -386,12 +466,22 @@ class ProductTaxonomy {
             
             ProductType(
                 canonical: "Body Oil",
-                variations: ["body oil", "massage oil", "moisturizing oil"],
-                synonyms: ["Massage Oil", "Body Serum", "Dry Oil"],
+                variations: ["body oil", "massage oil", "moisturizing oil", "dry oil", "bath oil", "shower oil", "body glow oil", "shimmer oil", "body serum oil"],
+                synonyms: ["Massage Oil", "Body Serum", "Dry Oil", "Bath Oil", "Shimmer Oil"],
                 category: "Body Care",
                 subcategory: "Oils",
+                typicalForms: ["oil", "spray"],
+                keywords: ["body", "massage", "bath", "shimmer", "glow", "moisturizing"]
+            ),
+            
+            ProductType(
+                canonical: "Cuticle Oil",
+                variations: ["cuticle oil", "nail oil", "nail cuticle oil", "nail care oil"],
+                synonyms: ["Nail Oil", "Nail Care Oil"],
+                category: "Makeup",
+                subcategory: "Nails",
                 typicalForms: ["oil"],
-                keywords: ["body", "oil", "massage"]
+                keywords: ["cuticle", "nail"]
             ),
             
             ProductType(
@@ -406,12 +496,22 @@ class ProductTaxonomy {
             
             ProductType(
                 canonical: "Body Wash",
-                variations: ["body wash", "shower gel", "body cleanser"],
-                synonyms: ["Shower Gel", "Body Cleanser", "Bath Gel"],
+                variations: ["body wash", "shower gel", "body cleanser", "shower cream", "bath gel", "body soap liquid", "exfoliating body wash"],
+                synonyms: ["Shower Gel", "Body Cleanser", "Bath Gel", "Shower Cream"],
                 category: "Body Care",
                 subcategory: "Cleansers",
-                typicalForms: ["liquid", "gel"],
-                keywords: ["body", "wash", "shower", "gel", "cleanser"]
+                typicalForms: ["liquid", "gel", "cream"],
+                keywords: ["body", "wash", "shower", "gel", "cleanser", "bath"]
+            ),
+            
+            ProductType(
+                canonical: "Intimate Wash",
+                variations: ["intimate wash", "feminine wash", "feminine hygiene wash", "ph balanced wash", "vaginal wash"],
+                synonyms: ["Feminine Wash", "Feminine Hygiene Wash"],
+                category: "Body Care",
+                subcategory: "Cleansers",
+                typicalForms: ["liquid", "gel", "foam"],
+                keywords: ["intimate", "feminine", "hygiene", "ph"]
             ),
             
             ProductType(
@@ -489,13 +589,33 @@ class ProductTaxonomy {
             ),
             
             ProductType(
-                canonical: "Face Powder",
-                variations: ["face powder", "setting powder", "pressed powder", "loose powder", "translucent powder", "finishing powder", "compact powder"],
-                synonyms: ["Setting Powder", "Pressed Powder", "Finishing Powder"],
+                canonical: "Setting Powder",
+                variations: ["setting powder", "loose setting powder", "pressed setting powder", "translucent powder", "translucent setting powder", "hd powder", "baking powder"],
+                synonyms: ["Translucent Powder", "HD Powder", "Baking Powder"],
                 category: "Makeup",
                 subcategory: "Face",
                 typicalForms: ["powder"],
-                keywords: ["powder", "setting", "pressed", "loose", "translucent", "finishing", "compact"]
+                keywords: ["setting", "translucent", "baking", "hd", "loose"]
+            ),
+            
+            ProductType(
+                canonical: "Face Powder",
+                variations: ["face powder", "pressed powder", "loose powder", "compact powder", "finishing powder", "mineral powder"],
+                synonyms: ["Pressed Powder", "Finishing Powder", "Loose Powder", "Compact Powder", "Mineral Powder"],
+                category: "Makeup",
+                subcategory: "Face",
+                typicalForms: ["powder", "compact"],
+                keywords: ["powder", "pressed", "loose", "finishing", "compact", "mineral", "face"]
+            ),
+            
+            ProductType(
+                canonical: "Body Powder",
+                variations: ["body powder", "talcum powder", "talc powder", "dusting powder", "baby powder"],
+                synonyms: ["Talcum Powder", "Dusting Powder", "Baby Powder", "Talc-Free Powder"],
+                category: "Body Care",
+                subcategory: "Powders",
+                typicalForms: ["powder"],
+                keywords: ["body", "powder", "talc", "talcum", "dusting", "baby"]
             ),
             
             ProductType(
@@ -760,12 +880,12 @@ class ProductTaxonomy {
             
             ProductType(
                 canonical: "Beard Oil",
-                variations: ["beard oil", "facial hair oil"],
-                synonyms: ["Facial Hair Oil", "Beard Serum"],
+                variations: ["beard oil", "facial hair oil", "beard growth oil", "beard moisturizing oil", "beard serum"],
+                synonyms: ["Facial Hair Oil", "Beard Serum", "Beard Growth Oil"],
                 category: "Men's Care",
                 subcategory: "Beard",
                 typicalForms: ["oil"],
-                keywords: ["beard", "oil", "facial", "hair"]
+                keywords: ["beard", "facial", "hair"]
             ),
             
             ProductType(
@@ -836,12 +956,12 @@ class ProductTaxonomy {
             
             ProductType(
                 canonical: "Deep Conditioner",
-                variations: ["deep conditioner", "deep conditioning treatment"],
-                synonyms: ["Deep Conditioning Treatment", "Intensive Conditioner", "Hair Treatment"],
+                variations: ["deep conditioner", "deep conditioning treatment", "deep conditioning masque", "deep conditioning mask", "deep treatment", "intensive conditioner", "moisture treatment", "hot oil treatment"],
+                synonyms: ["Deep Conditioning Treatment", "Intensive Conditioner", "Hair Treatment", "Deep Conditioning Masque", "Hot Oil Treatment"],
                 category: "Hair Care",
                 subcategory: "Treatments",
-                typicalForms: ["cream"],
-                keywords: ["deep", "conditioner", "treatment", "intensive"]
+                typicalForms: ["cream", "other"],
+                keywords: ["deep", "conditioner", "treatment", "intensive", "masque", "moisture"]
             ),
             
             ProductType(
@@ -1175,13 +1295,73 @@ class ProductTaxonomy {
             // MARK: - Household & Cleaning
             
             ProductType(
-                canonical: "Cleaning Products",
-                variations: ["all-purpose cleaner", "spray cleaner", "dish soap", "laundry detergent", "fabric softener", "disinfectant", "multi-purpose cleaner"],
-                synonyms: ["Cleaner", "Household Cleaner"],
+                canonical: "Multi-Purpose Cleaner",
+                variations: ["multi-purpose cleaner", "multi purpose cleaner", "all-purpose cleaner", "all purpose cleaner", "multipurpose cleaner", "surface cleaner", "multi-surface cleaner", "household cleaner"],
+                synonyms: ["All-Purpose Cleaner", "Surface Cleaner", "Household Cleaner"],
                 category: "Home Care",
                 subcategory: "Cleaning",
-                typicalForms: ["liquid", "spray", "gel"],
-                keywords: ["cleaner", "clean", "spray", "soap", "detergent", "disinfectant"]
+                typicalForms: ["liquid", "spray"],
+                keywords: ["multi", "purpose", "surface", "all-purpose", "cleaner", "clean", "household"]
+            ),
+            
+            ProductType(
+                canonical: "Glass Cleaner",
+                variations: ["glass cleaner", "window cleaner", "mirror cleaner"],
+                synonyms: ["Window Cleaner"],
+                category: "Home Care",
+                subcategory: "Cleaning",
+                typicalForms: ["spray", "liquid"],
+                keywords: ["glass", "window", "mirror", "streak"]
+            ),
+            
+            ProductType(
+                canonical: "Floor Cleaner",
+                variations: ["floor cleaner", "floor wash", "mopping solution"],
+                synonyms: ["Floor Wash", "Mopping Solution"],
+                category: "Home Care",
+                subcategory: "Cleaning",
+                typicalForms: ["liquid"],
+                keywords: ["floor", "mop", "mopping"]
+            ),
+            
+            ProductType(
+                canonical: "Dish Soap",
+                variations: ["dish soap", "dish detergent", "dish liquid", "dishwashing liquid", "dish wash"],
+                synonyms: ["Dish Detergent", "Dishwashing Liquid"],
+                category: "Home Care",
+                subcategory: "Cleaning",
+                typicalForms: ["liquid", "gel"],
+                keywords: ["dish", "dishwashing", "dishes"]
+            ),
+            
+            ProductType(
+                canonical: "Laundry Detergent",
+                variations: ["laundry detergent", "laundry soap", "washing powder", "fabric wash", "laundry pods"],
+                synonyms: ["Laundry Soap", "Fabric Wash", "Washing Powder"],
+                category: "Home Care",
+                subcategory: "Laundry",
+                typicalForms: ["liquid", "powder", "other"],
+                keywords: ["laundry", "detergent", "fabric", "washing"]
+            ),
+            
+            ProductType(
+                canonical: "Fabric Softener",
+                variations: ["fabric softener", "fabric conditioner", "dryer sheets"],
+                synonyms: ["Fabric Conditioner", "Dryer Sheets"],
+                category: "Home Care",
+                subcategory: "Laundry",
+                typicalForms: ["liquid", "other"],
+                keywords: ["fabric", "softener", "dryer", "sheets"]
+            ),
+            
+            ProductType(
+                canonical: "Disinfectant",
+                variations: ["disinfectant", "disinfecting spray", "disinfecting wipes", "sanitizing spray"],
+                synonyms: ["Sanitizing Spray", "Disinfecting Spray"],
+                category: "Home Care",
+                subcategory: "Cleaning",
+                typicalForms: ["spray", "wipe", "liquid"],
+                keywords: ["disinfect", "sanitize", "antibacterial", "germ"]
             ),
             
             ProductType(
