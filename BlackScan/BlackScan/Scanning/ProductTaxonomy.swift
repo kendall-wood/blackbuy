@@ -365,6 +365,26 @@ class ProductTaxonomy {
             ),
             
             ProductType(
+                canonical: "Body Mist",
+                variations: ["body mist", "body spray", "fragrance mist", "body fragrance"],
+                synonyms: ["Body Spray", "Fragrance Mist", "Moisturizing Mist"],
+                category: "Body Care",
+                subcategory: "Mists",
+                typicalForms: ["spray", "mist"],
+                keywords: ["body", "mist", "spray", "fragrance"]
+            ),
+            
+            ProductType(
+                canonical: "Cleansing Wipes",
+                variations: ["cleansing wipes", "cleansing towelettes", "facial wipes", "makeup remover wipes", "face wipes", "micellar wipes"],
+                synonyms: ["Facial Wipes", "Makeup Remover Wipes", "Cleansing Towelettes"],
+                category: "Skincare",
+                subcategory: "Cleansers",
+                typicalForms: ["wipe", "towelette"],
+                keywords: ["wipe", "wipes", "towelette", "towelettes", "cleansing", "remover"]
+            ),
+            
+            ProductType(
                 canonical: "Body Oil",
                 variations: ["body oil", "massage oil", "moisturizing oil"],
                 synonyms: ["Massage Oil", "Body Serum", "Dry Oil"],

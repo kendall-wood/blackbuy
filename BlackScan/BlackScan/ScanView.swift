@@ -11,6 +11,7 @@ struct ScanView: View {
     @Binding var pendingShopSearch: String?
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var scanHistoryManager: ScanHistoryManager
     @State private var isShowingResults = false
     @State private var scanResults: [ScoredProduct] = []
     @State private var lastAnalysis: HybridScanService.ProductAnalysis?
@@ -344,8 +345,8 @@ struct ScanView: View {
                             isShowingResults = true
                         }) {
                             HStack(spacing: 14) {
-                                Image(systemName: "sparkles")
-                                    .font(.system(size: 26, weight: .medium))
+                                Image(systemName: "square.stack.fill")
+                                    .font(.system(size: 22, weight: .medium))
                                     .foregroundColor(.white.opacity(0.9))
                                 
                                 VStack(alignment: .leading, spacing: 3) {
@@ -359,6 +360,10 @@ struct ScanView: View {
                                             .foregroundColor(.white.opacity(0.8))
                                     }
                                 }
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.7))
                             }
                             .padding(.horizontal, 28)
                             .padding(.vertical, 16)
@@ -785,17 +790,47 @@ struct ScanView: View {
                 let productSpecific = findDescriptors(in: nameWords)
                 let specificOverlap = targetSpecific.intersection(productSpecific)
                 
+                // Descriptor synonym groups: descriptors in the same group are treated as equivalent
+                // e.g., "wash" and "soap" serve the same cleansing purpose
+                let descriptorSynonymGroups: [[String]] = [
+                    ["wash", "soap", "cleanser", "cleansing"],
+                    ["conditioner", "mask", "masque", "treatment"],
+                    ["cream", "lotion", "moisturizer", "butter", "balm"],
+                    ["mist", "spray"],
+                    ["wipe", "towelette"],
+                    ["scrub", "exfoliant"],
+                    ["serum", "oil"],
+                ]
+                
+                // Expand overlap: check if target and product descriptors belong to the same synonym group
+                var synonymOverlap = specificOverlap
+                if synonymOverlap.isEmpty && !targetSpecific.isEmpty && !productSpecific.isEmpty {
+                    for group in descriptorSynonymGroups {
+                        let targetInGroup = !targetSpecific.intersection(Set(group)).isEmpty
+                        let productInGroup = !productSpecific.intersection(Set(group)).isEmpty
+                        if targetInGroup && productInGroup {
+                            // Found a synonym-group match — add a synthetic overlap marker
+                            synonymOverlap.insert("~synonym_group~")
+                            break
+                        }
+                    }
+                }
+                
                 // Check if product name or productType matches a taxonomy synonym of the scanned type
                 let isTaxonomySynonym = taxonomySynonyms.contains(where: { syn in
                     nameLower.contains(syn) || productTypeLower.contains(syn)
                 })
                 
                 // CRITICAL: If target has specific descriptors, product MUST match at least one
-                // (taxonomy synonyms bypass this gate — "Hand Gel" is valid for "Hand Sanitizer")
-                if !targetSpecific.isEmpty && specificOverlap.isEmpty && !isTaxonomySynonym {
+                // (taxonomy synonyms and descriptor synonym groups bypass this gate)
+                if !targetSpecific.isEmpty && synonymOverlap.isEmpty && !isTaxonomySynonym {
                     Log.debug("FILTERED: '\(product.name)' - descriptor mismatch", category: .scan)
                     return nil
                 }
+                
+                // Determine if this is an exact descriptor match or synonym-group match
+                let hasExactDescriptorMatch = !specificOverlap.isEmpty
+                let hasSynonymGroupMatch = !synonymOverlap.isEmpty && !hasExactDescriptorMatch
                 
                 // Now score based on how well they match
                 if nameLower.contains(targetLower) {
@@ -815,6 +850,16 @@ struct ScanView: View {
                     } else {
                         // Only the specific descriptor matches (e.g., "hand sanitizer" → "sanitizer")
                         nameScore = 0.70
+                    }
+                } else if hasSynonymGroupMatch {
+                    // Descriptor synonym group match (e.g., "Body Wash" → "African Black Soap",
+                    // "Deep Conditioner" → "Deep Conditioning Masque")
+                    if overlap.count >= 2 {
+                        // Multiple words overlap + synonym group match
+                        nameScore = 0.88
+                    } else {
+                        // Just the synonym group match
+                        nameScore = 0.78
                     }
                 } else {
                     // No specific descriptors matched (should be rare due to gate above)
@@ -877,8 +922,19 @@ struct ScanView: View {
                 )
             }
             
-            // Sort by score and show top 20
-            let filteredResults = Array(scoredResults.sorted { $0.confidenceScore > $1.confidenceScore }.prefix(20))
+            // Sort by score, limit to 2 per company for variety, show top 20
+            let sortedResults = scoredResults.sorted { $0.confidenceScore > $1.confidenceScore }
+            var companyCounts: [String: Int] = [:]
+            var filteredResults: [ScoredProduct] = []
+            for result in sortedResults {
+                let company = result.product.company
+                let count = companyCounts[company, default: 0]
+                if count < 2 {
+                    filteredResults.append(result)
+                    companyCounts[company] = count + 1
+                }
+                if filteredResults.count >= 20 { break }
+            }
             
             Log.debug("After filter: \(scoredResults.count) products (from \(results.count)), showing top \(filteredResults.count)", category: .scan)
             
@@ -887,6 +943,13 @@ struct ScanView: View {
                 withAnimation(.easeOut(duration: 0.3)) {
                     scanState = .results
                 }
+                
+                // Save scan to history
+                scanHistoryManager.addScan(
+                    recognizedText: analysis.rawText,
+                    classifiedProduct: analysis.productType,
+                    resultCount: filteredResults.count
+                )
             }
             
         } catch {
@@ -1378,54 +1441,55 @@ struct ScanGlowOverlay: View {
         let cr = screenRadius
         
         ZStack {
-            // Layer 1: Ultra-wide ambient glow (inset so blur bleeds inward)
+            // Layer 1: Ultra-wide ambient glow
+            // lineWidth & blur stay fixed to avoid layout churn — only opacity animates
             RoundedRectangle(cornerRadius: cr)
                 .stroke(
                     AngularGradient(
                         colors: [
-                            glowColor.opacity(isResults ? 0.6 : (pulse ? 0.7 : 0.2)),
+                            glowColor.opacity(isResults ? 0.6 : (pulse ? 0.70 : 0.20)),
                             secondaryColor.opacity(isResults ? 0.5 : (pulse ? 0.55 : 0.12)),
                             glowColor.opacity(isResults ? 0.6 : (pulse ? 0.65 : 0.18)),
                             secondaryColor.opacity(isResults ? 0.5 : (pulse ? 0.55 : 0.12)),
-                            glowColor.opacity(isResults ? 0.6 : (pulse ? 0.7 : 0.2))
+                            glowColor.opacity(isResults ? 0.6 : (pulse ? 0.70 : 0.20))
                         ],
                         center: .center
                     ),
-                    lineWidth: isResults ? 14 : (pulse ? 14 : 5)
+                    lineWidth: isResults ? 14 : 10
                 )
-                .blur(radius: isResults ? 32 : (pulse ? 36 : 18))
+                .blur(radius: isResults ? 32 : 28)
             
             // Layer 2: Medium body glow
             RoundedRectangle(cornerRadius: cr)
                 .stroke(
                     LinearGradient(
                         colors: [
-                            glowColor.opacity(isResults ? 0.7 : (pulse ? 0.6 : 0.15)),
-                            secondaryColor.opacity(isResults ? 0.55 : (pulse ? 0.5 : 0.1)),
-                            glowColor.opacity(isResults ? 0.7 : (pulse ? 0.6 : 0.15))
+                            glowColor.opacity(isResults ? 0.7 : (pulse ? 0.60 : 0.15)),
+                            secondaryColor.opacity(isResults ? 0.55 : (pulse ? 0.50 : 0.10)),
+                            glowColor.opacity(isResults ? 0.7 : (pulse ? 0.60 : 0.15))
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
-                    lineWidth: isResults ? 8 : (pulse ? 9 : 3)
+                    lineWidth: isResults ? 8 : 6
                 )
-                .blur(radius: isResults ? 16 : (pulse ? 18 : 8))
+                .blur(radius: isResults ? 16 : 13)
             
             // Layer 3: Tight inner glow
             RoundedRectangle(cornerRadius: cr)
                 .stroke(
                     LinearGradient(
                         colors: [
-                            glowColor.opacity(isResults ? 0.65 : (pulse ? 0.5 : 0.12)),
-                            secondaryColor.opacity(isResults ? 0.55 : (pulse ? 0.4 : 0.08)),
-                            glowColor.opacity(isResults ? 0.65 : (pulse ? 0.5 : 0.12))
+                            glowColor.opacity(isResults ? 0.65 : (pulse ? 0.50 : 0.12)),
+                            secondaryColor.opacity(isResults ? 0.55 : (pulse ? 0.40 : 0.08)),
+                            glowColor.opacity(isResults ? 0.65 : (pulse ? 0.50 : 0.12))
                         ],
                         startPoint: .top,
                         endPoint: .bottom
                     ),
-                    lineWidth: isResults ? 4 : (pulse ? 5 : 2)
+                    lineWidth: isResults ? 4 : 3.5
                 )
-                .blur(radius: isResults ? 6 : (pulse ? 6 : 3))
+                .blur(radius: isResults ? 6 : 4.5)
             
             // Layer 4: Crisp edge stroke aligned to screen rim
             RoundedRectangle(cornerRadius: cr)
@@ -1433,17 +1497,20 @@ struct ScanGlowOverlay: View {
                     LinearGradient(
                         colors: [
                             glowColor.opacity(isResults ? 0.8 : (pulse ? 0.55 : 0.15)),
-                            secondaryColor.opacity(isResults ? 0.7 : (pulse ? 0.45 : 0.1)),
+                            secondaryColor.opacity(isResults ? 0.7 : (pulse ? 0.45 : 0.10)),
                             glowColor.opacity(isResults ? 0.8 : (pulse ? 0.55 : 0.15))
                         ],
                         startPoint: .leading,
                         endPoint: .trailing
                     ),
-                    lineWidth: isResults ? 2.5 : (pulse ? 2.5 : 1)
+                    lineWidth: isResults ? 2.5 : 1.8
                 )
         }
         .onAppear {
-            withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+            withAnimation(
+                .easeInOut(duration: 1.4)
+                .repeatForever(autoreverses: true)
+            ) {
                 pulse = true
             }
         }

@@ -299,31 +299,40 @@ class HybridScanService {
         }
         
         // Step 3: General fallback — find best match from the full raw text
+        // BUT: reject corrections where the detected form conflicts with the candidate's typical forms
         if let match = taxonomy.findBestMatch(analysis.rawText), match.confidence >= 0.4 {
-            Log.debug("Taxonomy correction (raw text): '\(analysis.productType)' → '\(match.type.canonical)' (\(Int(match.confidence * 100))%)", category: .scan)
-            return ProductAnalysis(
-                brand: analysis.brand,
-                productType: match.type.canonical,
-                form: analysis.form ?? match.type.typicalForms.first,
-                size: analysis.size,
-                ingredients: analysis.ingredients,
-                confidence: min(analysis.confidence, max(match.confidence, 0.7)),
-                rawText: analysis.rawText
-            )
+            if isFormCompatibleWithType(detectedForm: analysis.form, candidateType: match.type) {
+                Log.debug("Taxonomy correction (raw text): '\(analysis.productType)' → '\(match.type.canonical)' (\(Int(match.confidence * 100))%)", category: .scan)
+                return ProductAnalysis(
+                    brand: analysis.brand,
+                    productType: match.type.canonical,
+                    form: analysis.form ?? match.type.typicalForms.first,
+                    size: analysis.size,
+                    ingredients: analysis.ingredients,
+                    confidence: min(analysis.confidence, max(match.confidence, 0.7)),
+                    rawText: analysis.rawText
+                )
+            } else {
+                Log.debug("Taxonomy: rejected '\(match.type.canonical)' — form '\(analysis.form ?? "nil")' incompatible with typical forms \(match.type.typicalForms)", category: .scan)
+            }
         }
         
         // Step 4: Try from just the product type string itself
         if let match = taxonomy.findBestMatch(analysis.productType), match.confidence >= 0.3 {
-            Log.debug("Taxonomy correction (type text): '\(analysis.productType)' → '\(match.type.canonical)'", category: .scan)
-            return ProductAnalysis(
-                brand: analysis.brand,
-                productType: match.type.canonical,
-                form: analysis.form ?? match.type.typicalForms.first,
-                size: analysis.size,
-                ingredients: analysis.ingredients,
-                confidence: analysis.confidence * 0.9,
-                rawText: analysis.rawText
-            )
+            if isFormCompatibleWithType(detectedForm: analysis.form, candidateType: match.type) {
+                Log.debug("Taxonomy correction (type text): '\(analysis.productType)' → '\(match.type.canonical)'", category: .scan)
+                return ProductAnalysis(
+                    brand: analysis.brand,
+                    productType: match.type.canonical,
+                    form: analysis.form ?? match.type.typicalForms.first,
+                    size: analysis.size,
+                    ingredients: analysis.ingredients,
+                    confidence: analysis.confidence * 0.9,
+                    rawText: analysis.rawText
+                )
+            } else {
+                Log.debug("Taxonomy: rejected '\(match.type.canonical)' — form '\(analysis.form ?? "nil")' incompatible", category: .scan)
+            }
         }
         
         // No taxonomy match found — use GPT's output as-is
@@ -402,6 +411,52 @@ class HybridScanService {
         
         // Require at least one real match (score >= 2)
         return bestScore >= 2 ? bestType : nil
+    }
+    
+    /// Check if a detected form is compatible with a candidate product type.
+    /// Returns true if no form was detected, or if the form plausibly fits the type.
+    /// Prevents corrections like "Body Mist" → "Body Butter" (mist ≠ cream/butter).
+    private func isFormCompatibleWithType(detectedForm: String?, candidateType: ProductType) -> Bool {
+        guard let form = detectedForm?.lowercased(),
+              !form.isEmpty else {
+            return true // No form detected — allow any match
+        }
+        
+        // If the candidate's typical forms include the detected form, it's compatible
+        if candidateType.typicalForms.contains(form) {
+            return true
+        }
+        
+        // Check form family compatibility (spray≈mist, cream≈lotion, etc.)
+        let formFamilies: [[String]] = [
+            ["spray", "mist", "spritz"],
+            ["cream", "lotion", "butter"],
+            ["gel", "jelly", "gelly"],
+            ["oil", "serum"],
+            ["foam", "mousse"],
+            ["liquid", "wash"],
+            ["bar", "stick", "solid"],
+            ["wipe", "towelette", "towelettes"],
+            ["powder", "compact"],
+        ]
+        
+        for family in formFamilies {
+            if family.contains(form) {
+                // The detected form belongs to this family.
+                // Check if the candidate type has ANY typical form in the same family.
+                let candidateInFamily = candidateType.typicalForms.contains { family.contains($0) }
+                if candidateInFamily { return true }
+            }
+        }
+        
+        // If we couldn't place the form in any family, be permissive
+        // (e.g., "pack", "other", or unusual GPT forms like "Cleansing Towelettes")
+        let knownForms = formFamilies.flatMap { $0 }
+        if !knownForms.contains(form) {
+            return true // Unknown form — don't block
+        }
+        
+        return false // Known form that doesn't match the candidate
     }
     
     // MARK: - Error Types

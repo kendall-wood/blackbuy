@@ -117,8 +117,8 @@ class GPT4TextService {
         
         VALID PRODUCT TYPES — you MUST pick the closest match from this list:
         • Hair: Shampoo, Conditioner, Leave-In Conditioner, Hair Oil, Hair Mask, Hair Cream, Hair Gel, Hair Butter, Edge Control, Deep Conditioner, Hair Serum, Curl Cream, Styling Gel, Hair Balm
-        • Skin: Facial Cleanser, Face Serum, Face Cream, Face Mask, Face Oil, Toner, Eye Cream, Moisturizer, Facial Mist, Facial Scrub, Sunscreen
-        • Body: Hand Sanitizer, Body Butter, Body Oil, Body Scrub, Body Wash, Body Lotion, Bar Soap, Deodorant, Body Balm, Hand Soap, Liquid Soap, Body Gloss, Sugar Scrub
+        • Skin: Facial Cleanser, Face Serum, Face Cream, Face Mask, Face Oil, Toner, Eye Cream, Moisturizer, Facial Mist, Facial Scrub, Sunscreen, Cleansing Wipes
+        • Body: Hand Sanitizer, Body Butter, Body Oil, Body Mist, Body Scrub, Body Wash, Body Lotion, Bar Soap, Deodorant, Body Balm, Hand Soap, Liquid Soap, Body Gloss, Sugar Scrub
         • Lips: Lip Balm, Lip Gloss, Lipstick, Lip Scrub, Liquid Lipstick
         • Makeup: Foundation, Face Powder, Concealer, Mascara, Eyeshadow, Eyeshadow Palette, Blush, Highlighter, Bronzer, Primer, Eyeliner, Brow Gel, Nail Polish, Gel Polish, False Eyelashes
         • Fragrance: Perfume, Eau de Parfum, Perfume Oil

@@ -34,7 +34,7 @@ class ScanHistoryManager: ObservableObject {
     
     private let userDefaults = UserDefaults.standard
     private let storageKey = "BlackScan_ScanHistory"
-    private let maxHistoryCount = 50 // Limit to last 50 scans for performance
+    private let maxHistoryCount = 24 // Limit to last 24 scans
     
     // MARK: - Initialization
     
