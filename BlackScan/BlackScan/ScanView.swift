@@ -315,11 +315,11 @@ struct ScanView: View {
         case .initial:
             return "Start Scanning"
         case .capturing:
-            return "Capturing..."
+            return "Scanning..."
         case .analyzing:
-            return "Analyzing..."
+            return "Scanning..."
         case .searching:
-            return "Searching..."
+            return "Scanning..."
         case .results:
             return "Scan Again"
         }
@@ -330,11 +330,11 @@ struct ScanView: View {
         case .initial:
             return "Start Scanning"
         case .capturing:
-            return "Capturing..."
+            return "Scanning..."
         case .analyzing:
-            return "Analyzing..."
+            return "Scanning..."
         case .searching:
-            return "Searching..."
+            return "Scanning..."
         case .results:
             let count = scanResults.count
             if let productType = lastAnalysis?.productType {
