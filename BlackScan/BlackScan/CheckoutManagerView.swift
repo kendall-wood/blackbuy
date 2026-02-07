@@ -47,7 +47,7 @@ struct CheckoutManagerView: View {
                     if cartManager.cartItems.isEmpty {
                         emptyCartView
                     } else {
-                        VStack(spacing: 16) {
+                        VStack(spacing: 12) {
                             ForEach(cartManager.groupedByCompany()) { group in
                                 CompanyCartGroup(group: group)
                             }
@@ -98,13 +98,13 @@ struct CheckoutManagerView: View {
             Divider()
             
             HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text("Total")
-                        .font(DS.body)
+                        .font(DS.caption)
                         .foregroundColor(Color(.systemGray))
                     
                     Text(cartManager.formattedTotalPrice)
-                        .font(.system(size: 36, weight: .bold))
+                        .font(.system(size: 28, weight: .semibold))
                         .foregroundColor(.black)
                 }
                 
@@ -112,16 +112,17 @@ struct CheckoutManagerView: View {
                 
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("\(cartManager.totalItemCount) items")
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.system(size: 14, weight: .medium))
                         .foregroundColor(Color(.systemGray))
                     
                     Text("\(cartManager.companyCount) stores")
-                        .font(DS.body)
+                        .font(DS.caption)
                         .foregroundColor(Color(.systemGray2))
                 }
             }
             .padding(.horizontal, DS.horizontalPadding)
-            .padding(.vertical, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 40)
             .background(DS.cardBackground)
         }
     }
@@ -138,21 +139,21 @@ struct CompanyCartGroup: View {
             // Company name header
             HStack {
                 Text(group.company)
-                    .font(DS.sectionHeader)
+                    .font(.system(size: 17, weight: .medium))
                     .foregroundColor(.black)
                 
                 Spacer()
                 
                 Text(group.formattedTotalPrice)
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(DS.brandBlue)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
+            .padding(.horizontal, 14)
+            .padding(.top, 14)
+            .padding(.bottom, 10)
             
             // Products in this company
-            VStack(spacing: 14) {
+            VStack(spacing: 10) {
                 ForEach(group.items) { entry in
                     CartProductRow(
                         item: entry.item,
@@ -169,8 +170,8 @@ struct CompanyCartGroup: View {
                     )
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 16)
+            .padding(.horizontal, 14)
+            .padding(.bottom, 14)
         }
         .background(DS.cardBackground)
         .cornerRadius(DS.radiusLarge)
@@ -208,9 +209,9 @@ struct CartProductRow: View {
                         }
                     }) {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 92, height: 120)
+                            .frame(width: 72, height: 96)
                             .background(
                                 UnevenRoundedRectangle(cornerRadii: .init(
                                     topLeading: DS.radiusMedium,
@@ -233,9 +234,9 @@ struct CartProductRow: View {
                     
                     Button(action: { onRemove() }) {
                         Image(systemName: "trash")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 92, height: 120)
+                            .frame(width: 72, height: 96)
                             .background(
                                 UnevenRoundedRectangle(cornerRadii: .init(
                                     topLeading: 0,
@@ -280,13 +281,13 @@ struct CartProductRow: View {
                             }
                     )
             }
-            .frame(height: 120)
+            .frame(height: 96)
         }
-        .frame(height: 120)
+        .frame(height: 96)
     }
     
     private var cardContent: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .center, spacing: 10) {
             // Product Image
             CachedAsyncImage(url: URL(string: item.product.imageUrl)) { image in
                 image
@@ -295,26 +296,25 @@ struct CartProductRow: View {
             } placeholder: {
                 Color.white.overlay(ProgressView())
             }
-            .frame(width: 80, height: 80)
+            .frame(width: 64, height: 64)
             .background(Color.white)
             .cornerRadius(DS.radiusSmall)
             .clipped()
             
             // Product Info
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(item.product.name)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.black)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                 
                 Text(item.product.formattedPrice)
-                    .font(.system(size: 14, weight: .regular))
+                    .font(.system(size: 13, weight: .regular))
                     .foregroundColor(Color(.systemGray))
-                    .padding(.bottom, 1)
                 
                 // Quantity Controls
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     Button(action: {
                         if item.quantity > 1 {
                             onQuantityChange(item.quantity - 1)
@@ -324,27 +324,27 @@ struct CartProductRow: View {
                     }) {
                         ZStack {
                             Circle()
-                                .fill(Color(.systemGray))
-                                .frame(width: 24, height: 24)
+                                .fill(Color(.systemGray4))
+                                .frame(width: 22, height: 22)
                             Image(systemName: "minus")
-                                .font(.system(size: 10, weight: .medium))
+                                .font(.system(size: 9, weight: .medium))
                                 .foregroundColor(.white)
                         }
                     }
                     .buttonStyle(.plain)
                     
                     Text("\(item.quantity)")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 13, weight: .medium))
                         .foregroundColor(.black)
-                        .frame(minWidth: 20)
+                        .frame(minWidth: 16)
                     
                     Button(action: { onQuantityChange(item.quantity + 1) }) {
                         ZStack {
                             Circle()
                                 .fill(DS.brandBlue)
-                                .frame(width: 24, height: 24)
+                                .frame(width: 22, height: 22)
                             Image(systemName: "plus")
-                                .font(.system(size: 10, weight: .medium))
+                                .font(.system(size: 9, weight: .medium))
                                 .foregroundColor(.white)
                         }
                     }
@@ -352,29 +352,28 @@ struct CartProductRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.trailing, 12)
             
             // Total Price and Buy Button stacked
-            VStack(spacing: 10) {
+            VStack(spacing: 8) {
                 Text(item.formattedTotalPrice)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.black)
                 
                 Button(action: onBuy) {
                     Text("Buy")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 7)
                         .background(DS.brandGradient)
                         .cornerRadius(DS.radiusSmall)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 12)
-        .frame(height: 120)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 10)
+        .frame(height: 96)
         .background(DS.cardBackground)
         .cornerRadius(DS.radiusMedium)
         .overlay(

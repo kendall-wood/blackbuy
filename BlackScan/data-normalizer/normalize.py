@@ -214,6 +214,13 @@ def normalize_product(product, main_category_map, product_type_synonyms):
     except (ValueError, TypeError):
         price = 0.0
     
+    # Convert Nigerian Naira (NGN) prices to USD for known Nigerian sources
+    NGN_SOURCES = {'nubanbeauty.com', 'yangabeauty.com'}
+    NGN_TO_USD = 1 / 1500  # Approximate exchange rate
+    source = product.get('Source', '')
+    if source in NGN_SOURCES and price > 0:
+        price = round(price * NGN_TO_USD, 2)
+    
     image_url = product.get('Image URL', '')
     product_url = product.get('Link', '')
     description = ''  # Not in your current JSON

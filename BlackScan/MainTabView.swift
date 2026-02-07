@@ -43,6 +43,12 @@ struct MainTabView: View {
                 selectedTab = tab
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .searchInShop)) { notification in
+            if let query = notification.object as? String {
+                pendingShopSearch = query
+                selectedTab = .shop
+            }
+        }
         .onChange(of: selectedTab) { oldValue, newValue in
             // Only push if it's a forward navigation (not a back)
             if tabHistory.last != newValue {

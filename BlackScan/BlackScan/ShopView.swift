@@ -24,13 +24,17 @@ struct ShopView: View {
     @State private var searchText = ""
     @State private var searchTask: Task<Void, Never>?
     @State private var showSearchDropdown = false
+    @FocusState private var isSearchFocused: Bool
     
     // Category browsing state
     @State private var categoryProducts: [Product] = []
     @State private var displayedCategoryProducts: [Product] = []
     @State private var isCategoryLoading = false
     @State private var categorySortOrder: SortOrder = .relevant
-    @State private var categoryPage = 0
+    @State private var categoryServerPage: Int = 1
+    @State private var categoryTotalFound: Int = 0
+    @State private var hasMoreCategoryPages: Bool = false
+    @State private var isCategoryLoadingMore: Bool = false
     private let pageSize = 24
     
     // Search results grid state
@@ -104,7 +108,7 @@ struct ShopView: View {
                         VStack(spacing: DS.sectionSpacing) {
                             // Categories Section
                             categoriesSection
-                                .padding(.top, 24)
+                                .padding(.top, 12)
                             
                             if activeSearchQuery != nil {
                                 // Search results mode
@@ -123,8 +127,8 @@ struct ShopView: View {
                 }
                 .background(DS.cardBackground)
                 
-                // Search Dropdown Overlay
-                if showSearchDropdown && !searchResults.isEmpty {
+                // Search Dropdown Overlay (only while typing)
+                if showSearchDropdown && isSearchFocused && !searchResults.isEmpty {
                     searchDropdown
                 }
             }
@@ -175,6 +179,7 @@ struct ShopView: View {
                     TextField("", text: $searchText)
                         .font(DS.body)
                         .foregroundColor(.black)
+                        .focused($isSearchFocused)
                         .submitLabel(.search)
                         .onSubmit {
                             commitSearch()
@@ -217,8 +222,8 @@ struct ShopView: View {
                     .dsCardShadow()
             )
             .padding(.horizontal, DS.horizontalPadding)
-            .padding(.top, 4)
-            .padding(.bottom, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
             .background(DS.cardBackground)
         }
     }
@@ -376,7 +381,8 @@ struct ShopView: View {
                     }
                 }
                 .padding(.horizontal, DS.horizontalPadding)
-                .padding(.vertical, 8)
+                .padding(.top, 8)
+                .padding(.bottom, 14)
             }
         }
     }
@@ -513,7 +519,7 @@ struct ShopView: View {
             .padding(.horizontal, DS.horizontalPadding)
             
             // Showing count
-            Text("Showing \(displayedCategoryProducts.count) of \(categoryProducts.count) products")
+            Text("Showing \(displayedCategoryProducts.count) of \(categoryTotalFound) products")
                 .font(.system(size: 13, weight: .regular))
                 .foregroundColor(Color(.systemGray))
                 .padding(.horizontal, DS.horizontalPadding)
@@ -573,17 +579,25 @@ struct ShopView: View {
                 .padding(.horizontal, DS.horizontalPadding)
                 
                 // Load More button
-                if displayedCategoryProducts.count < categoryProducts.count {
+                if displayedCategoryProducts.count < categoryTotalFound {
                     Button(action: loadMoreCategoryProducts) {
-                        Text("Load More")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 48)
-                            .background(DS.brandGradient)
-                            .cornerRadius(DS.radiusMedium)
+                        Group {
+                            if isCategoryLoadingMore {
+                                ProgressView()
+                                    .tint(.white)
+                            } else {
+                                Text("Load More")
+                                    .font(.system(size: 16, weight: .semibold))
+                            }
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(DS.brandGradient)
+                        .cornerRadius(DS.radiusMedium)
                     }
                     .buttonStyle(.plain)
+                    .disabled(isCategoryLoadingMore)
                     .padding(.horizontal, DS.horizontalPadding)
                     .padding(.top, 8)
                 }
@@ -594,7 +608,7 @@ struct ShopView: View {
     // MARK: - Featured Brands Section
     
     private var featuredBrandsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Featured Brands")
                 .font(DS.sectionHeader)
                 .foregroundColor(.black)
@@ -726,8 +740,8 @@ struct ShopView: View {
         searchGridProducts = []
         displayedSearchProducts = []
         
-        // Dismiss keyboard
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        // Dismiss keyboard and dropdown
+        isSearchFocused = false
         
         Task {
             do {
@@ -799,26 +813,26 @@ struct ShopView: View {
         isCategoryLoading = true
         categoryProducts = []
         displayedCategoryProducts = []
-        categoryPage = 0
+        categoryServerPage = 1
+        categoryTotalFound = 0
+        hasMoreCategoryPages = false
         categorySortOrder = .relevant
-        
-        let sanitizedCategory = InputValidator.sanitizeSearchQuery(category)
         
         Task {
             do {
-                let products = try await NetworkSecurity.withRetry(maxAttempts: 2) {
-                    try await typesenseClient.searchProducts(
-                        query: sanitizedCategory,
-                        page: 1,
-                        perPage: Env.maxResultsPerPage
+                let result = try await NetworkSecurity.withRetry(maxAttempts: 2) {
+                    try await typesenseClient.searchByCategory(
+                        mainCategory: category,
+                        page: 1
                     )
                 }
                 
-                let filtered = products.filter { $0.mainCategory == category }
-                
                 await MainActor.run {
-                    categoryProducts = filtered
-                    loadMoreCategoryProducts()
+                    categoryProducts = result.products
+                    categoryTotalFound = result.totalFound
+                    categoryServerPage = 1
+                    hasMoreCategoryPages = categoryProducts.count < categoryTotalFound
+                    showMoreLocalCategoryProducts()
                     isCategoryLoading = false
                 }
             } catch {
@@ -830,13 +844,55 @@ struct ShopView: View {
         }
     }
     
-    private func loadMoreCategoryProducts() {
+    /// Show more products from the locally fetched pool
+    private func showMoreLocalCategoryProducts() {
         let sorted = sortedCategoryProducts
         let start = displayedCategoryProducts.count
         let end = min(start + pageSize, sorted.count)
         
         if start < sorted.count {
             displayedCategoryProducts.append(contentsOf: sorted[start..<end])
+        }
+    }
+    
+    /// Load more category products — pulls from local pool first, fetches next server page when exhausted
+    private func loadMoreCategoryProducts() {
+        let sorted = sortedCategoryProducts
+        
+        // If we still have local products not yet displayed, show those first
+        if displayedCategoryProducts.count < sorted.count {
+            showMoreLocalCategoryProducts()
+            return
+        }
+        
+        // Otherwise fetch the next page from the server
+        guard hasMoreCategoryPages, !isCategoryLoadingMore, let category = selectedCategory else { return }
+        
+        isCategoryLoadingMore = true
+        let nextPage = categoryServerPage + 1
+        
+        Task {
+            do {
+                let result = try await NetworkSecurity.withRetry(maxAttempts: 2) {
+                    try await typesenseClient.searchByCategory(
+                        mainCategory: category,
+                        page: nextPage
+                    )
+                }
+                
+                await MainActor.run {
+                    categoryServerPage = nextPage
+                    categoryProducts.append(contentsOf: result.products)
+                    hasMoreCategoryPages = categoryProducts.count < categoryTotalFound
+                    showMoreLocalCategoryProducts()
+                    isCategoryLoadingMore = false
+                }
+            } catch {
+                await MainActor.run {
+                    isCategoryLoadingMore = false
+                }
+                Log.error("Category page load failed", category: .network)
+            }
         }
     }
     

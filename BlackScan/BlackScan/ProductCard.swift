@@ -125,9 +125,9 @@ struct UnifiedProductCard: View {
                     if showAddToCart {
                         Button(action: { onAddToCart?() }) {
                             Image(systemName: isInCart ? "checkmark" : "plus")
-                                .font(.system(size: 14, weight: .medium))
+                                .font(.system(size: 16, weight: .medium))
                                 .foregroundColor(isInCart ? .white : DS.brandBlue)
-                                .frame(width: 28, height: 28)
+                                .frame(width: 34, height: 34)
                                 .background(
                                     Circle().fill(isInCart ? DS.brandBlue : Color.white)
                                 )
@@ -138,8 +138,8 @@ struct UnifiedProductCard: View {
                     }
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.bottom, 12)
+            .padding(.horizontal, 10)
+            .padding(.bottom, 16)
             .padding(.top, 6)
         }
         .background(DS.cardBackground)

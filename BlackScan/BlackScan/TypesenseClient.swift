@@ -141,6 +141,28 @@ class TypesenseClient: ObservableObject {
         return response.products
     }
     
+    /// Search products by category with pagination support
+    /// - Parameters:
+    ///   - mainCategory: Category to filter by (e.g., "Skincare")
+    ///   - page: Page number (1-based)
+    ///   - perPage: Number of results per page
+    /// - Returns: Tuple of products and total found count
+    func searchByCategory(
+        mainCategory: String,
+        page: Int = 1,
+        perPage: Int = Env.maxResultsPerPage
+    ) async throws -> (products: [Product], totalFound: Int) {
+        let parameters = SearchParameters(
+            query: "*",
+            page: page,
+            perPage: perPage,
+            mainCategory: mainCategory
+        )
+        
+        let response = try await search(parameters: parameters)
+        return (response.products, response.found)
+    }
+    
     /// Search products with product type filter
     /// - Parameters:
     ///   - query: Search query string

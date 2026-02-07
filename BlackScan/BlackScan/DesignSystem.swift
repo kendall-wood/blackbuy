@@ -114,6 +114,14 @@ extension View {
     }
 }
 
+// MARK: - Notifications
+
+extension Notification.Name {
+    /// Posted when a view wants to navigate to the Shop and search for a term.
+    /// The `object` should be a `String` containing the search query.
+    static let searchInShop = Notification.Name("searchInShop")
+}
+
 // MARK: - App Tab Enum
 
 /// Navigation tab enum used across the app.

@@ -119,20 +119,15 @@ struct ProductDetailView: View {
                         
                         // Product name
                         Text(product.name)
-                            .font(.system(size: 24, weight: .semibold))
-                            .tracking(-0.3)
+                            .font(.system(size: 22, weight: .semibold))
                             .foregroundColor(.black)
                             .lineLimit(3)
-                            .lineSpacing(2)
-                            .padding(.top, 2)
                         
                         // Price
                         Text(product.formattedPrice)
-                            .font(.system(size: 26, weight: .semibold))
-                            .tracking(-0.5)
-                            .foregroundColor(.black)
-                            .padding(.top, 8)
-                            .padding(.bottom, 4)
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(Color(.darkGray))
+                            .padding(.top, 4)
                         
                         // Categories label
                         Text("CATEGORIES")
@@ -143,11 +138,17 @@ struct ProductDetailView: View {
                         // Category chips
                         FlowLayout(spacing: 8) {
                             if !product.mainCategory.isEmpty && product.mainCategory != "Other" {
-                                CategoryChip(text: product.mainCategory, isPrimary: true)
+                                Button(action: { searchInShop(product.mainCategory) }) {
+                                    CategoryChip(text: product.mainCategory, isPrimary: true)
+                                }
+                                .buttonStyle(.plain)
                             }
                             
                             if !product.productType.isEmpty && product.productType != "Other" {
-                                CategoryChip(text: product.productType, isPrimary: false)
+                                Button(action: { searchInShop(product.productType) }) {
+                                    CategoryChip(text: product.productType, isPrimary: false)
+                                }
+                                .buttonStyle(.plain)
                             }
                             
                             if let form = product.form, !form.isEmpty && form != "other" {
@@ -268,6 +269,12 @@ struct ProductDetailView: View {
                 .environmentObject(savedCompaniesManager)
                 .environmentObject(cartManager)
         }
+    }
+    
+    /// Dismiss and navigate to Shop with a search query
+    private func searchInShop(_ query: String) {
+        dismiss()
+        NotificationCenter.default.post(name: .searchInShop, object: query)
     }
     
     private func loadSimilarProducts() {
