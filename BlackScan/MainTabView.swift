@@ -49,6 +49,10 @@ struct MainTabView: View {
                 selectedTab = .shop
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToCategory)) { _ in
+            // Ensure we're on the Shop tab so ShopView can process the notification
+            selectedTab = .shop
+        }
         .onChange(of: selectedTab) { oldValue, newValue in
             // Only push if it's a forward navigation (not a back)
             if tabHistory.last != newValue {

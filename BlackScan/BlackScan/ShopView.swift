@@ -25,6 +25,7 @@ struct ShopView: View {
     @State private var searchTask: Task<Void, Never>?
     @State private var showSearchDropdown = false
     @FocusState private var isSearchFocused: Bool
+    @State private var shopScrollToTop: Bool = false
     
     // Category browsing state
     @State private var categoryProducts: [Product] = []
@@ -131,25 +132,33 @@ struct ShopView: View {
                     searchBar
                     
                     // Main Content
-                    ScrollView(.vertical, showsIndicators: false) {
-                        VStack(spacing: DS.sectionSpacing) {
-                            // Categories Section
-                            categoriesSection
-                                .padding(.top, 12)
-                            
-                            if activeSearchQuery != nil {
-                                // Search results mode
-                                searchResultsSection
-                            } else if selectedCategory != nil {
-                                // Category browsing mode
-                                categoryBrowseSection
-                            } else {
-                                // Default: Featured Brands + Products
-                                featuredBrandsSection
-                                featuredProductsSection
+                    ScrollViewReader { mainProxy in
+                        ScrollView(.vertical, showsIndicators: false) {
+                            VStack(spacing: DS.sectionSpacing) {
+                                // Categories Section
+                                categoriesSection
+                                    .padding(.top, 12)
+                                    .id("shopTop")
+                                
+                                if activeSearchQuery != nil {
+                                    // Search results mode
+                                    searchResultsSection
+                                } else if selectedCategory != nil {
+                                    // Category browsing mode
+                                    categoryBrowseSection
+                                } else {
+                                    // Default: Featured Brands + Products
+                                    featuredBrandsSection
+                                    featuredProductsSection
+                                }
+                            }
+                            .padding(.bottom, 40)
+                        }
+                        .onChange(of: shopScrollToTop) { _ in
+                            withAnimation(.easeOut(duration: 0.25)) {
+                                mainProxy.scrollTo("shopTop", anchor: .top)
                             }
                         }
-                        .padding(.bottom, 40)
                     }
                 }
                 .background(DS.cardBackground)
@@ -382,69 +391,82 @@ struct ShopView: View {
                 .foregroundColor(.black)
                 .padding(.horizontal, DS.horizontalPadding)
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(categories, id: \.self) { category in
-                        Button(action: {
-                            // Clear any active search when tapping a category
-                            if activeSearchQuery != nil {
-                                activeSearchQuery = nil
-                                searchGridProducts = []
-                                displayedSearchProducts = []
-                                searchText = ""
-                            }
-                            
-                            if selectedCategory == category {
-                                // Deselect
-                                withAnimation(.easeOut(duration: 0.25)) {
-                                    selectedCategory = nil
-                                    categoryProducts = []
-                                    displayedCategoryProducts = []
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(categories, id: \.self) { category in
+                            Button(action: {
+                                    // Clear any active search when tapping a category
+                                    if activeSearchQuery != nil {
+                                        activeSearchQuery = nil
+                                        searchGridProducts = []
+                                        displayedSearchProducts = []
+                                        searchText = ""
+                                    }
+                                    
+                                    if selectedCategory == category {
+                                        // Deselect
+                                        withAnimation(.easeOut(duration: 0.25)) {
+                                            selectedCategory = nil
+                                            categoryProducts = []
+                                            displayedCategoryProducts = []
+                                        }
+                                    } else {
+                                        withAnimation(.easeOut(duration: 0.25)) {
+                                            selectedCategory = category
+                                        }
+                                        loadCategoryProducts(category)
+                                        withAnimation {
+                                            proxy.scrollTo(category, anchor: .leading)
+                                        }
+                                    }
+                                }) {
+                                    HStack(spacing: 6) {
+                                        let icon = categoryIcon(for: category)
+                                        let isUnicode = icon.unicodeScalars.first.map { !$0.isASCII } ?? false
+                                        let isAsset = icon.hasPrefix("icon_")
+                                        if isUnicode {
+                                            Text(icon)
+                                                .font(.system(size: 14))
+                                        } else if isAsset {
+                                            Image(icon)
+                                                .renderingMode(.template)
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 14, height: 14)
+                                        } else {
+                                            Image(systemName: icon)
+                                                .font(.system(size: 13, weight: .medium))
+                                        }
+                                        Text(category)
+                                            .font(.system(size: 15, weight: selectedCategory == category ? .semibold : .medium))
+                                    }
+                                    .foregroundColor(DS.brandBlue)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 10)
+                                    .background(Color.white)
+                                    .cornerRadius(DS.radiusMedium)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: DS.radiusMedium)
+                                            .stroke(DS.brandBlue, lineWidth: selectedCategory == category ? 2 : 0)
+                                    )
+                                    .dsCardShadow()
                                 }
-                            } else {
-                                withAnimation(.easeOut(duration: 0.25)) {
-                                    selectedCategory = category
-                                }
-                                loadCategoryProducts(category)
-                            }
-                        }) {
-                            HStack(spacing: 6) {
-                                let icon = categoryIcon(for: category)
-                                let isUnicode = icon.unicodeScalars.first.map { !$0.isASCII } ?? false
-                                let isAsset = icon.hasPrefix("icon_")
-                                if isUnicode {
-                                    Text(icon)
-                                        .font(.system(size: 14))
-                                } else if isAsset {
-                                    Image(icon)
-                                        .renderingMode(.template)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 14, height: 14)
-                                } else {
-                                    Image(systemName: icon)
-                                        .font(.system(size: 13, weight: .medium))
-                                }
-                                Text(category)
-                                    .font(.system(size: 15, weight: selectedCategory == category ? .semibold : .medium))
-                            }
-                            .foregroundColor(DS.brandBlue)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color.white)
-                            .cornerRadius(DS.radiusMedium)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: DS.radiusMedium)
-                                    .stroke(DS.brandBlue, lineWidth: selectedCategory == category ? 2 : 0)
-                            )
-                            .dsCardShadow()
+                                .buttonStyle(DSButtonStyle())
+                                .id(category)
                         }
-                        .buttonStyle(DSButtonStyle())
+                    }
+                    .padding(.horizontal, DS.horizontalPadding)
+                    .padding(.top, 8)
+                    .padding(.bottom, 14)
+                }
+                .onChange(of: selectedCategory) { newCategory in
+                    if let cat = newCategory {
+                        withAnimation {
+                            proxy.scrollTo(cat, anchor: .leading)
+                        }
                     }
                 }
-                .padding(.horizontal, DS.horizontalPadding)
-                .padding(.top, 8)
-                .padding(.bottom, 14)
             }
         }
     }
@@ -790,6 +812,9 @@ struct ShopView: View {
             selectedCategory = category
         }
         loadCategoryProducts(category)
+        
+        // Scroll main content to top so the user sees the category section
+        shopScrollToTop.toggle()
     }
     
     /// Picks up a search query passed from another tab (e.g. Recent Scans)
@@ -1098,8 +1123,8 @@ struct FeaturedBrandCircleCard: View {
 // MARK: - Helper Struct for Identifiable String
 
 struct IdentifiableString: Identifiable {
-    let id = UUID()
     let value: String
+    var id: String { value }
 }
 
 #Preview {

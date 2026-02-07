@@ -280,7 +280,11 @@ struct ProductDetailView: View {
     /// Dismiss and navigate to Shop with the corresponding category row selected
     private func navigateToCategory(_ category: String) {
         dismiss()
-        NotificationCenter.default.post(name: .navigateToCategory, object: category)
+        // Small delay so the sheet/fullScreenCover dismiss animation completes
+        // before the tab switches and ShopView processes the notification
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            NotificationCenter.default.post(name: .navigateToCategory, object: category)
+        }
     }
     
     private func loadSimilarProducts() {
