@@ -286,18 +286,19 @@ struct ShopView: View {
                     Button(action: {
                         commitSearch()
                     }) {
-                        HStack(spacing: 8) {
+                        HStack(spacing: 6) {
                             Text("See all results")
-                                .font(.system(size: 15, weight: .semibold))
+                                .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(DS.brandBlue)
                             
                             Image(systemName: "arrow.right")
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.system(size: 12, weight: .regular))
                                 .foregroundColor(DS.brandBlue)
+                            
+                            Spacer()
                         }
-                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 16)
                         .padding(.vertical, 14)
-                        .background(DS.brandBlue.opacity(0.05))
                     }
                     .buttonStyle(.plain)
                 }
