@@ -207,74 +207,72 @@ struct ScanView: View {
                     }
                 }
                 
-                // Bottom Left - Clock Button
+                // Bottom Navigation Buttons
                 VStack {
                     Spacer()
                     
-                    HStack {
-                        Button(action: {
-                            selectedTab = .saved
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 55, height: 55)
-                                    .dsButtonShadow()
-                                
-                                Image(systemName: "clock.fill")
-                                    .font(.system(size: 22))
-                                    .foregroundColor(DS.brandBlue)
+                    HStack(spacing: 28) {
+                        // Recent Scans
+                        Button(action: { selectedTab = .saved }) {
+                            VStack(spacing: 6) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 58, height: 58)
+                                        .dsButtonShadow()
+                                    
+                                    Image(systemName: "clock.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundColor(DS.brandBlue)
+                                }
+                                Text("Recent")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.white)
                             }
                         }
                         .buttonStyle(.plain)
-                        .padding(.leading, 20)
-                        .padding(.bottom, 50)
                         
-                        Spacer()
+                        // Saved
+                        Button(action: { selectedTab = .saved }) {
+                            VStack(spacing: 6) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 58, height: 58)
+                                        .dsButtonShadow()
+                                    
+                                    Image(systemName: "heart.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundColor(DS.brandBlue)
+                                }
+                                Text("Saved")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        
+                        // Shop
+                        Button(action: { selectedTab = .shop }) {
+                            VStack(spacing: 6) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 58, height: 58)
+                                        .dsButtonShadow()
+                                    
+                                    Image(systemName: "storefront.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundColor(DS.brandBlue)
+                                }
+                                Text("Shop")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .buttonStyle(.plain)
                     }
-                }
-                
-                // Bottom Right - Heart and Shop Buttons
-                VStack {
-                    Spacer()
-                    
-                    HStack(spacing: 12) {
-                        Spacer()
-                        
-                        Button(action: {
-                            selectedTab = .saved
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 55, height: 55)
-                                    .dsButtonShadow()
-                                
-                                Image(systemName: "heart.fill")
-                                    .font(.system(size: 22))
-                                    .foregroundColor(DS.brandBlue)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        
-                        Button(action: {
-                            selectedTab = .shop
-                        }) {
-                            ZStack {
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 55, height: 55)
-                                    .dsButtonShadow()
-                                
-                                Image(systemName: "storefront.fill")
-                                    .font(.system(size: 22))
-                                    .foregroundColor(DS.brandBlue)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.trailing, 20)
-                    }
-                    .padding(.bottom, 50)
+                    .padding(.bottom, 90)
                 }
             }
         }
