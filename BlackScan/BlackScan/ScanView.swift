@@ -109,7 +109,7 @@ struct ScanView: View {
                 }
                 
                 // Top Center - Logo and Subtitle
-                VStack(spacing: 14) {
+                VStack(spacing: 18) {
                     Image("logo")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -122,7 +122,7 @@ struct ScanView: View {
                     
                     Spacer()
                 }
-                .padding(.top, 48)
+                .padding(.top, 70)
                 
                 // Center - Scan Button + Inline Results
                 VStack(spacing: 10) {
