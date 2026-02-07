@@ -9,6 +9,7 @@ struct ScanView: View {
     
     @Binding var selectedTab: AppTab
     @StateObject private var typesenseClient = TypesenseClient()
+    @EnvironmentObject var cartManager: CartManager
     @State private var isShowingResults = false
     @State private var scanResults: [ScoredProduct] = []
     @State private var lastAnalysis: HybridScanService.ProductAnalysis?
@@ -193,61 +194,71 @@ struct ScanView: View {
                 VStack {
                     Spacer()
                     
-                    VStack(spacing: 14) {
-                        // Checkout Manager (above shop, aligned with shop button)
-                        HStack {
-                            Spacer()
-                            
-                            Button(action: { selectedTab = .checkout }) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 54, height: 54)
-                                        .dsButtonShadow()
-                                    
-                                    Image("cart_icon")
-                                        .renderingMode(.template)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 26, height: 26)
-                                        .foregroundColor(DS.brandBlue)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.trailing, 20)
-                        }
+                    HStack {
+                        Spacer()
                         
-                        // Heart and Shop row
-                        HStack(spacing: 14) {
-                            Spacer()
-                            
-                            Button(action: { selectedTab = .saved }) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 54, height: 54)
-                                        .dsButtonShadow()
+                        VStack(alignment: .trailing, spacing: 14) {
+                            // Checkout Manager (aligned right edge with shop button)
+                            Button(action: { selectedTab = .checkout }) {
+                                ZStack(alignment: .topTrailing) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.white)
+                                            .frame(width: 54, height: 54)
+                                            .dsButtonShadow()
+                                        
+                                        Image("cart_icon")
+                                            .renderingMode(.template)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 26, height: 26)
+                                            .foregroundColor(DS.brandBlue)
+                                    }
                                     
-                                    Image(systemName: "heart")
-                                        .font(.system(size: 20))
-                                        .foregroundColor(DS.brandBlue)
+                                    // Quantity badge
+                                    if cartManager.totalItemCount > 0 {
+                                        Text("\(cartManager.totalItemCount)")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .frame(minWidth: 20, minHeight: 20)
+                                            .background(DS.brandBlue)
+                                            .clipShape(Circle())
+                                            .offset(x: 4, y: -4)
+                                    }
                                 }
                             }
                             .buttonStyle(.plain)
                             
-                            Button(action: { selectedTab = .shop }) {
-                                ZStack {
-                                    Circle()
-                                        .fill(Color.white)
-                                        .frame(width: 54, height: 54)
-                                        .dsButtonShadow()
-                                    
-                                    Image(systemName: "storefront")
-                                        .font(.system(size: 20))
-                                        .foregroundColor(DS.brandBlue)
+                            // Heart and Shop row
+                            HStack(spacing: 14) {
+                                Button(action: { selectedTab = .saved }) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.white)
+                                            .frame(width: 54, height: 54)
+                                            .dsButtonShadow()
+                                        
+                                        Image(systemName: "heart")
+                                            .font(.system(size: 20))
+                                            .foregroundColor(DS.brandBlue)
+                                    }
                                 }
+                                .buttonStyle(.plain)
+                                
+                                Button(action: { selectedTab = .shop }) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.white)
+                                            .frame(width: 54, height: 54)
+                                            .dsButtonShadow()
+                                        
+                                        Image(systemName: "storefront")
+                                            .font(.system(size: 20))
+                                            .foregroundColor(DS.brandBlue)
+                                    }
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
                         .padding(.trailing, 20)
                     }
