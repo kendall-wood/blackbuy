@@ -109,11 +109,11 @@ struct ScanView: View {
                 }
                 
                 // Top Center - Logo and Subtitle
-                VStack(spacing: 6) {
+                VStack(spacing: 14) {
                     Image("logo")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(height: 36)
+                        .frame(height: 26)
                     
                     Text("Scan any product to\nfind your black-owned option")
                         .font(.system(size: 13, weight: .regular))
