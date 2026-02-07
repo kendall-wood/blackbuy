@@ -192,6 +192,38 @@ struct ScanView: View {
                         .transition(.opacity)
                     }
                     
+                    // No results found - grey button to shop
+                    if scanState == .results && scanResults.isEmpty {
+                        Button(action: {
+                            scanState = .initial
+                            selectedTab = .shop
+                        }) {
+                            HStack(spacing: 14) {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.system(size: 22, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.9))
+                                
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("No products found")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.white)
+                                    
+                                    Text("Search the shop")
+                                        .font(.system(size: 13, weight: .regular))
+                                        .foregroundColor(.white.opacity(0.8))
+                                }
+                            }
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 16)
+                            .background(Color(.systemGray))
+                            .cornerRadius(DS.radiusPill)
+                            .dsButtonShadow()
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 6)
+                        .transition(.opacity)
+                    }
+                    
                     Spacer()
                 }
                 
@@ -846,10 +878,10 @@ struct ScanView: View {
                         if let analysis = lastAnalysis {
                             HStack(spacing: 0) {
                                 Text("Found: ")
-                                    .font(.system(size: 18, weight: .bold))
+                                    .font(.system(size: 18, weight: .semibold))
                                     .foregroundColor(.black)
                                 Text(analysis.productType)
-                                    .font(.system(size: 18, weight: .bold))
+                                    .font(.system(size: 18, weight: .semibold))
                                     .foregroundColor(.black)
                             }
                             
@@ -860,17 +892,25 @@ struct ScanView: View {
                             }
                             
                             Text("Black-owned alternatives to \(analysis.productType)")
-                                .font(.system(size: 15))
+                                .font(.system(size: 13))
                                 .foregroundColor(Color(.systemGray))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                                .fixedSize(horizontal: false, vertical: true)
                                 .padding(.top, 2)
+                            
+                            Text("Not what you were looking for?")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(.orange)
+                                .padding(.top, 1)
                         } else {
                             Text("Search Results")
-                                .font(.system(size: 22, weight: .bold))
+                                .font(.system(size: 22, weight: .regular))
                                 .foregroundColor(.black)
                         }
                     }
                     
-                    Spacer()
+                    Spacer(minLength: 12)
                     
                     Button(action: {
                         isShowingResults = false
@@ -881,14 +921,18 @@ struct ScanView: View {
                         searchError = nil
                     }) {
                         Text("Done")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(DS.brandBlue)
-                            .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 8)
+                            .background(Color.white)
+                            .cornerRadius(DS.radiusPill)
+                            .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 2)
                     }
                     .buttonStyle(.plain)
                 }
                 .padding(.horizontal, DS.horizontalPadding)
-                .padding(.top, 20)
+                .padding(.top, 32)
                 .padding(.bottom, 16)
                 
                 Divider()
@@ -938,14 +982,15 @@ struct ScanView: View {
                                     .font(.system(size: 13, weight: .medium))
                                     .foregroundColor(DS.brandBlue)
                             }
-                            .padding(.horizontal, 24)
-                            .padding(.vertical, 14)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
                             .background(Color.white)
-                            .cornerRadius(DS.radiusPill)
-                            .dsButtonShadow()
+                            .cornerRadius(DS.radiusLarge)
+                            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
                         }
                         .buttonStyle(.plain)
-                        .padding(.top, 8)
+                        .padding(.horizontal, DS.horizontalPadding)
+                        .padding(.top, 20)
                     }
                     
                     Spacer().frame(height: 80)
