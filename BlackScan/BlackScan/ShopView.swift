@@ -19,7 +19,6 @@ struct ShopView: View {
     @State private var selectedProduct: Product?
     @State private var selectedCompany: String?
     @State private var currentCarouselIndex = 0
-    @State private var showingSearch = false
     @State private var showingAllFeatured = false
     @State private var searchText = ""
     @State private var searchTask: Task<Void, Never>?
@@ -29,11 +28,18 @@ struct ShopView: View {
     @State private var categoryProducts: [Product] = []
     @State private var displayedCategoryProducts: [Product] = []
     @State private var isCategoryLoading = false
-    @State private var categorySortOrder: CategorySortOrder = .relevant
+    @State private var categorySortOrder: SortOrder = .relevant
     @State private var categoryPage = 0
-    private let categoryPageSize = 24
+    private let pageSize = 24
     
-    enum CategorySortOrder: String, CaseIterable {
+    // Search results grid state
+    @State private var activeSearchQuery: String? = nil
+    @State private var searchGridProducts: [Product] = []
+    @State private var displayedSearchProducts: [Product] = []
+    @State private var isSearchLoading = false
+    @State private var searchSortOrder: SortOrder = .relevant
+    
+    enum SortOrder: String, CaseIterable {
         case relevant = "Relevant"
         case priceLowToHigh = "Price: Low to High"
         case priceHighToLow = "Price: High to Low"
@@ -72,7 +78,10 @@ struct ShopView: View {
                             categoriesSection
                                 .padding(.top, 16)
                             
-                            if selectedCategory != nil {
+                            if activeSearchQuery != nil {
+                                // Search results mode
+                                searchResultsSection
+                            } else if selectedCategory != nil {
                                 // Category browsing mode
                                 categoryBrowseSection
                             } else {
@@ -100,9 +109,6 @@ struct ShopView: View {
             ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
         }
-        .fullScreenCover(isPresented: $showingSearch) {
-            SearchView(initialSearchText: searchText)
-        }
         .fullScreenCover(isPresented: $showingAllFeatured) {
             AllFeaturedProductsView(excludedProductIds: Set(carouselProducts.map { $0.id } + gridProducts.map { $0.id }))
         }
@@ -117,7 +123,7 @@ struct ShopView: View {
         }
     }
     
-    // MARK: - Search Bar with Dropdown
+    // MARK: - Search Bar
     
     private var searchBar: some View {
         VStack(spacing: 0) {
@@ -136,6 +142,10 @@ struct ShopView: View {
                     TextField("", text: $searchText)
                         .font(DS.body)
                         .foregroundColor(.black)
+                        .submitLabel(.search)
+                        .onSubmit {
+                            commitSearch()
+                        }
                 }
                 .onChange(of: searchText) { oldValue, newValue in
                     searchTask?.cancel()
@@ -146,20 +156,18 @@ struct ShopView: View {
                         return
                     }
                     
+                    // Show dropdown suggestions while typing
                     searchTask = Task {
                         try? await Task.sleep(nanoseconds: 300_000_000)
                         if !Task.isCancelled {
-                            await performSearch(query: newValue)
+                            await performDropdownSearch(query: newValue)
                         }
                     }
                 }
                 
                 if !searchText.isEmpty {
                     Button(action: {
-                        searchTask?.cancel()
-                        searchText = ""
-                        searchResults = []
-                        showSearchDropdown = false
+                        clearSearch()
                     }) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 18))
@@ -182,87 +190,101 @@ struct ShopView: View {
         }
     }
     
-    // MARK: - Search Dropdown
+    // MARK: - Search Dropdown (autocomplete suggestions)
     
     private var searchDropdown: some View {
-        VStack(spacing: 0) {
-            Color.clear
-                .frame(height: 140)
-            
+        GeometryReader { geometry in
             VStack(spacing: 0) {
-                ForEach(searchResults.prefix(9)) { product in
-                    Button(action: {
-                        selectedProduct = product
-                        showSearchDropdown = false
-                    }) {
-                        HStack(spacing: 12) {
-                            CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            } placeholder: {
-                                Color.white
-                            }
-                            .frame(width: 50, height: 50)
-                            .background(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: DS.radiusSmall))
-                            
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(product.name)
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.black)
-                                    .lineLimit(1)
-                                
-                                Text(product.company)
-                                    .font(.system(size: 12, weight: .regular))
-                                    .foregroundColor(Color(.systemGray2))
-                                    .lineLimit(1)
-                            }
-                            
-                            Spacer()
-                            
-                            Text(product.formattedPrice)
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.black)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                    }
-                    .buttonStyle(.plain)
-                    
-                    if product.id != searchResults.prefix(9).last?.id {
-                        Divider()
-                            .padding(.leading, 78)
-                    }
-                }
+                // Spacer to push dropdown right below the search bar
+                // Header (~56) + search bar (~60) + padding
+                Color.clear
+                    .frame(height: 108)
                 
-                Button(action: {
-                    showSearchDropdown = false
-                    showingSearch = true
-                }) {
-                    Text("See more...")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(DS.brandBlue)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                VStack(spacing: 0) {
+                    ForEach(Array(searchResults.prefix(6).enumerated()), id: \.element.id) { index, product in
+                        Button(action: {
+                            selectedProduct = product
+                            showSearchDropdown = false
+                        }) {
+                            HStack(spacing: 12) {
+                                CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                } placeholder: {
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(Color(.systemGray6))
+                                }
+                                .frame(width: 40, height: 40)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(product.name)
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.black)
+                                        .lineLimit(1)
+                                    
+                                    Text(product.company)
+                                        .font(.system(size: 12))
+                                        .foregroundColor(Color(.systemGray))
+                                        .lineLimit(1)
+                                }
+                                
+                                Spacer()
+                                
+                                Text(product.formattedPrice)
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.black)
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                        }
+                        .buttonStyle(.plain)
+                        
+                        if index < min(searchResults.count, 6) - 1 {
+                            Divider()
+                                .padding(.leading, 66)
+                        }
+                    }
+                    
+                    // "See all" row
+                    if searchResults.count > 0 {
+                        Divider()
+                        
+                        Button(action: {
+                            commitSearch()
+                        }) {
+                            HStack {
+                                Text("See all results")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(DS.brandBlue)
+                                
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(DS.brandBlue)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .buttonStyle(.plain)
-                .background(Color(.systemGray6).opacity(0.5))
+                .background(Color.white)
+                .cornerRadius(DS.radiusMedium)
+                .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
+                .padding(.horizontal, DS.horizontalPadding)
+                
+                Spacer()
             }
-            .background(Color.white)
-            .cornerRadius(DS.radiusMedium)
-            .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 5)
-            .padding(.horizontal, DS.horizontalPadding)
-            
-            Spacer()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(
+                Color.black.opacity(0.2)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        showSearchDropdown = false
+                    }
+            )
         }
-        .background(
-            Color.black.opacity(0.3)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    showSearchDropdown = false
-                }
-        )
     }
     
     // MARK: - Categories Section
@@ -278,6 +300,14 @@ struct ShopView: View {
                 HStack(spacing: 12) {
                     ForEach(categories, id: \.self) { category in
                         Button(action: {
+                            // Clear any active search when tapping a category
+                            if activeSearchQuery != nil {
+                                activeSearchQuery = nil
+                                searchGridProducts = []
+                                displayedSearchProducts = []
+                                searchText = ""
+                            }
+                            
                             if selectedCategory == category {
                                 // Deselect
                                 selectedCategory = nil
@@ -310,14 +340,128 @@ struct ShopView: View {
         }
     }
     
+    // MARK: - Search Results Section (grid, like category browse)
+    
+    private var searchResultsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Sort button
+            HStack {
+                Menu {
+                    ForEach(SortOrder.allCases, id: \.self) { order in
+                        Button(action: {
+                            searchSortOrder = order
+                            applySearchSort()
+                        }) {
+                            HStack {
+                                Text(order.rawValue)
+                                if searchSortOrder == order {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.up.arrow.down")
+                            .font(.system(size: 13, weight: .medium))
+                        Text("Sort")
+                            .font(.system(size: 14, weight: .medium))
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: DS.radiusSmall)
+                            .fill(Color.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: DS.radiusSmall)
+                                    .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
+                            )
+                    )
+                }
+                .buttonStyle(.plain)
+                
+                Spacer()
+            }
+            .padding(.horizontal, DS.horizontalPadding)
+            
+            // Showing count
+            Text("Showing \(displayedSearchProducts.count) of \(searchGridProducts.count) products")
+                .font(.system(size: 13, weight: .regular))
+                .foregroundColor(Color(.systemGray))
+                .padding(.horizontal, DS.horizontalPadding)
+            
+            if isSearchLoading {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                    Text("Searching...")
+                        .font(DS.body)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 60)
+            } else if displayedSearchProducts.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 40))
+                        .foregroundColor(Color(.systemGray3))
+                    Text("No results found")
+                        .font(DS.body)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 60)
+            } else {
+                // Product grid
+                LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
+                    ForEach(displayedSearchProducts) { product in
+                        UnifiedProductCard(
+                            product: product,
+                            isSaved: savedProductsManager.isProductSaved(product),
+                            isInCart: cartManager.isInCart(product),
+                            onCardTapped: { selectedProduct = product },
+                            onSaveTapped: {
+                                savedProductsManager.isProductSaved(product)
+                                    ? savedProductsManager.removeSavedProduct(product)
+                                    : savedProductsManager.saveProduct(product)
+                            },
+                            onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) },
+                            onCompanyTapped: { selectedCompany = product.company }
+                        )
+                    }
+                }
+                .padding(.horizontal, DS.horizontalPadding)
+                
+                // Load More button
+                if displayedSearchProducts.count < searchGridProducts.count {
+                    Button(action: loadMoreSearchProducts) {
+                        Text("Load More")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(DS.brandGradient)
+                            .cornerRadius(DS.radiusMedium)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, DS.horizontalPadding)
+                    .padding(.top, 8)
+                }
+            }
+        }
+    }
+    
     // MARK: - Category Browse Section
     
     private var categoryBrowseSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Filter button
+            // Sort button
             HStack {
                 Menu {
-                    ForEach(CategorySortOrder.allCases, id: \.self) { order in
+                    ForEach(SortOrder.allCases, id: \.self) { order in
                         Button(action: {
                             categorySortOrder = order
                             applyCategorySort()
@@ -332,9 +476,9 @@ struct ShopView: View {
                     }
                 } label: {
                     HStack(spacing: 6) {
-                        Image(systemName: "line.3.horizontal.decrease")
+                        Image(systemName: "arrow.up.arrow.down")
                             .font(.system(size: 13, weight: .medium))
-                        Text("Filter")
+                        Text("Sort")
                             .font(.system(size: 14, weight: .medium))
                         Image(systemName: "chevron.down")
                             .font(.system(size: 10, weight: .medium))
@@ -410,13 +554,11 @@ struct ShopView: View {
                     Button(action: loadMoreCategoryProducts) {
                         Text("Load More")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(DS.brandBlue)
+                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
-                            .background(
-                                RoundedRectangle(cornerRadius: DS.radiusMedium)
-                                    .stroke(DS.brandBlue, lineWidth: 2)
-                            )
+                            .background(DS.brandGradient)
+                            .cornerRadius(DS.radiusMedium)
                     }
                     .buttonStyle(.plain)
                     .padding(.horizontal, DS.horizontalPadding)
@@ -492,6 +634,92 @@ struct ShopView: View {
         }
     }
     
+    // MARK: - Search Actions
+    
+    /// Called when user presses return or taps "See all" — commits the search to a grid
+    private func commitSearch() {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return }
+        
+        showSearchDropdown = false
+        
+        // Clear category selection
+        selectedCategory = nil
+        categoryProducts = []
+        displayedCategoryProducts = []
+        
+        // Enter search results mode
+        activeSearchQuery = query
+        searchSortOrder = .relevant
+        isSearchLoading = true
+        searchGridProducts = []
+        displayedSearchProducts = []
+        
+        // Dismiss keyboard
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        
+        Task {
+            do {
+                let products = try await typesenseClient.searchProducts(
+                    query: query,
+                    page: 1,
+                    perPage: 200
+                )
+                
+                await MainActor.run {
+                    searchGridProducts = products
+                    loadMoreSearchProducts()
+                    isSearchLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    isSearchLoading = false
+                }
+                print("Search grid error: \(error)")
+            }
+        }
+    }
+    
+    /// Clears search text and exits search results mode
+    private func clearSearch() {
+        searchTask?.cancel()
+        searchText = ""
+        searchResults = []
+        showSearchDropdown = false
+        activeSearchQuery = nil
+        searchGridProducts = []
+        displayedSearchProducts = []
+    }
+    
+    // MARK: - Search Results Pagination & Sort
+    
+    private func loadMoreSearchProducts() {
+        let sorted = sortedSearchProducts
+        let start = displayedSearchProducts.count
+        let end = min(start + pageSize, sorted.count)
+        
+        if start < sorted.count {
+            displayedSearchProducts.append(contentsOf: sorted[start..<end])
+        }
+    }
+    
+    private func applySearchSort() {
+        displayedSearchProducts = Array(sortedSearchProducts.prefix(displayedSearchProducts.count))
+    }
+    
+    private var sortedSearchProducts: [Product] {
+        switch searchSortOrder {
+        case .relevant:
+            return searchGridProducts
+        case .priceLowToHigh:
+            return searchGridProducts.sorted { $0.price < $1.price }
+        case .priceHighToLow:
+            return searchGridProducts.sorted { $0.price > $1.price }
+        case .nameAZ:
+            return searchGridProducts.sorted { $0.name < $1.name }
+        }
+    }
+    
     // MARK: - Category Loading
     
     private func loadCategoryProducts(_ category: String) {
@@ -528,7 +756,7 @@ struct ShopView: View {
     private func loadMoreCategoryProducts() {
         let sorted = sortedCategoryProducts
         let start = displayedCategoryProducts.count
-        let end = min(start + categoryPageSize, sorted.count)
+        let end = min(start + pageSize, sorted.count)
         
         if start < sorted.count {
             displayedCategoryProducts.append(contentsOf: sorted[start..<end])
@@ -552,14 +780,14 @@ struct ShopView: View {
         }
     }
     
-    // MARK: - Perform Search
+    // MARK: - Dropdown Search (autocomplete)
     
-    private func performSearch(query: String) async {
+    private func performDropdownSearch(query: String) async {
         do {
             let products = try await typesenseClient.searchProducts(
                 query: query,
                 page: 1,
-                perPage: 50
+                perPage: 20
             )
             
             await MainActor.run {
