@@ -233,7 +233,7 @@ struct ScanView: View {
                     }
                 }
                 
-                // Bottom Right - Heart and Shop Buttons
+                // Bottom Right - Heart, Shop, and Cart Buttons
                 VStack {
                     Spacer()
                     
@@ -262,6 +262,20 @@ struct ScanView: View {
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "storefront")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(DS.brandBlue)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        
+                        Button(action: { selectedTab = .checkout }) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 54, height: 54)
+                                    .dsButtonShadow()
+                                
+                                Image(systemName: "bag")
                                     .font(.system(size: 20))
                                     .foregroundColor(DS.brandBlue)
                             }
