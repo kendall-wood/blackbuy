@@ -12,6 +12,7 @@ struct BlackScanApp: App {
     @StateObject private var scanHistoryManager = ScanHistoryManager()
     @StateObject private var toastManager = ToastManager()
     @StateObject private var productCacheManager = ProductCacheManager()
+    @StateObject private var networkMonitor = NetworkMonitor()
     
     @State private var isReady = false
     
@@ -38,6 +39,7 @@ struct BlackScanApp: App {
             .environmentObject(scanHistoryManager)
             .environmentObject(toastManager)
             .environmentObject(productCacheManager)
+            .environmentObject(networkMonitor)
             .preferredColorScheme(.light)
             .task {
                 // Pre-fetch featured products during splash

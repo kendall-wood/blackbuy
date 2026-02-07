@@ -358,6 +358,45 @@ struct ToastOverlay: View {
     }
 }
 
+// MARK: - Offline Banner (matches toast style)
+
+/// Overlay that shows a pill-shaped "No Internet Connection" banner
+/// when the device loses connectivity. Matches the existing toast design.
+struct OfflineBannerOverlay: View {
+    @EnvironmentObject var networkMonitor: NetworkMonitor
+    
+    var body: some View {
+        VStack {
+            if networkMonitor.showOfflineBanner {
+                HStack(spacing: 10) {
+                    Image(systemName: networkMonitor.isConnected ? "wifi" : "wifi.slash")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(networkMonitor.isConnected ? DS.brandGreen : .orange)
+                    
+                    Text(networkMonitor.isConnected ? "Back Online" : "No Internet Connection")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.black)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 14)
+                .background(
+                    RoundedRectangle(cornerRadius: DS.radiusPill)
+                        .fill(Color.white)
+                        .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
+                )
+                .padding(.horizontal, 24)
+                .padding(.top, 56)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+            
+            Spacer()
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: networkMonitor.showOfflineBanner)
+    }
+}
+
 // MARK: - Toast Window (renders above all sheets/covers)
 
 /// A passthrough window that sits above everything but doesn't block touches
@@ -373,10 +412,12 @@ class ToastWindow: UIWindow {
 class ToastWindowManager {
     static let shared = ToastWindowManager()
     private var toastWindow: ToastWindow?
+    private var offlineWindow: ToastWindow?
     
-    func setup(toastManager: ToastManager, onNavigate: @escaping (AppTab) -> Void) {
+    func setup(toastManager: ToastManager, networkMonitor: NetworkMonitor, onNavigate: @escaping (AppTab) -> Void) {
         guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
         
+        // Toast overlay window
         let toastView = ToastOverlay(onNavigate: onNavigate)
             .environmentObject(toastManager)
         
@@ -390,5 +431,20 @@ class ToastWindowManager {
         window.backgroundColor = .clear
         
         self.toastWindow = window
+        
+        // Offline banner window (slightly below toast)
+        let offlineView = OfflineBannerOverlay()
+            .environmentObject(networkMonitor)
+        
+        let offlineHosting = UIHostingController(rootView: offlineView)
+        offlineHosting.view.backgroundColor = .clear
+        
+        let offlineWin = ToastWindow(windowScene: scene)
+        offlineWin.rootViewController = offlineHosting
+        offlineWin.isHidden = false
+        offlineWin.windowLevel = .alert  // Just below the toast window
+        offlineWin.backgroundColor = .clear
+        
+        self.offlineWindow = offlineWin
     }
 }

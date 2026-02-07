@@ -10,6 +10,7 @@ struct MainTabView: View {
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var authManager: AppleAuthManager
     @EnvironmentObject var toastManager: ToastManager
+    @EnvironmentObject var networkMonitor: NetworkMonitor
     
     /// Navigate back: pop the stack and go to the previous tab
     private func goBack() {
@@ -38,7 +39,7 @@ struct MainTabView: View {
         }
         .ignoresSafeArea(.all, edges: .bottom)
         .onAppear {
-            ToastWindowManager.shared.setup(toastManager: toastManager) { tab in
+            ToastWindowManager.shared.setup(toastManager: toastManager, networkMonitor: networkMonitor) { tab in
                 selectedTab = tab
             }
         }

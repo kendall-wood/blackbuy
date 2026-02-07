@@ -22,6 +22,7 @@ struct ScanView: View {
     @State private var shouldCapturePhoto = false
     @State private var selectedDetailProduct: Product?
     @State private var showingScanHistory = false
+    @State private var cameraAuthStatus: AVAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
     
     // Default initializer for binding
     init(selectedTab: Binding<AppTab> = .constant(.scan), pendingShopSearch: Binding<String?> = .constant(nil)) {
@@ -44,6 +45,169 @@ struct ScanView: View {
     
     
     var body: some View {
+        Group {
+            switch cameraAuthStatus {
+            case .authorized:
+                cameraBody
+            case .notDetermined:
+                cameraPermissionRequestView
+            default:
+                cameraPermissionDeniedView
+            }
+        }
+        .onAppear {
+            cameraAuthStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        }
+    }
+    
+    // MARK: - Camera Permission Views
+    
+    /// Shown when the user hasn't been asked yet — auto-requests on appear
+    private var cameraPermissionRequestView: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .scaleEffect(1.5)
+                
+                Text("Requesting camera access...")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.white.opacity(0.8))
+            }
+        }
+        .onAppear {
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    cameraAuthStatus = granted ? .authorized : .denied
+                }
+            }
+        }
+    }
+    
+    /// Shown when camera access was denied or restricted
+    private var cameraPermissionDeniedView: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            VStack(spacing: 24) {
+                // Top navigation buttons (same as camera view)
+                HStack {
+                    // Profile button for navigation
+                    Spacer()
+                    
+                    Button(action: { selectedTab = .profile }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 58, height: 58)
+                                .dsButtonShadow()
+                            
+                            Image(systemName: "person.crop.circle")
+                                .font(.system(size: 24))
+                                .foregroundColor(DS.brandBlue)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.trailing, 20)
+                }
+                .padding(.top, 40)
+                
+                Spacer()
+                
+                Image(systemName: "camera.fill")
+                    .font(.system(size: 56))
+                    .foregroundColor(DS.brandBlue)
+                    .padding(.bottom, 8)
+                
+                Text("Camera Access Required")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.white)
+                
+                Text("BlackScan needs camera access to scan\nproduct labels and find Black-owned alternatives.")
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+                
+                Button(action: {
+                    if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(settingsURL)
+                    }
+                }) {
+                    Text("Open Settings")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 36)
+                        .padding(.vertical, 14)
+                        .background(DS.brandGradient)
+                        .cornerRadius(DS.radiusPill)
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 8)
+                
+                // Still allow navigation to other tabs
+                HStack(spacing: 18) {
+                    Button(action: { selectedTab = .shop }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 58, height: 58)
+                                .dsButtonShadow()
+                            
+                            Image(systemName: "storefront")
+                                .font(.system(size: 22))
+                                .foregroundColor(DS.brandBlue)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Button(action: { selectedTab = .saved }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 58, height: 58)
+                                .dsButtonShadow()
+                            
+                            Image(systemName: "heart")
+                                .font(.system(size: 22))
+                                .foregroundColor(DS.brandBlue)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    
+                    Button(action: { selectedTab = .checkout }) {
+                        ZStack {
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 58, height: 58)
+                                .dsButtonShadow()
+                            
+                            Image("cart_icon")
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 28, height: 28)
+                                .foregroundColor(DS.brandBlue)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 16)
+                
+                Spacer()
+                Spacer()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            cameraAuthStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        }
+    }
+    
+    // MARK: - Camera Body
+    
+    private var cameraBody: some View {
         GeometryReader { geometry in
             ZStack {
                 // Live Camera Feed

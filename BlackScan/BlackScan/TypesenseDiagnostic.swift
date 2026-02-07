@@ -1,3 +1,4 @@
+#if DEBUG
 import SwiftUI
 
 /// Diagnostic view to test Typesense connection
@@ -249,3 +250,4 @@ struct ConfigRow: View {
 #Preview {
     TypesenseDiagnosticView()
 }
+#endif

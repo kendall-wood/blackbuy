@@ -60,6 +60,7 @@
 		30B399E6F7740EA656AFAEBF /* InputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD520B9334DB3D478D121CA /* InputValidator.swift */; };
 		91E3819F1DC5875A8A37EC88 /* LogManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F47F55A3C55625C244BF152 /* LogManager.swift */; };
 		41EEC4A43FF078436E32D50A /* NetworkSecurity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B17401CF0FB11806CDFFA89C /* NetworkSecurity.swift */; };
+		A2C7D9F41E3A0B52D8F1C6E0 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E8B3A72F9C61D09A4E27F1 /* NetworkMonitor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,6 +104,7 @@
 		EDD520B9334DB3D478D121CA /* InputValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputValidator.swift; sourceTree = "<group>"; };
 		7F47F55A3C55625C244BF152 /* LogManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogManager.swift; sourceTree = "<group>"; };
 		B17401CF0FB11806CDFFA89C /* NetworkSecurity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSecurity.swift; sourceTree = "<group>"; };
+		D4E8B3A72F9C61D09A4E27F1 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		8DFC7777280840E1BFF25C9A /* AppleAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleAuthManager.swift; sourceTree = "<group>"; };
 		914FF8189FED445B8CEBBCD5 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		98171DA12E6D61A600A323C7 /* BlackScan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlackScan.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -279,6 +281,7 @@
 				EDD520B9334DB3D478D121CA /* InputValidator.swift */,
 				7F47F55A3C55625C244BF152 /* LogManager.swift */,
 				B17401CF0FB11806CDFFA89C /* NetworkSecurity.swift */,
+				D4E8B3A72F9C61D09A4E27F1 /* NetworkMonitor.swift */,
 			);
 			path = Security;
 			sourceTree = "<group>";
@@ -434,6 +437,7 @@
 				30B399E6F7740EA656AFAEBF /* InputValidator.swift in Sources */,
 				91E3819F1DC5875A8A37EC88 /* LogManager.swift in Sources */,
 				41EEC4A43FF078436E32D50A /* NetworkSecurity.swift in Sources */,
+				A2C7D9F41E3A0B52D8F1C6E0 /* NetworkMonitor.swift in Sources */,
 				68C3C791DBA54F789650CF84 /* FeedbackManager.swift in Sources */,
 				ACC64E1E00CA44038FE01F24 /* Item.swift in Sources */,
 				582CC9A5239A414E83EE6558 /* LaunchScreenView.swift in Sources */,
@@ -621,6 +625,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BlackScan/BlackScan.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"BlackScan/Preview Content\"";
@@ -629,6 +634,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "BlackScan uses your camera to scan product labels and find matching Black-owned alternatives.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -650,6 +656,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BlackScan/BlackScan.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"BlackScan/Preview Content\"";
@@ -658,6 +665,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "BlackScan uses your camera to scan product labels and find matching Black-owned alternatives.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
