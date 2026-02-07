@@ -23,6 +23,7 @@
 		86FDE1CFAE2144B5B254F7E3 /* CompanyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483EAB22DE12485CAFEB830D /* CompanyView.swift */; };
 		9626C455B93B4831926AAECE /* SavedProductsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CDEED77BE4D87A438833E /* SavedProductsManager.swift */; };
 		98171DAB2E6D61A700A323C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98171DAA2E6D61A700A323C7 /* Assets.xcassets */; };
+		C9A4E7F13B2D58A0E1F09C76 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B8F3A1C2D7E04A91F0C26E3D /* PrivacyInfo.xcprivacy */; };
 		98171DAE2E6D61A700A323C7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98171DAD2E6D61A700A323C7 /* Preview Assets.xcassets */; };
 		98171DB82E6D61A700A323C7 /* BlackScanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98171DB72E6D61A700A323C7 /* BlackScanTests.swift */; };
 		98171DC22E6D61A700A323C7 /* BlackScanUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98171DC12E6D61A700A323C7 /* BlackScanUITests.swift */; };
@@ -109,6 +110,7 @@
 		914FF8189FED445B8CEBBCD5 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		98171DA12E6D61A600A323C7 /* BlackScan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlackScan.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98171DAA2E6D61A700A323C7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B8F3A1C2D7E04A91F0C26E3D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		98171DAD2E6D61A700A323C7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		98171DB32E6D61A700A323C7 /* BlackScanTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlackScanTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		98171DB72E6D61A700A323C7 /* BlackScanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackScanTests.swift; sourceTree = "<group>"; };
@@ -195,6 +197,7 @@
 				989513652F3433040093A83B /* Scanning */,
 				80C9C066F5CFAC696924F52C /* Security */,
 				98171DAA2E6D61A700A323C7 /* Assets.xcassets */,
+				B8F3A1C2D7E04A91F0C26E3D /* PrivacyInfo.xcprivacy */,
 				98171DAC2E6D61A700A323C7 /* Preview Content */,
 				6A7B23A9180845D9A3B8750E /* UserAuthService.swift */,
 				8DFC7777280840E1BFF25C9A /* AppleAuthManager.swift */,
@@ -392,6 +395,7 @@
 			files = (
 				98171DAE2E6D61A700A323C7 /* Preview Assets.xcassets in Resources */,
 				98171DAB2E6D61A700A323C7 /* Assets.xcassets in Resources */,
+				C9A4E7F13B2D58A0E1F09C76 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -638,6 +642,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UIApplicationPrivacyPolicyURL = "https://kendall-wood.github.io/blackbuy/privacy-policy/";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -669,6 +674,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UIApplicationPrivacyPolicyURL = "https://kendall-wood.github.io/blackbuy/privacy-policy/";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
