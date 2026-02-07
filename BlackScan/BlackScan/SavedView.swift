@@ -205,9 +205,8 @@ struct CompanyCircleCard: View {
                         Circle()
                             .fill(DS.circleFallbackBg)
                         
-                        Text(company.name.prefix(1).uppercased())
-                            .font(.system(size: 32, weight: .medium))
-                            .foregroundColor(DS.brandBlue)
+                        ProgressView()
+                            .tint(DS.brandBlue)
                     }
                 }
                 .frame(width: 80, height: 80)
