@@ -4,7 +4,7 @@ import SwiftUI
 struct CheckoutManagerView: View {
     
     @Binding var selectedTab: AppTab
-    var previousTab: AppTab = .scan
+    var onBack: () -> Void = {}
     @EnvironmentObject var cartManager: CartManager
     
     @State private var showingMenu = false
@@ -12,7 +12,7 @@ struct CheckoutManagerView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            AppHeader(centerContent: .logo, onBack: { selectedTab = previousTab })
+            AppHeader(centerContent: .logo, onBack: onBack)
             
             // Checkout Manager Title
             Text("Checkout Manager")

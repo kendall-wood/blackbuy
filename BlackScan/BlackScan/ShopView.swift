@@ -5,7 +5,7 @@ struct ShopView: View {
     
     @Binding var selectedTab: AppTab
     @Binding var pendingShopSearch: String?
-    var previousTab: AppTab = .scan
+    var onBack: () -> Void = {}
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
@@ -70,7 +70,7 @@ struct ShopView: View {
                     // Header
                     AppHeader(
                         centerContent: .logo,
-                        onBack: { selectedTab = previousTab },
+                        onBack: onBack,
                         trailingContent: AnyView(
                             Button(action: { selectedTab = .checkout }) {
                                 ZStack(alignment: .topTrailing) {

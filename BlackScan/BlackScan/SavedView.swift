@@ -4,7 +4,7 @@ import SwiftUI
 struct SavedView: View {
     
     @Binding var selectedTab: AppTab
-    var previousTab: AppTab = .scan
+    var onBack: () -> Void = {}
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
@@ -23,7 +23,7 @@ struct SavedView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            AppHeader(centerContent: .logo, onBack: { selectedTab = previousTab })
+            AppHeader(centerContent: .logo, onBack: onBack)
             
             // Content
             ScrollView {

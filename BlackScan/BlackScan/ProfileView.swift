@@ -5,7 +5,7 @@ import AuthenticationServices
 struct ProfileView: View {
     
     @Binding var selectedTab: AppTab
-    var previousTab: AppTab = .scan
+    var onBack: () -> Void = {}
     @EnvironmentObject var authManager: AppleAuthManager
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
@@ -14,7 +14,7 @@ struct ProfileView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            AppHeader(centerContent: .title("Profile"), onBack: { selectedTab = previousTab })
+            AppHeader(centerContent: .title("Profile"), onBack: onBack)
             
             // Content
             ScrollView {
