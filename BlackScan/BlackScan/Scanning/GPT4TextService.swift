@@ -37,29 +37,33 @@ class GPT4TextService {
     /// - Parameter ocrText: Text extracted from product label via OCR
     /// - Returns: ProductAnalysis with extracted data
     func analyzeOCRText(_ ocrText: String) async throws -> ProductAnalysis {
-        if Env.isDebugMode {
-            print("💬 GPT-4 Text: Analyzing OCR text (\(ocrText.count) chars)")
+        // Sanitize and limit OCR text input
+        let sanitizedText = String(ocrText.prefix(5000))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !sanitizedText.isEmpty else {
+            throw TextError.noContentInResponse
         }
         
-        // Build request
-        let request = try buildTextRequest(ocrText: ocrText)
+        Log.debug("GPT-4 Text: Analyzing OCR text (\(sanitizedText.count) chars)", category: .scan)
         
-        // Make API call
-        let (data, response) = try await URLSession.shared.data(for: request)
+        // Build request
+        let request = try buildTextRequest(ocrText: sanitizedText)
+        
+        // Make API call with retry
+        let (data, response) = try await NetworkSecurity.withRetry(maxAttempts: 2) {
+            try await URLSession.shared.data(for: request)
+        }
         
         // Check response
         guard let httpResponse = response as? HTTPURLResponse else {
             throw TextError.invalidResponse
         }
         
-        if Env.isDebugMode {
-            print("💬 GPT-4 Text: Response status \(httpResponse.statusCode)")
-        }
+        Log.debug("GPT-4 Text: Response status \(httpResponse.statusCode)", category: .scan)
         
         guard httpResponse.statusCode == 200 else {
-            if let errorString = String(data: data, encoding: .utf8) {
-                print("❌ GPT-4 Text Error: \(errorString)")
-            }
+            Log.error("GPT-4 Text API returned status \(httpResponse.statusCode)", category: .scan)
             throw TextError.apiError(statusCode: httpResponse.statusCode)
         }
         
@@ -70,20 +74,12 @@ class GPT4TextService {
             throw TextError.noContentInResponse
         }
         
-        if Env.isDebugMode {
-            print("💬 GPT-4 Text: Raw response:\n\(content)")
-        }
+        Log.debug("GPT-4 Text: Received response content", category: .scan)
         
         // Parse JSON from response
-        let analysis = try parseAnalysisFromContent(content, originalText: ocrText)
+        let analysis = try parseAnalysisFromContent(content, originalText: sanitizedText)
         
-        if Env.isDebugMode {
-            print("✅ GPT-4 Text: Extracted product type: \(analysis.productType)")
-            print("   Brand: \(analysis.brand ?? "unknown")")
-            print("   Form: \(analysis.form ?? "unknown")")
-            print("   Confidence: \(Int(analysis.confidence * 100))%")
-            print("   💰 Cost: ~$0.001 (text API)")
-        }
+        Log.debug("GPT-4 Text: Extracted product type: \(analysis.productType), confidence: \(Int(analysis.confidence * 100))%", category: .scan)
         
         return analysis
     }
@@ -205,15 +201,15 @@ class GPT4TextService {
         var errorDescription: String? {
             switch self {
             case .invalidURL:
-                return "Invalid OpenAI API URL"
+                return "Unable to connect to analysis service."
             case .invalidResponse:
-                return "Invalid response from OpenAI"
-            case .apiError(let statusCode):
-                return "OpenAI API error: \(statusCode)"
+                return "Received an unexpected response. Please try again."
+            case .apiError:
+                return "Analysis service is temporarily unavailable. Please try again."
             case .noContentInResponse:
-                return "No content in OpenAI response"
+                return "Could not analyze the text. Please try again with a clearer photo."
             case .invalidJSONResponse:
-                return "Could not parse JSON from OpenAI response"
+                return "Could not process the analysis result. Please try again."
             }
         }
     }

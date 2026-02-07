@@ -65,7 +65,7 @@ struct LiveScannerView: UIViewControllerRepresentable {
                 }
                 device.unlockForConfiguration()
             } catch {
-                print("❌ Failed to set torch: \(error)")
+                Log.error("Failed to set torch", category: .scan)
             }
         }
         
@@ -124,7 +124,7 @@ struct LiveScannerView: UIViewControllerRepresentable {
                 return
             }
             
-            print("📸 Camera recognized \(addedItems.count) new items (total: \(allItems.count))")
+            Log.debug("Camera recognized \(addedItems.count) new items (total: \(allItems.count))", category: .scan)
             // Process newly added items
             for item in addedItems {
                 processRecognizedItem(item)
@@ -144,7 +144,7 @@ struct LiveScannerView: UIViewControllerRepresentable {
             _ dataScanner: DataScannerViewController,
             becameUnavailableWithError error: DataScannerViewController.ScanningUnavailable
         ) {
-            print("⚠️ Scanner unavailable: \(error)")
+            Log.warning("Scanner unavailable", category: .scan)
             // Scanner is unavailable - could be camera access, device support, etc.
         }
         
@@ -156,25 +156,25 @@ struct LiveScannerView: UIViewControllerRepresentable {
             switch item {
             case .text(let text):
                 extractedText = text.transcript
-                print("📷 Camera detected TEXT: '\(extractedText.prefix(50))'")
+                Log.debug("Camera detected text: '\(extractedText.prefix(50))'", category: .scan)
                 
             case .barcode(let barcode):
                 extractedText = barcode.payloadStringValue ?? ""
-                print("📷 Camera detected BARCODE: '\(extractedText)'")
+                Log.debug("Camera detected barcode", category: .scan)
                 
             @unknown default:
-                print("📷 Camera detected UNKNOWN item type")
+                Log.debug("Camera detected unknown item type", category: .scan)
                 return
             }
             
             // Filter out empty or very short text
             guard !extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                   extractedText.count >= 2 else {
-                print("⏭️ Skipping - text too short or empty")
+                Log.debug("Skipping - text too short or empty", category: .scan)
                 return
             }
             
-            print("✅ Adding text to aggregation queue")
+            Log.debug("Adding text to aggregation queue", category: .scan)
             textAggregationQueue.async { [weak self] in
                 self?.addRecognizedText(extractedText)
             }
@@ -187,15 +187,15 @@ struct LiveScannerView: UIViewControllerRepresentable {
             // Add to our set of recognized texts
             recognizedTexts.insert(cleanedText)
             
-            print("📝 Added text to set (now have \(recognizedTexts.count) unique texts)")
+            Log.debug("Added text to set (now have \(recognizedTexts.count) unique texts)", category: .scan)
             
             // Reset the debounce timer ON MAIN THREAD (required for RunLoop)
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.debounceTimer?.invalidate()
-                print("⏲️ Starting debounce timer (\(self.debounceDelay)s)")
+                Log.debug("Starting debounce timer (\(self.debounceDelay)s)", category: .scan)
                 self.debounceTimer = Timer.scheduledTimer(withTimeInterval: self.debounceDelay, repeats: false) { [weak self] _ in
-                    print("⏰ Debounce timer fired!")
+                    Log.debug("Debounce timer fired", category: .scan)
                     self?.processAggregatedText()
                 }
             }
@@ -203,7 +203,7 @@ struct LiveScannerView: UIViewControllerRepresentable {
         
         private func processAggregatedText() {
             guard !recognizedTexts.isEmpty else {
-                print("🔇 No texts to process")
+                Log.debug("No texts to process", category: .scan)
                 return
             }
             
@@ -212,7 +212,7 @@ struct LiveScannerView: UIViewControllerRepresentable {
                 .sorted { $0.count > $1.count } // Prioritize longer text
                 .joined(separator: " ")
             
-            print("📤 LiveScannerView sending \(recognizedTexts.count) text chunks (\(combinedText.count) chars total)")
+            Log.debug("LiveScannerView sending \(recognizedTexts.count) text chunks (\(combinedText.count) chars total)", category: .scan)
             
             // Call the recognition callback on main thread
             DispatchQueue.main.async { [weak self] in
@@ -326,7 +326,7 @@ struct ScannerContainerView: View {
 
 #Preview("Scanner View") {
     ScannerContainerView { recognizedText in
-        print("Recognized: \(recognizedText)")
+        Log.debug("Recognized text from preview", category: .scan)
     }
     .preferredColorScheme(.dark) // Test with dark mode
 }

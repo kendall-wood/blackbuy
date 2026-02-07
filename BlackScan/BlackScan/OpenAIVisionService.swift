@@ -44,31 +44,46 @@ class OpenAIVisionService {
             throw VisionError.imageCompressionFailed
         }
         
+        // Validate image size before upload
+        let validation = InputValidator.validateImageSize(imageData)
+        guard validation.isValid else {
+            Log.warning("Image too large for Vision API: \(imageData.count) bytes", category: .scan)
+            // Re-compress at lower quality if too large
+            guard let smallerData = image.jpegData(compressionQuality: 0.2) else {
+                throw VisionError.imageCompressionFailed
+            }
+            let revalidation = InputValidator.validateImageSize(smallerData)
+            guard revalidation.isValid else {
+                throw VisionError.imageTooLarge
+            }
+            return try await analyzeImageData(smallerData)
+        }
+        
+        return try await analyzeImageData(imageData)
+    }
+    
+    private func analyzeImageData(_ imageData: Data) async throws -> ProductAnalysis {
         let base64Image = imageData.base64EncodedString()
         
-        if Env.isDebugMode {
-            print("🤖 OpenAI Vision: Analyzing image (\(imageData.count / 1024)KB)")
-        }
+        Log.debug("Vision API: Analyzing image (\(imageData.count / 1024)KB)", category: .scan)
         
         // Build request
         let request = try buildVisionRequest(base64Image: base64Image)
         
-        // Make API call
-        let (data, response) = try await URLSession.shared.data(for: request)
+        // Make API call with retry
+        let (data, response) = try await NetworkSecurity.withRetry(maxAttempts: 2) {
+            try await URLSession.shared.data(for: request)
+        }
         
         // Check response
         guard let httpResponse = response as? HTTPURLResponse else {
             throw VisionError.invalidResponse
         }
         
-        if Env.isDebugMode {
-            print("🤖 OpenAI Vision: Response status \(httpResponse.statusCode)")
-        }
+        Log.debug("Vision API: Response status \(httpResponse.statusCode)", category: .scan)
         
         guard httpResponse.statusCode == 200 else {
-            if let errorString = String(data: data, encoding: .utf8) {
-                print("❌ OpenAI Vision Error: \(errorString)")
-            }
+            Log.error("Vision API returned status \(httpResponse.statusCode)", category: .scan)
             throw VisionError.apiError(statusCode: httpResponse.statusCode)
         }
         
@@ -79,19 +94,12 @@ class OpenAIVisionService {
             throw VisionError.noContentInResponse
         }
         
-        if Env.isDebugMode {
-            print("🤖 OpenAI Vision: Raw response:\n\(content)")
-        }
+        Log.debug("Vision API: Received response content", category: .scan)
         
         // Parse JSON from response
         let analysis = try parseAnalysisFromContent(content)
         
-        if Env.isDebugMode {
-            print("✅ OpenAI Vision: Extracted product type: \(analysis.productType)")
-            print("   Brand: \(analysis.brand ?? "unknown")")
-            print("   Form: \(analysis.form ?? "unknown")")
-            print("   Confidence: \(Int(analysis.confidence * 100))%")
-        }
+        Log.debug("Vision API: Extracted product type: \(analysis.productType), confidence: \(Int(analysis.confidence * 100))%", category: .scan)
         
         return analysis
     }
@@ -204,6 +212,7 @@ class OpenAIVisionService {
     
     enum VisionError: LocalizedError {
         case imageCompressionFailed
+        case imageTooLarge
         case invalidURL
         case invalidResponse
         case apiError(statusCode: Int)
@@ -213,17 +222,19 @@ class OpenAIVisionService {
         var errorDescription: String? {
             switch self {
             case .imageCompressionFailed:
-                return "Failed to compress image"
+                return "Failed to process image. Please try again."
+            case .imageTooLarge:
+                return "Image is too large to analyze. Please try a closer photo."
             case .invalidURL:
-                return "Invalid OpenAI API URL"
+                return "Unable to connect to analysis service."
             case .invalidResponse:
-                return "Invalid response from OpenAI"
-            case .apiError(let statusCode):
-                return "OpenAI API error: \(statusCode)"
+                return "Received an unexpected response. Please try again."
+            case .apiError:
+                return "Analysis service is temporarily unavailable. Please try again."
             case .noContentInResponse:
-                return "No content in OpenAI response"
+                return "Could not analyze this image. Please try again with a clearer photo."
             case .invalidJSONResponse:
-                return "Could not parse JSON from OpenAI response"
+                return "Could not process the analysis result. Please try again."
             }
         }
     }

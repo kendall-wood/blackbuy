@@ -18,10 +18,8 @@ class TypesenseClient: ObservableObject {
     // MARK: - Initialization
     
     init() {
-        // Configure URLSession with timeout
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = Env.requestTimeout
-        config.timeoutIntervalForResource = Env.requestTimeout * 2
+        // Configure URLSession with hardened security settings
+        let config = NetworkSecurity.secureSessionConfiguration()
         self.session = URLSession(configuration: config)
         
         // Configure JSON decoder
@@ -49,9 +47,7 @@ class TypesenseClient: ObservableObject {
             let url = try buildSearchURL(parameters: parameters)
             let request = try buildSearchRequest(url: url)
             
-            if Env.shouldLogNetworkRequests {
-                print("🔍 Typesense Request: \(url.absoluteString)")
-            }
+            Log.debug("Typesense search request initiated", category: .network)
             
             let (data, response) = try await session.data(for: request)
             responseData = data // Store for error handling
@@ -61,13 +57,12 @@ class TypesenseClient: ObservableObject {
                 throw TypesenseError.invalidResponse
             }
             
-            if Env.shouldLogNetworkRequests {
-                print("📡 Typesense Response: \(httpResponse.statusCode)")
-            }
+            Log.debug("Typesense response: \(httpResponse.statusCode)", category: .network)
             
             // Handle HTTP errors
             guard 200...299 ~= httpResponse.statusCode else {
                 if let errorData = try? decoder.decode(TypesenseErrorResponse.self, from: data) {
+                    Log.error("Typesense API error: \(errorData.message)", category: .network)
                     throw TypesenseError.apiError(errorData.message)
                 } else {
                     throw TypesenseError.httpError(httpResponse.statusCode)
@@ -77,66 +72,28 @@ class TypesenseClient: ObservableObject {
             // Decode successful response
             let searchResponse = try decoder.decode(TypesenseSearchResponse.self, from: data)
             
-            if Env.shouldLogNetworkRequests {
-                print("✅ Found \(searchResponse.found) products in \(searchResponse.searchTimeMs)ms")
-            }
+            Log.debug("Found \(searchResponse.found) products in \(searchResponse.searchTimeMs)ms", category: .network)
             
             return searchResponse
             
         } catch let error as DecodingError {
             lastError = error
             
-            // Enhanced decoding error logging
-            print("❌ Typesense Decoding Error: \(error)")
+            // Log decoding details only in debug (never in production)
+            Log.error("Typesense decoding error: \(error.localizedDescription)", category: .network)
             
-            // Print specific decoding error details
-            switch error {
-            case .keyNotFound(let key, let context):
-                print("❌ Missing key: '\(key.stringValue)'")
-                print("❌ Context: \(context.debugDescription)")
-                print("❌ Coding path: \(context.codingPath)")
-            case .typeMismatch(let type, let context):
-                print("❌ Type mismatch for type: \(type)")
-                print("❌ Context: \(context.debugDescription)")
-                print("❌ Coding path: \(context.codingPath)")
-            case .valueNotFound(let type, let context):
-                print("❌ Value not found for type: \(type)")
-                print("❌ Context: \(context.debugDescription)")
-                print("❌ Coding path: \(context.codingPath)")
-            case .dataCorrupted(let context):
-                print("❌ Data corrupted")
-                print("❌ Context: \(context.debugDescription)")
-                print("❌ Coding path: \(context.codingPath)")
-            @unknown default:
-                print("❌ Unknown decoding error")
+            #if DEBUG
+            // Detailed debug logging for development only
+            if let data = responseData, let rawString = String(data: data, encoding: .utf8) {
+                Log.debug("Raw response (truncated): \(String(rawString.prefix(500)))", category: .network)
             }
-            
-            // Try to print the raw response for debugging
-            if let data = responseData {
-                if let response = try? JSONSerialization.jsonObject(with: data, options: []) {
-                    print("📄 Raw Response Structure:")
-                    if let dict = response as? [String: Any] {
-                        print("   Top-level keys: \(dict.keys.sorted())")
-                        if let hits = dict["hits"] as? [[String: Any]], let firstHit = hits.first {
-                            print("   First hit keys: \(firstHit.keys.sorted())")
-                            if let document = firstHit["document"] as? [String: Any] {
-                                print("   Document keys: \(document.keys.sorted())")
-                            }
-                        }
-                    }
-                } else if let rawString = String(data: data, encoding: .utf8) {
-                    print("📄 Raw Response String (first 500 chars): \(rawString.prefix(500))")
-                }
-            }
+            #endif
             
             throw TypesenseError.decodingError(error)
             
         } catch {
             lastError = error
-            
-            print("❌ Typesense Error: \(error)")
-            print("🔍 Error type: \(type(of: error))")
-            
+            Log.error("Typesense request failed", category: .network)
             throw error
         }
     }
@@ -237,9 +194,7 @@ class TypesenseClient: ObservableObject {
             
         allCandidates.append(contentsOf: pass1Results)
         
-        if Env.shouldLogNetworkRequests {
-            print("🔍 PASS 1 (Specific): Found \(pass1Results.count) candidates for '\(productTypeString)'")
-        }
+        Log.debug("PASS 1 (Specific): Found \(pass1Results.count) candidates for '\(productTypeString)'", category: .network)
         
         // --- PASS 2: Broader Search (if needed) ---
         if allCandidates.count < 20 {
@@ -257,9 +212,7 @@ class TypesenseClient: ObservableObject {
             let newResults = pass2Results.filter { !existingIds.contains($0.id) }
             allCandidates.append(contentsOf: newResults)
             
-            if Env.shouldLogNetworkRequests {
-                print("🔍 PASS 2 (Broader): Found \(newResults.count) additional candidates in '\(category)'")
-            }
+            Log.debug("PASS 2 (Broader): Found \(newResults.count) additional candidates in '\(category)'", category: .network)
         }
         
         // --- PASS 3: Fallback (if still needed) ---
@@ -274,14 +227,10 @@ class TypesenseClient: ObservableObject {
             let newResults = pass3Results.filter { !existingIds.contains($0.id) }
             allCandidates.append(contentsOf: newResults)
             
-            if Env.shouldLogNetworkRequests {
-                print("🔍 PASS 3 (Fallback): Found \(newResults.count) additional candidates")
-            }
+            Log.debug("PASS 3 (Fallback): Found \(newResults.count) additional candidates", category: .network)
         }
         
-        if Env.shouldLogNetworkRequests {
-            print("✅ Total scan candidates: \(allCandidates.count)")
-        }
+        Log.debug("Total scan candidates: \(allCandidates.count)", category: .network)
         
         return allCandidates
     }
@@ -315,17 +264,16 @@ class TypesenseClient: ObservableObject {
         
         let (data, _) = try await session.data(for: request)
         
-        // Debug: Log raw response if decoding fails
         do {
             let response = try decoder.decode(TypesenseSearchResponse.self, from: data)
             return response.products
         } catch {
-            if Env.isDebugMode {
-                print("❌ Typesense decode error: \(error)")
-                if let rawString = String(data: data, encoding: .utf8) {
-                    print("📄 Raw Typesense response: \(rawString.prefix(500))")
-                }
+            Log.error("Typesense weighted search decode error", category: .network)
+            #if DEBUG
+            if let rawString = String(data: data, encoding: .utf8) {
+                Log.debug("Raw response (truncated): \(String(rawString.prefix(300)))", category: .network)
             }
+            #endif
             throw error
         }
     }
@@ -416,10 +364,7 @@ class TypesenseClient: ObservableObject {
             throw TypesenseError.invalidURL
         }
         
-        if Env.isDebugMode {
-            print("🔗 Typesense Query: \"\(productType)\" (form '\(form ?? "none")' used for local boosting)")
-            print("🔗 Typesense URL: \(url.absoluteString)")
-        }
+        Log.debug("Typesense Query: \"\(productType)\" (form '\(form ?? "none")' used for local boosting)", category: .network)
         
         return url
     }
@@ -502,20 +447,26 @@ enum TypesenseError: Error, LocalizedError {
     case decodingError(Error)
     case networkError(Error)
     
+    /// User-facing error descriptions (no internal details leaked)
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "Invalid Typesense URL configuration"
+            return "Unable to connect to the search service."
         case .invalidResponse:
-            return "Invalid response from Typesense server"
+            return "Received an unexpected response. Please try again."
         case .httpError(let statusCode):
-            return "HTTP error: \(statusCode)"
-        case .apiError(let message):
-            return "Typesense API error: \(message)"
-        case .decodingError(let error):
-            return "Failed to decode response: \(error.localizedDescription)"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
+            if statusCode == 429 {
+                return "Too many requests. Please wait a moment and try again."
+            } else if statusCode >= 500 {
+                return "Search service is temporarily unavailable. Please try again later."
+            }
+            return "Search request failed. Please try again."
+        case .apiError:
+            return "Search request failed. Please try again."
+        case .decodingError:
+            return "Could not process search results. Please try again."
+        case .networkError:
+            return "Network connection error. Please check your connection and try again."
         }
     }
 }

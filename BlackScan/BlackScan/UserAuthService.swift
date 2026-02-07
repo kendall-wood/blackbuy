@@ -36,14 +36,14 @@ class UserAuthService: ObservableObject {
     /// Record a scan request and update remaining count
     func recordScanRequest() {
         guard dailyScansRemaining > 0 else { 
-            print("⚠️ Rate limit exceeded for user")
+            Log.warning("Rate limit exceeded", category: .auth)
             return 
         }
         
         dailyScansRemaining -= 1
         updateLocalScanCount()
         
-        print("📊 Scan request recorded. Remaining: \(dailyScansRemaining)")
+        Log.debug("Scan request recorded. Remaining: \(dailyScansRemaining)", category: .auth)
         
         // TODO: Also update backend when implemented
         // Task { await updateBackendScanCount() }
@@ -81,7 +81,7 @@ class UserAuthService: ObservableObject {
         isAuthenticated = false
         dailyScansRemaining = maxDailyScans
         
-        print("🗑️ All user data cleared")
+        Log.info("All user data cleared", category: .auth)
     }
     
     /// Export user data for privacy compliance (GDPR-style)
@@ -119,7 +119,7 @@ class UserAuthService: ObservableObject {
             self.isAuthenticated = true
             loadLocalScanCount()
             
-            print("✅ User authenticated successfully")
+            Log.info("User authenticated", category: .auth)
         } else {
             let newID = generateUserID()
             saveUserIDToKeychain(newID)
@@ -127,7 +127,7 @@ class UserAuthService: ObservableObject {
             self.isAuthenticated = true
             self.dailyScansRemaining = maxDailyScans
             
-            print("✅ New user created and authenticated")
+            Log.info("New user created", category: .auth)
         }
     }
     
@@ -145,9 +145,8 @@ class UserAuthService: ObservableObject {
         if result == errSecSuccess {
             let randomHex = randomBytes.map { String(format: "%02x", $0) }.joined()
             combined += "_\(randomHex)"
-            print("✅ Enhanced user ID generation with secure random")
         } else {
-            print("⚠️ Failed to generate secure random bytes, using standard generation")
+            Log.warning("Secure random unavailable, using standard generation", category: .auth)
         }
         
         // Hash for privacy and consistent length
@@ -175,7 +174,7 @@ class UserAuthService: ObservableObject {
         // Add new item
         let status = SecItemAdd(query as CFDictionary, nil)
         if status != errSecSuccess {
-            print("⚠️ Failed to save user ID to keychain: \(status)")
+            Log.error("Failed to save user ID to keychain", category: .auth)
         }
     }
     
@@ -254,7 +253,7 @@ extension UserAuthService {
         // TODO: Implement when backend API is ready
         // This will replace local rate limiting with server-side enforcement
         
-        print("🔄 Backend validation not implemented yet for user: \(userID.prefix(8))...")
+        Log.debug("Backend validation not yet implemented", category: .auth)
     }
     
     /// Register user with backend (when backend is implemented)
@@ -262,7 +261,7 @@ extension UserAuthService {
         guard let userID = userID else { return }
         
         // TODO: Implement when backend API is ready
-        print("🔄 Backend registration not implemented yet for user: \(userID.prefix(8))...")
+        Log.debug("Backend registration not yet implemented", category: .auth)
     }
 }
 

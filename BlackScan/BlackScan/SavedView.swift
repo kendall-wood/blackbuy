@@ -309,7 +309,7 @@ struct CompanyCircleCard: View {
                     }
                 }
             } catch {
-                print("Error loading product image for \(company.name): \(error)")
+                Log.error("Failed to load product image for company", category: .network)
             }
         }
     }

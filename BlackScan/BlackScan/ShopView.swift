@@ -751,7 +751,7 @@ struct ShopView: View {
     
     /// Called when user presses return or taps "See all" — commits the search to a grid
     private func commitSearch() {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let query = InputValidator.sanitizeSearchQuery(searchText)
         guard !query.isEmpty else { return }
         
         showSearchDropdown = false
@@ -773,11 +773,13 @@ struct ShopView: View {
         
         Task {
             do {
-                let products = try await typesenseClient.searchProducts(
-                    query: query,
-                    page: 1,
-                    perPage: 200
-                )
+                let products = try await NetworkSecurity.withRetry(maxAttempts: 2) {
+                    try await typesenseClient.searchProducts(
+                        query: query,
+                        page: 1,
+                        perPage: Env.maxResultsPerPage
+                    )
+                }
                 
                 await MainActor.run {
                     searchGridProducts = products
@@ -788,7 +790,7 @@ struct ShopView: View {
                 await MainActor.run {
                     isSearchLoading = false
                 }
-                print("Search grid error: \(error)")
+                Log.error("Search grid failed", category: .network)
             }
         }
     }
@@ -842,13 +844,17 @@ struct ShopView: View {
         categoryPage = 0
         categorySortOrder = .relevant
         
+        let sanitizedCategory = InputValidator.sanitizeSearchQuery(category)
+        
         Task {
             do {
-                let products = try await typesenseClient.searchProducts(
-                    query: category,
-                    page: 1,
-                    perPage: 200
-                )
+                let products = try await NetworkSecurity.withRetry(maxAttempts: 2) {
+                    try await typesenseClient.searchProducts(
+                        query: sanitizedCategory,
+                        page: 1,
+                        perPage: Env.maxResultsPerPage
+                    )
+                }
                 
                 let filtered = products.filter { $0.mainCategory == category }
                 
@@ -861,7 +867,7 @@ struct ShopView: View {
                 await MainActor.run {
                     isCategoryLoading = false
                 }
-                print("Error loading category products: \(error)")
+                Log.error("Category load failed", category: .network)
             }
         }
     }
@@ -896,11 +902,14 @@ struct ShopView: View {
     // MARK: - Dropdown Search (autocomplete)
     
     private func performDropdownSearch(query: String) async {
+        let sanitizedQuery = InputValidator.sanitizeSearchQuery(query)
+        guard !sanitizedQuery.isEmpty else { return }
+        
         do {
             let products = try await typesenseClient.searchProducts(
-                query: query,
+                query: sanitizedQuery,
                 page: 1,
-                perPage: 20
+                perPage: Env.defaultResultsPerPage
             )
             
             await MainActor.run {
@@ -912,7 +921,7 @@ struct ShopView: View {
                 searchResults = []
                 showSearchDropdown = false
             }
-            print("Search error: \(error)")
+            Log.debug("Dropdown search failed", category: .network)
         }
     }
     

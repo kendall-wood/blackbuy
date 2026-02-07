@@ -67,37 +67,37 @@ class ScanHistoryManager: ObservableObject {
         
         saveHistory()
         
-        print("📚 ScanHistory: Added scan - '\(classifiedProduct ?? "Unknown")' with \(resultCount) results")
+        Log.debug("ScanHistory: Added scan with \(resultCount) results", category: .storage)
     }
     
     /// Clear all scan history
     func clearHistory() {
         scanHistory.removeAll()
         saveHistory()
-        print("📚 ScanHistory: Cleared all history")
+        Log.debug("ScanHistory: Cleared all history", category: .storage)
     }
     
     /// Remove a specific scan from history
     func removeScan(_ entry: ScanHistoryEntry) {
         scanHistory.removeAll { $0.id == entry.id }
         saveHistory()
-        print("📚 ScanHistory: Removed scan - '\(entry.classifiedProduct ?? "Unknown")'")
+        Log.debug("ScanHistory: Removed scan entry", category: .storage)
     }
     
     // MARK: - Private Methods
     
     private func loadHistory() {
         guard let data = userDefaults.data(forKey: storageKey) else {
-            print("📚 ScanHistory: No existing history found")
+            Log.debug("ScanHistory: No existing history found", category: .storage)
             return
         }
         
         do {
             let decoder = JSONDecoder()
             scanHistory = try decoder.decode([ScanHistoryEntry].self, from: data)
-            print("📚 ScanHistory: Loaded \(scanHistory.count) entries")
+            Log.debug("ScanHistory: Loaded \(scanHistory.count) entries", category: .storage)
         } catch {
-            print("❌ ScanHistory: Failed to load history - \(error)")
+            Log.error("ScanHistory: Failed to load history", category: .storage)
             scanHistory = []
         }
     }
@@ -107,9 +107,9 @@ class ScanHistoryManager: ObservableObject {
             let encoder = JSONEncoder()
             let data = try encoder.encode(scanHistory)
             userDefaults.set(data, forKey: storageKey)
-            print("📚 ScanHistory: Saved \(scanHistory.count) entries")
+            Log.debug("ScanHistory: Saved \(scanHistory.count) entries", category: .storage)
         } catch {
-            print("❌ ScanHistory: Failed to save history - \(error)")
+            Log.error("ScanHistory: Failed to save history", category: .storage)
         }
     }
 }

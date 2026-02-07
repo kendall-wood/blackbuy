@@ -37,7 +37,7 @@ class SavedCompaniesManager: ObservableObject {
     // MARK: - Initialization
     
     init() {
-        print("🏢 SavedCompaniesManager initializing...")
+        Log.debug("SavedCompaniesManager initializing", category: .storage)
         loadLocalCompanies()
     }
     
@@ -47,7 +47,7 @@ class SavedCompaniesManager: ObservableObject {
     private func loadLocalCompanies() {
         do {
             guard let data = UserDefaults.standard.data(forKey: localStorageKey) else {
-                print("🏢 No local saved companies found")
+                Log.debug("No local saved companies found", category: .storage)
                 return
             }
             
@@ -55,9 +55,9 @@ class SavedCompaniesManager: ObservableObject {
             let companies = try decoder.decode([SavedCompany].self, from: data)
             
             self.savedCompanies = companies
-            print("🏢 Loaded \(companies.count) companies from local storage")
+            Log.debug("Loaded \(companies.count) companies from local storage", category: .storage)
         } catch {
-            print("⚠️ Failed to load local companies: \(error.localizedDescription)")
+            Log.error("Failed to load local companies", category: .storage)
             self.savedCompanies = []
         }
     }
@@ -68,9 +68,9 @@ class SavedCompaniesManager: ObservableObject {
             let encoder = JSONEncoder()
             let data = try encoder.encode(savedCompanies)
             UserDefaults.standard.set(data, forKey: localStorageKey)
-            print("🏢 Saved \(savedCompanies.count) companies to local storage")
+            Log.debug("Saved \(savedCompanies.count) companies to local storage", category: .storage)
         } catch {
-            print("⚠️ Failed to save local companies: \(error.localizedDescription)")
+            Log.error("Failed to save local companies", category: .storage)
         }
     }
     
@@ -93,7 +93,6 @@ class SavedCompaniesManager: ObservableObject {
     /// Save a company to favorites
     func saveCompany(_ companyName: String, productCount: Int? = nil, imageUrl: String? = nil, category: String? = nil) {
         guard !isCompanySaved(companyName) else {
-            print("🏢 Company already saved: \(companyName)")
             return
         }
         
@@ -101,7 +100,7 @@ class SavedCompaniesManager: ObservableObject {
         savedCompanies.append(savedCompany)
         saveLocalCompanies()
         
-        print("❤️ Saved company: \(companyName)")
+        Log.debug("Saved company: \(companyName)", category: .storage)
     }
     
     /// Update cached image and category for a saved company (called after lazy fetch)
@@ -118,7 +117,7 @@ class SavedCompaniesManager: ObservableObject {
         savedCompanies.removeAll { $0.name == companyName }
         saveLocalCompanies()
         
-        print("💔 Removed saved company: \(companyName)")
+        Log.debug("Removed saved company: \(companyName)", category: .storage)
     }
     
     /// Update product count for a saved company

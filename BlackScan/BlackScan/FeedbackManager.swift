@@ -112,35 +112,40 @@ class FeedbackManager: ObservableObject {
             throw FeedbackError.invalidURL
         }
         
+        // Sanitize feedback payload
+        var sanitizedPayload = data.jsonPayload
+        if let notes = sanitizedPayload["user_notes"] as? String {
+            sanitizedPayload["user_notes"] = InputValidator.sanitizeFeedbackText(notes)
+        }
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = Env.requestTimeout
         
         do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: data.jsonPayload)
+            request.httpBody = try JSONSerialization.data(withJSONObject: sanitizedPayload)
             
-            let (responseData, response) = try await URLSession.shared.data(for: request)
+            let (responseData, response) = try await NetworkSecurity.withRetry(maxAttempts: 2) {
+                try await URLSession.shared.data(for: request)
+            }
             
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw FeedbackError.invalidResponse
             }
             
             if httpResponse.statusCode != 200 {
-                // Try to parse error message
-                if let errorJson = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any],
-                   let errorMessage = errorJson["error"] as? String {
-                    throw FeedbackError.serverError(errorMessage)
-                }
-                throw FeedbackError.serverError("Failed with status \(httpResponse.statusCode)")
+                Log.error("Feedback submission failed with status \(httpResponse.statusCode)", category: .network)
+                throw FeedbackError.submissionFailed
             }
             
-            print("✅ Feedback submitted successfully")
+            Log.info("Feedback submitted successfully", category: .general)
             
         } catch let error as FeedbackError {
             lastError = error.localizedDescription
             throw error
         } catch {
-            lastError = error.localizedDescription
+            lastError = FeedbackError.submissionFailed.localizedDescription
             throw FeedbackError.networkError(error)
         }
     }
@@ -155,18 +160,19 @@ enum FeedbackError: LocalizedError {
     case networkError(Error)
     case submissionFailed
     
+    /// User-facing error descriptions (no internal details)
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "Invalid feedback endpoint URL"
+            return "Unable to submit feedback at this time. Please try again later."
         case .invalidResponse:
-            return "Invalid server response"
-        case .serverError(let message):
-            return "Server error: \(message)"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
+            return "Received an unexpected response. Please try again."
+        case .serverError:
+            return "Unable to submit feedback. Please try again later."
+        case .networkError:
+            return "Network connection error. Please check your connection and try again."
         case .submissionFailed:
-            return "Failed to submit feedback"
+            return "Failed to submit feedback. Please try again."
         }
     }
 }

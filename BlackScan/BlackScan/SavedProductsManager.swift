@@ -38,7 +38,7 @@ class SavedProductsManager: ObservableObject {
         savedProducts.append(product)
         persistSavedProducts()
         
-        print("💾 Product saved: \(product.name)")
+        Log.debug("Product saved: \(product.name)", category: .storage)
         
         // TODO: Sync to CloudKit if signed in with Apple
         // syncToCloudIfNeeded()
@@ -49,7 +49,7 @@ class SavedProductsManager: ObservableObject {
         savedProducts.removeAll { $0.id == product.id }
         persistSavedProducts()
         
-        print("🗑️ Product removed: \(product.name)")
+        Log.debug("Product removed: \(product.name)", category: .storage)
         
         // TODO: Sync to CloudKit if signed in with Apple
         // syncToCloudIfNeeded()
@@ -69,7 +69,7 @@ class SavedProductsManager: ObservableObject {
         savedProducts.removeAll()
         persistSavedProducts()
         
-        print("🗑️ All saved products cleared")
+        Log.debug("All saved products cleared", category: .storage)
     }
     
     /// Get saved products by category
@@ -98,9 +98,9 @@ class SavedProductsManager: ObservableObject {
         
         do {
             savedProducts = try JSONDecoder().decode([Product].self, from: data)
-            print("✅ Loaded \(savedProducts.count) saved products")
+            Log.debug("Loaded \(savedProducts.count) saved products", category: .storage)
         } catch {
-            print("❌ Failed to load saved products: \(error)")
+            Log.error("Failed to load saved products", category: .storage)
             savedProducts = []
         }
         
@@ -120,9 +120,9 @@ class SavedProductsManager: ObservableObject {
             lastSyncDate = Date()
             userDefaults.set(lastSyncDate, forKey: lastSyncKey)
             
-            print("✅ Persisted \(savedProducts.count) saved products")
+            Log.debug("Persisted \(savedProducts.count) saved products", category: .storage)
         } catch {
-            print("❌ Failed to persist saved products: \(error)")
+            Log.error("Failed to persist saved products", category: .storage)
         }
     }
 }
@@ -205,6 +205,6 @@ extension SavedProductsManager {
         }
         
         persistSavedProducts()
-        print("✅ Imported \(importedProducts.count) products")
+        Log.info("Imported \(importedProducts.count) products", category: .storage)
     }
 }

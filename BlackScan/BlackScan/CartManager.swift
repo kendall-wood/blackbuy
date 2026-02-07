@@ -35,14 +35,14 @@ class CartManager: ObservableObject {
         }
         
         persistCartItems()
-        print("🛒 Added to cart: \(product.name) (qty: \(quantity))")
+        Log.debug("Added to cart: \(product.name)", category: .storage)
     }
     
     /// Remove a product from the cart
     func removeFromCart(_ product: Product) {
         cartItems.removeAll { $0.id == product.id }
         persistCartItems()
-        print("🗑️ Removed from cart: \(product.name)")
+        Log.debug("Removed from cart: \(product.name)", category: .storage)
     }
     
     /// Update quantity for a cart item
@@ -70,7 +70,7 @@ class CartManager: ObservableObject {
     func clearCart() {
         cartItems.removeAll()
         persistCartItems()
-        print("🗑️ Cart cleared")
+        Log.debug("Cart cleared", category: .storage)
     }
     
     /// Remove all checked items from cart
@@ -78,7 +78,7 @@ class CartManager: ObservableObject {
         let removedCount = cartItems.filter { $0.isChecked }.count
         cartItems.removeAll { $0.isChecked }
         persistCartItems()
-        print("✅ Removed \(removedCount) checked items")
+        Log.debug("Removed \(removedCount) checked items", category: .storage)
     }
     
     /// Check if a product is in the cart
@@ -138,9 +138,9 @@ class CartManager: ObservableObject {
         
         do {
             cartItems = try JSONDecoder().decode([CartItem].self, from: data)
-            print("✅ Loaded \(cartItems.count) cart items")
+            Log.debug("Loaded \(cartItems.count) cart items", category: .storage)
         } catch {
-            print("❌ Failed to load cart items: \(error)")
+            Log.error("Failed to load cart items", category: .storage)
             cartItems = []
         }
     }
@@ -150,9 +150,9 @@ class CartManager: ObservableObject {
         do {
             let data = try JSONEncoder().encode(cartItems)
             userDefaults.set(data, forKey: cartItemsKey)
-            print("✅ Persisted \(cartItems.count) cart items")
+            Log.debug("Persisted \(cartItems.count) cart items", category: .storage)
         } catch {
-            print("❌ Failed to persist cart items: \(error)")
+            Log.error("Failed to persist cart items", category: .storage)
         }
     }
 }

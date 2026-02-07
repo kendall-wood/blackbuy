@@ -150,8 +150,8 @@ struct CameraScanView: View {
         lastClassificationResult = classificationResult
         
         if Env.isDebugMode {
-            print("Recognized: \(recognizedText)")
-            print("Classified as: \(classificationResult.productType) (\(classificationResult.confidence))")
+            Log.debug("Recognized text from scan", category: .scan)
+            Log.debug("Classified as: \(classificationResult.productType) (\(classificationResult.confidence))", category: .scan)
         }
         
         guard classificationResult.confidence >= 0.2 else { return }

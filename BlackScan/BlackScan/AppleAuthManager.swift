@@ -4,6 +4,7 @@ import SwiftUI
 
 /// Manager for Apple Sign In authentication
 /// Handles sign in, sign out, and user state persistence
+/// Credentials stored securely in iOS Keychain (not UserDefaults)
 @MainActor
 class AppleAuthManager: NSObject, ObservableObject {
     
@@ -16,7 +17,7 @@ class AppleAuthManager: NSObject, ObservableObject {
     
     // MARK: - Private Properties
     
-    private let userDefaults = UserDefaults.standard
+    private let secureStorage = SecureStorage.auth
     private let userIdKey = "apple_user_id"
     private let userNameKey = "apple_user_name"
     private let userEmailKey = "apple_user_email"
@@ -26,21 +27,27 @@ class AppleAuthManager: NSObject, ObservableObject {
     
     override init() {
         super.init()
+        migrateFromUserDefaultsIfNeeded()
         checkAuthState()
     }
     
     // MARK: - Public Methods
     
-    /// Check current authentication state from storage
+    /// Check current authentication state from secure storage
     func checkAuthState() {
-        isSignedIn = userDefaults.bool(forKey: isSignedInKey)
-        userId = userDefaults.string(forKey: userIdKey)
-        userName = userDefaults.string(forKey: userNameKey)
-        userEmail = userDefaults.string(forKey: userEmailKey)
+        isSignedIn = secureStorage.getBool(forKey: isSignedInKey)
+        userId = secureStorage.getString(forKey: userIdKey)
+        userName = secureStorage.getString(forKey: userNameKey)
+        userEmail = secureStorage.getString(forKey: userEmailKey)
         
-        if isSignedIn {
-            print("✅ User is signed in with Apple ID: \(userId ?? "unknown")")
+        // Verify credential is still valid with Apple
+        if isSignedIn, let userId = userId {
+            Task {
+                await verifyAppleCredential(userId: userId)
+            }
         }
+        
+        Log.debug("Auth state loaded: signed_in=\(isSignedIn)", category: .auth)
     }
     
     /// Initiate Apple Sign In flow
@@ -67,12 +74,12 @@ class AppleAuthManager: NSObject, ObservableObject {
         userName = nil
         userEmail = nil
         
-        userDefaults.removeObject(forKey: isSignedInKey)
-        userDefaults.removeObject(forKey: userIdKey)
-        userDefaults.removeObject(forKey: userNameKey)
-        userDefaults.removeObject(forKey: userEmailKey)
+        secureStorage.delete(forKey: isSignedInKey)
+        secureStorage.delete(forKey: userIdKey)
+        secureStorage.delete(forKey: userNameKey)
+        secureStorage.delete(forKey: userEmailKey)
         
-        print("👋 User signed out")
+        Log.info("User signed out", category: .auth)
     }
     
     /// Get display name for UI
@@ -106,19 +113,74 @@ class AppleAuthManager: NSObject, ObservableObject {
     
     // MARK: - Private Methods
     
-    /// Save user credentials to storage
+    /// Save user credentials to Keychain (secure storage)
     private func saveUserCredentials(userId: String, name: String?, email: String?) {
         self.userId = userId
         self.userName = name
         self.userEmail = email
         self.isSignedIn = true
         
-        userDefaults.set(true, forKey: isSignedInKey)
-        userDefaults.set(userId, forKey: userIdKey)
-        userDefaults.set(name, forKey: userNameKey)
-        userDefaults.set(email, forKey: userEmailKey)
+        secureStorage.setBool(true, forKey: isSignedInKey)
+        secureStorage.setString(userId, forKey: userIdKey)
+        if let name = name {
+            secureStorage.setString(name, forKey: userNameKey)
+        }
+        if let email = email {
+            secureStorage.setString(email, forKey: userEmailKey)
+        }
         
-        print("✅ Saved user credentials for: \(userId)")
+        Log.info("Credentials saved to Keychain", category: .auth)
+    }
+    
+    /// Verify Apple credential is still valid (handles revoked accounts)
+    private func verifyAppleCredential(userId: String) async {
+        let provider = ASAuthorizationAppleIDProvider()
+        do {
+            let state = try await provider.credentialState(forUserID: userId)
+            switch state {
+            case .revoked, .notFound:
+                Log.warning("Apple credential revoked or not found, signing out", category: .auth)
+                await MainActor.run { signOut() }
+            case .authorized:
+                break // Still valid
+            case .transferred:
+                Log.info("Apple credential transferred", category: .auth)
+            @unknown default:
+                break
+            }
+        } catch {
+            Log.error("Failed to verify Apple credential", category: .auth)
+        }
+    }
+    
+    /// One-time migration from UserDefaults to Keychain
+    private func migrateFromUserDefaultsIfNeeded() {
+        let defaults = UserDefaults.standard
+        let migrationKey = "auth_migrated_to_keychain"
+        
+        guard !defaults.bool(forKey: migrationKey) else { return }
+        
+        // Check if there's data in UserDefaults to migrate
+        if let oldUserId = defaults.string(forKey: userIdKey) {
+            secureStorage.setString(oldUserId, forKey: userIdKey)
+            if let name = defaults.string(forKey: userNameKey) {
+                secureStorage.setString(name, forKey: userNameKey)
+            }
+            if let email = defaults.string(forKey: userEmailKey) {
+                secureStorage.setString(email, forKey: userEmailKey)
+            }
+            secureStorage.setBool(defaults.bool(forKey: isSignedInKey), forKey: isSignedInKey)
+            
+            // Clean up UserDefaults
+            defaults.removeObject(forKey: userIdKey)
+            defaults.removeObject(forKey: userNameKey)
+            defaults.removeObject(forKey: userEmailKey)
+            defaults.removeObject(forKey: isSignedInKey)
+            
+            Log.info("Migrated auth credentials from UserDefaults to Keychain", category: .auth)
+        }
+        
+        defaults.set(true, forKey: migrationKey)
     }
 }
 
@@ -128,7 +190,7 @@ extension AppleAuthManager: ASAuthorizationControllerDelegate {
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
-            print("❌ Invalid credential type")
+            Log.error("Invalid credential type received", category: .auth)
             return
         }
         
@@ -144,35 +206,20 @@ extension AppleAuthManager: ASAuthorizationControllerDelegate {
             displayName = givenName
         }
         
-        // Save credentials
+        // Save credentials securely
         saveUserCredentials(userId: userId, name: displayName, email: email)
         
-        print("✅ Apple Sign In successful")
-        print("   User ID: \(userId)")
-        print("   Name: \(displayName ?? "N/A")")
-        print("   Email: \(email ?? "N/A")")
+        Log.info("Apple Sign In successful", category: .auth)
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        print("❌ Apple Sign In failed: \(error.localizedDescription)")
-        
-        // Check if user cancelled
-        if let authError = error as? ASAuthorizationError {
-            switch authError.code {
-            case .canceled:
-                print("   User cancelled sign in")
-            case .failed:
-                print("   Authorization failed")
-            case .invalidResponse:
-                print("   Invalid response from Apple")
-            case .notHandled:
-                print("   Authorization not handled")
-            case .unknown:
-                print("   Unknown error")
-            @unknown default:
-                print("   Unexpected error")
-            }
+        // Check if user cancelled (not a real error)
+        if let authError = error as? ASAuthorizationError, authError.code == .canceled {
+            Log.debug("User cancelled sign in", category: .auth)
+            return
         }
+        
+        Log.error("Apple Sign In failed", category: .auth)
     }
 }
 

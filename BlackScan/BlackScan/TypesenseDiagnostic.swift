@@ -173,15 +173,16 @@ struct TypesenseDiagnosticView: View {
     }
     
     private func testConnection() {
+        #if DEBUG
         status = .testing
         errorMessage = ""
         productCount = 0
         responseTime = 0
         
-        print("\n🧪 === TYPESENSE DIAGNOSTIC TEST ===")
-        print("📡 Host: \(Env.typesenseHost)")
-        print("🔑 API Key: \(Env.typesenseApiKey.prefix(10))...")
-        print("🔗 Search URL: \(Env.typesenseSearchURL())")
+        print("\n=== TYPESENSE DIAGNOSTIC TEST ===")
+        print("Host: [CONFIGURED]")
+        print("API Key: [SET] (\(Env.typesenseApiKey.count) chars)")
+        print("Search URL: [CONFIGURED]")
         
         Task {
             do {
@@ -199,30 +200,31 @@ struct TypesenseDiagnosticView: View {
                     productCount = response.found
                     responseTime = response.searchTimeMs
                     
-                    print("✅ Test PASSED")
-                    print("📊 Products found: \(productCount)")
-                    print("⏱️ Response time: \(responseTime)ms")
-                    print("🌐 Network time: \(elapsed)ms")
+                    print("Test PASSED")
+                    print("Products found: \(productCount)")
+                    print("Response time: \(responseTime)ms")
+                    print("Network time: \(elapsed)ms")
                 }
             } catch {
                 await MainActor.run {
                     status = .failed
                     errorMessage = error.localizedDescription
                     
-                    print("❌ Test FAILED")
-                    print("❌ Error: \(error)")
-                    print("❌ Error type: \(type(of: error))")
+                    print("Test FAILED")
+                    print("Error occurred")
+                    print("Error type: \(type(of: error))")
                     
                     if let localizedError = error as? LocalizedError {
-                        print("❌ Description: \(localizedError.errorDescription ?? "N/A")")
-                        print("❌ Reason: \(localizedError.failureReason ?? "N/A")")
-                        print("❌ Suggestion: \(localizedError.recoverySuggestion ?? "N/A")")
+                        print("Description: \(localizedError.errorDescription ?? "N/A")")
+                        print("Reason: \(localizedError.failureReason ?? "N/A")")
+                        print("Suggestion: \(localizedError.recoverySuggestion ?? "N/A")")
                     }
                 }
             }
             
             print("=================================\n")
         }
+        #endif
     }
 }
 

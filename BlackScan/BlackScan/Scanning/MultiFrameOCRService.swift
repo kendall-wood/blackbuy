@@ -37,7 +37,7 @@ class MultiFrameOCRService {
         }
         
         if Env.isDebugMode {
-            print("📝 Multi-frame OCR: Processing \(images.count) frames...")
+            Log.debug("Multi-frame OCR: Processing \(images.count) frames", category: .scan)
         }
         
         // Run OCR on each frame
@@ -51,7 +51,7 @@ class MultiFrameOCRService {
                 totalConfidence += 1.0 // Each successful extraction adds confidence
                 
                 if Env.isDebugMode {
-                    print("   Frame \(index + 1): \(text.count) chars - \"\(text.prefix(50))...\"")
+                    Log.debug("Frame \(index + 1): \(text.count) chars", category: .scan)
                 }
             }
         }
@@ -71,9 +71,9 @@ class MultiFrameOCRService {
         let hasBrand = containsCommonBrand(mergedText)
         
         if Env.isDebugMode {
-            print("✅ OCR Complete: \(mergedText.count) chars, quality: \(Int(quality * 100))%, words: \(wordCount)")
-            print("   Keywords: \(hasKeywords ? "✅" : "❌"), Brand: \(hasBrand ? "✅" : "❌")")
-            print("   Should use cheap API: \(quality >= 0.7 && wordCount >= 5 ? "YES" : "NO")")
+            Log.debug("OCR Complete: \(mergedText.count) chars, quality: \(Int(quality * 100))%, words: \(wordCount)", category: .scan)
+            Log.debug("Keywords: \(hasKeywords), Brand: \(hasBrand)", category: .scan)
+            Log.debug("Should use cheap API: \(quality >= 0.7 && wordCount >= 5)", category: .scan)
         }
         
         return OCRResult(

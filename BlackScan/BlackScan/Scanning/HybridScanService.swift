@@ -58,9 +58,7 @@ class HybridScanService {
     func analyzeProduct(image: UIImage) async throws -> ScanResult {
         let startTime = Date()
         
-        if Env.isDebugMode {
-            print("🔬 Hybrid Scan: Starting analysis (single frame mode)...")
-        }
+        Log.debug("Hybrid Scan: Starting analysis (single frame mode)", category: .scan)
         
         // Single frame mode: Try OCR first, fallback to Vision
         do {
@@ -68,9 +66,7 @@ class HybridScanService {
             let ocrResult = try await MultiFrameOCRService.shared.analyzeImages([image])
             
             if ocrResult.shouldUseCheapAPI {
-                if Env.isDebugMode {
-                    print("✅ OCR quality good (\(Int(ocrResult.qualityScore * 100))%) - trying cheap text API")
-                }
+                Log.debug("OCR quality good (\(Int(ocrResult.qualityScore * 100))%) - trying text API", category: .scan)
                 
                 let textAnalysis = try await GPT4TextService.shared.analyzeOCRText(ocrResult.text)
                 
@@ -78,12 +74,7 @@ class HybridScanService {
                 if textAnalysis.confidence >= 0.7 {
                     let processingTime = Date().timeIntervalSince(startTime)
                     
-                    if Env.isDebugMode {
-                        print("✅ Hybrid Scan: SUCCESS via OCR + Text API!")
-                        print("   Time: \(String(format: "%.2f", processingTime))s")
-                        print("   Cost: ~$\(String(format: "%.4f", ScanMethod.ocrPlusText.estimatedCost))")
-                        print("   💰 SAVED: $\(String(format: "%.4f", ScanMethod.vision.estimatedCost - ScanMethod.ocrPlusText.estimatedCost))!")
-                    }
+                    Log.debug("Hybrid Scan: SUCCESS via OCR + Text API (\(String(format: "%.2f", processingTime))s)", category: .scan)
                     
                     let analysis = ProductAnalysis(
                         brand: textAnalysis.brand,
@@ -102,35 +93,23 @@ class HybridScanService {
                         processingTime: processingTime
                     )
                 } else {
-                    if Env.isDebugMode {
-                        print("⚠️ GPT confidence low (\(Int(textAnalysis.confidence * 100))%) - falling back to Vision")
-                    }
+                    Log.debug("GPT confidence low (\(Int(textAnalysis.confidence * 100))%) - falling back to Vision", category: .scan)
                 }
             } else {
-                if Env.isDebugMode {
-                    print("⚠️ OCR quality low (\(Int(ocrResult.qualityScore * 100))%) - falling back to Vision")
-                }
+                Log.debug("OCR quality low (\(Int(ocrResult.qualityScore * 100))%) - falling back to Vision", category: .scan)
             }
         } catch {
-            if Env.isDebugMode {
-                print("⚠️ OCR failed: \(error.localizedDescription) - falling back to Vision")
-            }
+            Log.debug("OCR failed - falling back to Vision", category: .scan)
         }
         
         // Fallback to Vision API
-        if Env.isDebugMode {
-            print("🔄 Using Vision API fallback...")
-        }
+        Log.debug("Using Vision API fallback", category: .scan)
         
         let visionAnalysis = try await OpenAIVisionService.shared.analyzeProduct(image: image)
         
         let processingTime = Date().timeIntervalSince(startTime)
         
-        if Env.isDebugMode {
-            print("✅ Hybrid Scan: Complete via Vision API (fallback)")
-            print("   Time: \(String(format: "%.2f", processingTime))s")
-            print("   Cost: ~$\(String(format: "%.4f", ScanMethod.vision.estimatedCost))")
-        }
+        Log.debug("Hybrid Scan: Complete via Vision API (\(String(format: "%.2f", processingTime))s)", category: .scan)
         
         let analysis = ProductAnalysis(
             brand: visionAnalysis.brand,
@@ -160,32 +139,21 @@ class HybridScanService {
             throw ScanError.noImages
         }
         
-        if Env.isDebugMode {
-            print("🔬 Hybrid Scan: Multi-frame analysis with \(images.count) frames")
-        }
+        Log.debug("Hybrid Scan: Multi-frame analysis with \(images.count) frames", category: .scan)
         
         // Step 1: Try OCR + Text API (cheap!)
         do {
             let ocrResult = try await MultiFrameOCRService.shared.analyzeImages(images)
             
             if ocrResult.shouldUseCheapAPI {
-                // OCR quality is good, use cheap text API
-                if Env.isDebugMode {
-                    print("✅ OCR quality good (\(Int(ocrResult.qualityScore * 100))%) - using cheap text API")
-                }
+                Log.debug("OCR quality good (\(Int(ocrResult.qualityScore * 100))%) - using text API", category: .scan)
                 
                 let textAnalysis = try await GPT4TextService.shared.analyzeOCRText(ocrResult.text)
                 
-                // Check if GPT is confident in its parsing
                 if textAnalysis.confidence >= 0.7 {
                     let processingTime = Date().timeIntervalSince(startTime)
                     
-                    if Env.isDebugMode {
-                        print("✅ Hybrid Scan: Complete via OCR + Text API")
-                        print("   Time: \(String(format: "%.2f", processingTime))s")
-                        print("   Cost: ~$\(String(format: "%.4f", ScanMethod.ocrPlusText.estimatedCost))")
-                        print("   💰 Saved: $\(String(format: "%.4f", ScanMethod.vision.estimatedCost - ScanMethod.ocrPlusText.estimatedCost))")
-                    }
+                    Log.debug("Hybrid Scan: Complete via OCR + Text API (\(String(format: "%.2f", processingTime))s)", category: .scan)
                     
                     let analysis = ProductAnalysis(
                         brand: textAnalysis.brand,
@@ -204,25 +172,17 @@ class HybridScanService {
                         processingTime: processingTime
                     )
                 } else {
-                    if Env.isDebugMode {
-                        print("⚠️ GPT confidence low (\(Int(textAnalysis.confidence * 100))%) - falling back to Vision API")
-                    }
+                    Log.debug("GPT confidence low (\(Int(textAnalysis.confidence * 100))%) - falling back to Vision", category: .scan)
                 }
             } else {
-                if Env.isDebugMode {
-                    print("⚠️ OCR quality low (\(Int(ocrResult.qualityScore * 100))%) - falling back to Vision API")
-                }
+                Log.debug("OCR quality low (\(Int(ocrResult.qualityScore * 100))%) - falling back to Vision", category: .scan)
             }
         } catch {
-            if Env.isDebugMode {
-                print("⚠️ OCR failed: \(error.localizedDescription) - falling back to Vision API")
-            }
+            Log.debug("OCR failed - falling back to Vision API", category: .scan)
         }
         
         // Step 2: Fallback to Vision API (expensive but accurate)
-        if Env.isDebugMode {
-            print("🔄 Using Vision API fallback...")
-        }
+        Log.debug("Using Vision API fallback", category: .scan)
         
         // Use the first/best image for Vision API
         let bestImage = images.first!
@@ -230,11 +190,7 @@ class HybridScanService {
         
         let processingTime = Date().timeIntervalSince(startTime)
         
-        if Env.isDebugMode {
-            print("✅ Hybrid Scan: Complete via Vision API (fallback)")
-            print("   Time: \(String(format: "%.2f", processingTime))s")
-            print("   Cost: ~$\(String(format: "%.4f", ScanMethod.vision.estimatedCost))")
-        }
+        Log.debug("Hybrid Scan: Complete via Vision API (\(String(format: "%.2f", processingTime))s)", category: .scan)
         
         let analysis = ProductAnalysis(
             brand: visionAnalysis.brand,

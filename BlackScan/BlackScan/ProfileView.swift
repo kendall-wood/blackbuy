@@ -10,6 +10,11 @@ struct ProfileView: View {
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var scanHistoryManager: ScanHistoryManager
+    
+    @State private var showDeleteConfirmation = false
+    @State private var showExportSheet = false
+    @State private var exportData: String = ""
     
     var body: some View {
         VStack(spacing: 0) {
@@ -30,6 +35,9 @@ struct ProfileView: View {
                     // Settings Section
                     settingsSection
                     
+                    // Privacy Section
+                    privacySection
+                    
                     // Legal Section
                     legalSection
                 }
@@ -38,6 +46,36 @@ struct ProfileView: View {
             }
         }
         .background(DS.cardBackground)
+        .alert("Delete All Data", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete Everything", role: .destructive) {
+                deleteAllUserData()
+            }
+        } message: {
+            Text("This will permanently delete all your saved products, companies, cart items, scan history, and sign you out. This action cannot be undone.")
+        }
+        .sheet(isPresented: $showExportSheet) {
+            NavigationView {
+                ScrollView {
+                    Text(exportData)
+                        .font(.system(size: 13, design: .monospaced))
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .navigationTitle("Your Data")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Done") { showExportSheet = false }
+                    }
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        ShareLink(item: exportData) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                        }
+                    }
+                }
+            }
+        }
     }
     
     // MARK: - Welcome Section
@@ -151,6 +189,46 @@ struct ProfileView: View {
         }
     }
     
+    // MARK: - Privacy Section
+    
+    private var privacySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Your Data")
+                .font(DS.sectionHeader)
+                .foregroundColor(.black)
+                .padding(.horizontal, DS.horizontalPadding)
+            
+            VStack(spacing: 0) {
+                // Export Data
+                settingsRow(
+                    icon: "square.and.arrow.up",
+                    iconColor: DS.brandBlue,
+                    title: "Export My Data",
+                    showChevron: true,
+                    action: { exportMyData() }
+                )
+                
+                Divider()
+                    .padding(.leading, 56)
+                
+                // Delete All Data
+                settingsRow(
+                    icon: "trash",
+                    iconColor: .red,
+                    title: "Delete All My Data",
+                    showChevron: false,
+                    action: { showDeleteConfirmation = true }
+                )
+            }
+            .background(
+                RoundedRectangle(cornerRadius: DS.radiusLarge)
+                    .fill(Color.white)
+                    .dsCardShadow()
+            )
+            .padding(.horizontal, DS.horizontalPadding)
+        }
+    }
+    
     // MARK: - Legal Section
     
     private var legalSection: some View {
@@ -226,10 +304,92 @@ struct ProfileView: View {
     }
 }
 
+    // MARK: - Privacy Actions
+    
+    /// Delete all user data (GDPR/App Store compliance)
+    private func deleteAllUserData() {
+        // Clear all saved products
+        savedProductsManager.clearAllSavedProducts()
+        
+        // Clear cart
+        cartManager.clearCart()
+        
+        // Clear scan history
+        scanHistoryManager.clearHistory()
+        
+        // Clear saved companies
+        for company in savedCompaniesManager.savedCompanies {
+            savedCompaniesManager.removeSavedCompany(company.name)
+        }
+        
+        // Sign out and clear auth data
+        authManager.signOut()
+        
+        // Clear any remaining UserDefaults data
+        let domain = Bundle.main.bundleIdentifier ?? ""
+        UserDefaults.standard.removePersistentDomain(forName: domain)
+        
+        // Clear secure storage
+        SecureStorage.auth.deleteAll()
+        SecureStorage.userData.deleteAll()
+        
+        Log.info("All user data deleted", category: .auth)
+    }
+    
+    /// Export all user data as JSON (GDPR compliance)
+    private func exportMyData() {
+        var data: [String: Any] = [
+            "export_date": ISO8601DateFormatter().string(from: Date()),
+            "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
+        ]
+        
+        // Saved products
+        data["saved_products"] = savedProductsManager.savedProducts.map { product in
+            ["name": product.name, "company": product.company, "category": product.mainCategory]
+        }
+        
+        // Saved companies
+        data["saved_companies"] = savedCompaniesManager.savedCompanies.map { company in
+            ["name": company.name, "date_saved": ISO8601DateFormatter().string(from: company.dateSaved)]
+        }
+        
+        // Cart items
+        data["cart_items"] = cartManager.cartItems.map { item in
+            ["product_name": item.product.name, "quantity": item.quantity]
+        }
+        
+        // Scan history count (not full details for privacy)
+        data["scan_history_count"] = scanHistoryManager.scanHistory.count
+        
+        // Auth status (anonymized)
+        data["is_signed_in"] = authManager.isSignedIn
+        data["account_type"] = authManager.isSignedIn ? "Apple ID" : "anonymous"
+        
+        // Storage info
+        data["data_storage"] = [
+            "location": "on-device only",
+            "encryption": "iOS Keychain for credentials, UserDefaults for preferences",
+            "cloud_sync": false,
+            "third_party_sharing": "none"
+        ]
+        
+        // Format as pretty JSON
+        if let jsonData = try? JSONSerialization.data(withJSONObject: data, options: .prettyPrinted),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            exportData = jsonString
+        } else {
+            exportData = "Unable to export data. Please try again."
+        }
+        
+        showExportSheet = true
+    }
+}
+
 #Preview("Profile - Signed Out") {
     ProfileView(selectedTab: .constant(.profile))
         .environmentObject(AppleAuthManager())
         .environmentObject(SavedProductsManager())
         .environmentObject(SavedCompaniesManager())
         .environmentObject(CartManager())
+        .environmentObject(ScanHistoryManager())
 }

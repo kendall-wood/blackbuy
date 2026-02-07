@@ -407,18 +407,16 @@ struct ScanView: View {
     // MARK: - Button Action
     
     private func handleButtonTap() {
-        print("🔘 Scan button tapped! Current state: \(scanState)")
+        Log.debug("Scan button tapped, state: \(scanState)", category: .scan)
         
         if scanState == .results {
             // Reset to scan again
-            print("🔄 Resetting to scan again...")
             scanState = .initial
             scanResults = []
             lastAnalysis = nil
             capturedImage = nil
         } else if scanState == .initial {
             // Trigger image capture
-            print("📸 Triggering image capture...")
             scanState = .capturing
             
             // Provide haptic feedback
@@ -433,7 +431,7 @@ struct ScanView: View {
     // MARK: - Image Processing Pipeline
     
     private func handleCapturedImage(_ image: UIImage) {
-        print("📸 Image captured! Size: \(image.size)")
+        Log.debug("Image captured, size: \(image.size)", category: .scan)
         
         Task {
             await analyzeAndSearch(image: image)
@@ -446,19 +444,12 @@ struct ScanView: View {
             scanState = .analyzing
         }
         
-        print("🤖 Starting Hybrid Scan (OCR+Text or Vision)...")
+        Log.debug("Starting Hybrid Scan", category: .scan)
         
         do {
             let scanResult = try await HybridScanService.shared.analyzeProduct(image: image)
             
-            print("✅ Analysis complete!")
-            print("   Method: \(scanResult.method.displayName)")
-            print("   Cost: ~$\(String(format: "%.4f", scanResult.cost))")
-            print("   Time: \(String(format: "%.2f", scanResult.processingTime))s")
-            print("   Product Type: \(scanResult.analysis.productType)")
-            print("   Brand: \(scanResult.analysis.brand ?? "unknown")")
-            print("   Form: \(scanResult.analysis.form ?? "unknown")")
-            print("   Confidence: \(Int(scanResult.analysis.confidence * 100))%")
+            Log.debug("Analysis complete via \(scanResult.method.displayName): \(scanResult.analysis.productType) (\(Int(scanResult.analysis.confidence * 100))%)", category: .scan)
             
             await MainActor.run {
                 lastAnalysis = scanResult.analysis
@@ -470,10 +461,10 @@ struct ScanView: View {
             await searchForMatches(analysis: scanResult.analysis)
             
         } catch {
-            print("❌ OpenAI Vision error: \(error.localizedDescription)")
+            Log.error("Scan analysis failed", category: .scan)
             
             await MainActor.run {
-                searchError = "Failed to analyze product: \(error.localizedDescription)"
+                searchError = error.localizedDescription
                 scanState = .initial
             }
         }
@@ -484,7 +475,7 @@ struct ScanView: View {
             scanState = .searching
         }
         
-        print("🔍 Searching Typesense for: \(analysis.productType)")
+        Log.debug("Searching for: \(analysis.productType)", category: .scan)
         
         do {
             // Convert OpenAI analysis to ScanClassification format
@@ -496,7 +487,7 @@ struct ScanView: View {
                 candidateCount: 150
             )
             
-            print("✅ Found \(results.count) candidate products from Typesense")
+            Log.debug("Found \(results.count) candidate products", category: .scan)
             
             // NAME IS PRIMARY GATE: Filter by name first, then use Typesense ranking
             let targetLower = analysis.productType.lowercased()
@@ -515,10 +506,7 @@ struct ScanView: View {
                 let isConsumableProduct = !["accessory", "tool", "equipment"].contains(productTypeLower)
                 
                 if isAccessory && isConsumableProduct {
-                    // User scanned a product (e.g., foundation), not an accessory (e.g., foundation brush)
-                    if Env.isDebugMode {
-                        print("   ❌ FILTERED OUT: '\(product.name)' - accessory mismatch")
-                    }
+                    Log.debug("FILTERED: '\(product.name)' - accessory mismatch", category: .scan)
                     return nil
                 }
                 
@@ -537,9 +525,7 @@ struct ScanView: View {
                     let hasWrongWords = mismatch.wrong.contains { nameLower.contains($0) || productTypeLower.contains($0) }
                     
                     if hasScannedWords && hasWrongWords {
-                        if Env.isDebugMode {
-                            print("   ❌ FILTERED OUT: '\(product.name)' - use-case mismatch")
-                        }
+                        Log.debug("FILTERED: '\(product.name)' - use-case mismatch", category: .scan)
                         return nil
                     }
                 }
@@ -559,9 +545,7 @@ struct ScanView: View {
                     if let invalidForms = formMismatches[targetForm],
                        let productForm = product.form?.lowercased(),
                        invalidForms.contains(productForm) {
-                        if Env.isDebugMode {
-                            print("   ❌ FILTERED OUT: '\(product.name)' - form mismatch (\(targetForm) vs \(productForm))")
-                        }
+                        Log.debug("FILTERED: '\(product.name)' - form mismatch", category: .scan)
                         return nil
                     }
                 }
@@ -596,11 +580,7 @@ struct ScanView: View {
                 
                 // CRITICAL: If target has specific descriptors, product MUST match at least one
                 if !targetSpecific.isEmpty && specificOverlap.isEmpty {
-                    // Target says "Facial Towelettes" but product is "Facial Wash"
-                    // → "towelette" ≠ "wash" = MISMATCH
-                    if Env.isDebugMode {
-                        print("   ❌ FILTERED OUT: '\(product.name)' - specific descriptor mismatch (need: \(targetSpecific), has: \(productSpecific))")
-                    }
+                    Log.debug("FILTERED: '\(product.name)' - descriptor mismatch", category: .scan)
                     return nil
                 }
                 
@@ -627,10 +607,7 @@ struct ScanView: View {
                     } else if targetWords.contains(where: { tagsLower.contains($0) }) {
                         nameScore = 0.50
                     } else {
-                        // Not enough match
-                        if Env.isDebugMode {
-                            print("   ❌ FILTERED OUT: '\(product.name)' - insufficient match")
-                        }
+                        Log.debug("FILTERED: '\(product.name)' - insufficient match", category: .scan)
                         return nil
                     }
                 }
@@ -657,10 +634,7 @@ struct ScanView: View {
                 let baseScore = (nameScore * 0.30) + (positionScore * 0.70)
                 let finalScore = min(baseScore + formBonus, 1.0)  // Cap at 100%
                 
-                if Env.isDebugMode {
-                    let formInfo = formBonus > 0 ? ", form: +\(Int(formBonus * 100))%" : ""
-                    print("   ✅ #\(index + 1): \(product.name) = \(Int(finalScore * 100))% (name: \(Int(nameScore * 100))%, position: \(Int(positionScore * 100))%\(formInfo))")
-                }
+                Log.debug("#\(index + 1): \(product.name) = \(Int(finalScore * 100))%", category: .scan)
                 
                 return ScoredProduct(
                     id: product.id,
@@ -681,15 +655,7 @@ struct ScanView: View {
             // Sort by score and show top 20
             let filteredResults = Array(scoredResults.sorted { $0.confidenceScore > $1.confidenceScore }.prefix(20))
             
-            print("📊 After name filter: \(scoredResults.count) products (filtered from \(results.count))")
-            print("📊 Showing top \(filteredResults.count) results")
-            
-            if Env.isDebugMode && !filteredResults.isEmpty {
-                print("🏆 Top 5 matches:")
-                for (index, result) in filteredResults.prefix(5).enumerated() {
-                    print("   \(index + 1). \(result.product.name) - \(result.confidencePercentage)%")
-                }
-            }
+            Log.debug("After filter: \(scoredResults.count) products (from \(results.count)), showing top \(filteredResults.count)", category: .scan)
             
             await MainActor.run {
                 scanResults = filteredResults
@@ -697,10 +663,10 @@ struct ScanView: View {
             }
             
         } catch {
-            print("❌ Search error: \(error.localizedDescription)")
+            Log.error("Search failed", category: .scan)
             
             await MainActor.run {
-                searchError = "Search failed: \(error.localizedDescription)"
+                searchError = error.localizedDescription
                 scanState = .initial
             }
         }
@@ -715,7 +681,7 @@ struct ScanView: View {
         targetType: String,
         targetForm: String?
     ) -> [ScoredProduct] {
-        print("🎯 Scoring \(products.count) products with simple accurate method...")
+        Log.debug("Scoring \(products.count) products", category: .scan)
         
         let scored = products.map { product -> ScoredProduct in
             var score: Double = 0.0
@@ -729,9 +695,6 @@ struct ScanView: View {
             if nameLower.contains(targetLower) {
                 // Name contains full target
                 nameScore = 1.0
-                if Env.isDebugMode {
-                    print("   ✅ NAME MATCH: '\(product.name)' contains '\(targetType)' = 100%")
-                }
             } else {
                 // Check word overlap
                 let targetWords = Set(targetLower.split(separator: " ").map(String.init))
@@ -741,21 +704,12 @@ struct ScanView: View {
                 if overlap.count >= 2 {
                     // At least 2 words match (e.g., "Hand" + "Sanitizer")
                     nameScore = 0.80
-                    if Env.isDebugMode {
-                        print("   ✅ NAME PARTIAL: '\(product.name)' has \(overlap.count) words = 80%")
-                    }
                 } else if overlap.count == 1 {
                     // Only 1 word matches
                     nameScore = 0.40
-                    if Env.isDebugMode {
-                        print("   ⚠️ NAME WEAK: '\(product.name)' has 1 word = 40%")
-                    }
                 } else {
                     // No match - but Typesense found it, so give some credit
                     nameScore = 0.20
-                    if Env.isDebugMode {
-                        print("   ⚠️ NO NAME MATCH: '\(product.name)' = 20%")
-                    }
                 }
             }
             score += nameScore * 0.60
@@ -787,9 +741,7 @@ struct ScanView: View {
             score += searchRankScore * 0.15
             
             // Final score
-            if Env.isDebugMode {
-                print("   📊 \(product.name): \(Int(score * 100))% (name:\(Int(nameScore * 100))% form:\(Int(formScore * 100))%)")
-            }
+            Log.debug("\(product.name): \(Int(score * 100))%", category: .scan)
             
             return ScoredProduct(
                 id: product.id,
@@ -1094,7 +1046,7 @@ class CameraPreviewUIView: UIView {
         
         guard let captureSession = captureSession,
               let backCamera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
-            print("❌ Failed to access back camera")
+            Log.error("Failed to access back camera", category: .scan)
             return
         }
         
@@ -1125,7 +1077,7 @@ class CameraPreviewUIView: UIView {
             }
             
         } catch {
-            print("❌ Camera setup error: \(error)")
+            Log.error("Camera setup error", category: .scan)
         }
     }
     
@@ -1142,7 +1094,7 @@ class CameraPreviewUIView: UIView {
             device.torchMode = on ? .on : .off
             device.unlockForConfiguration()
         } catch {
-            print("❌ Torch error: \(error)")
+            Log.error("Torch error", category: .scan)
         }
     }
     
@@ -1157,13 +1109,13 @@ class CameraPreviewUIView: UIView {
 extension CameraPreviewUIView: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let error = error {
-            print("❌ Photo capture error: \(error)")
+            Log.error("Photo capture error", category: .scan)
             return
         }
         
         guard let imageData = photo.fileDataRepresentation(),
               let image = UIImage(data: imageData) else {
-            print("❌ Failed to convert photo to UIImage")
+            Log.error("Failed to convert photo to UIImage", category: .scan)
             return
         }
         

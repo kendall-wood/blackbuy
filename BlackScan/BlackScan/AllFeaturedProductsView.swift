@@ -192,7 +192,7 @@ struct AllFeaturedProductsView: View {
                 await MainActor.run {
                     isLoading = false
                 }
-                print("Error loading products: \(error)")
+                Log.error("Failed to load featured products", category: .network)
             }
         }
     }

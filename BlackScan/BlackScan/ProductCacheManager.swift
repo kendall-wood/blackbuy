@@ -38,11 +38,13 @@ class ProductCacheManager: ObservableObject {
         loadError = nil
         
         do {
-            let allProducts = try await typesenseClient.searchProducts(
-                query: "*",
-                page: 1,
-                perPage: 200
-            )
+            let allProducts = try await NetworkSecurity.withRetry(maxAttempts: 2) {
+                try await typesenseClient.searchProducts(
+                    query: "*",
+                    page: 1,
+                    perPage: Env.maxResultsPerPage
+                )
+            }
             
             let uniqueCompanies = Array(Set(allProducts.map { $0.company }))
             let selectedCompanies = uniqueCompanies.shuffled().prefix(12)
@@ -63,11 +65,11 @@ class ProductCacheManager: ObservableObject {
             isLoaded = true
             isLoading = false
             
-            print("✅ ProductCacheManager: Loaded \(carouselProducts.count) carousel + \(gridProducts.count) grid products")
+            Log.debug("ProductCacheManager: Loaded \(carouselProducts.count) carousel + \(gridProducts.count) grid products", category: .network)
         } catch {
             isLoading = false
-            loadError = error.localizedDescription
-            print("❌ ProductCacheManager: \(error.localizedDescription)")
+            loadError = "Unable to load products. Please try again."
+            Log.error("ProductCacheManager load failed", category: .network)
         }
     }
 }

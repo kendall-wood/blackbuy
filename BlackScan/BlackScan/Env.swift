@@ -145,7 +145,7 @@ struct Env {
             _ = openAIAPIKey
             return true
         } catch {
-            print("❌ Environment validation failed: \(error)")
+            Log.error("Environment validation failed", category: .general)
             return false
         }
     }
@@ -160,15 +160,15 @@ struct Env {
         return "\(typesenseCollectionURL())/documents/search"
     }
     
-    /// Debug description of current environment
+    /// Debug description of current environment (redacted for security)
     static var debugDescription: String {
         return """
         BlackScan Environment Configuration:
-        - Typesense Host: \(typesenseHost)
-        - Typesense API Key: \(String(repeating: "*", count: max(0, typesenseApiKey.count - 4)))\(typesenseApiKey.suffix(4))
+        - Typesense Host: [SET]
+        - Typesense API Key: [SET] (\(typesenseApiKey.count) chars)
         - Collection: \(typesenseCollection)
-        - Backend URL: \(backendURL)
-        - OpenAI API Key: \(String(repeating: "*", count: max(0, openAIAPIKey.count - 4)))\(openAIAPIKey.suffix(4))
+        - Backend URL: [SET]
+        - OpenAI API Key: [SET] (\(openAIAPIKey.count) chars)
         - OpenAI Model: \(openAIVisionModel)
         - Debug Mode: \(isDebugMode)
         - Network Logging: \(shouldLogNetworkRequests)

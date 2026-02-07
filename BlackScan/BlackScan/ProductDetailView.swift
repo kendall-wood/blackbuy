@@ -311,7 +311,7 @@ struct ProductDetailView: View {
                     isLoadingSimilar = false
                 }
             } catch {
-                print("Error loading similar products: \(error)")
+                Log.error("Failed to load similar products", category: .network)
                 await MainActor.run {
                     isLoadingSimilar = false
                 }

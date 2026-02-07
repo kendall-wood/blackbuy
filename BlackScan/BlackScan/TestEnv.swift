@@ -4,40 +4,46 @@ import Foundation
 /// This will crash if variables are not set, showing exactly which one is missing
 struct TestEnv {
     static func validateOnStartup() {
-        print("\n========================================")
-        print("🔍 ENVIRONMENT VARIABLE CHECK")
-        print("========================================\n")
+        #if DEBUG
+        Log.debug("========================================", category: .general)
+        Log.debug("ENVIRONMENT VARIABLE CHECK", category: .general)
+        Log.debug("========================================", category: .general)
         
         // Test Typesense Host
         do {
             let host = Env.typesenseHost
-            print("✅ TYPESENSE_HOST: \(host)")
+            Log.debug("TYPESENSE_HOST: [SET]", category: .general)
         } catch {
-            print("❌ TYPESENSE_HOST: NOT SET OR ERROR")
-            print("   Error: \(error)")
+            Log.error("TYPESENSE_HOST: NOT SET", category: .general)
         }
         
-        // Test Typesense API Key
+        // Test Typesense API Key (NEVER log the actual key)
         do {
             let key = Env.typesenseApiKey
-            print("✅ TYPESENSE_API_KEY: \(key.prefix(15))... (\(key.count) chars)")
+            Log.debug("TYPESENSE_API_KEY: [SET] (\(key.count) chars)", category: .general)
         } catch {
-            print("❌ TYPESENSE_API_KEY: NOT SET OR ERROR")
-            print("   Error: \(error)")
+            Log.error("TYPESENSE_API_KEY: NOT SET", category: .general)
         }
         
         // Test Backend URL
         do {
             let url = Env.backendURL
-            print("✅ BACKEND_URL: \(url)")
+            Log.debug("BACKEND_URL: [SET]", category: .general)
         } catch {
-            print("❌ BACKEND_URL: NOT SET OR ERROR")
-            print("   Error: \(error)")
+            Log.error("BACKEND_URL: NOT SET", category: .general)
         }
         
-        print("\n========================================")
-        print("Collection: \(Env.typesenseCollection)")
-        print("Debug Mode: \(Env.isDebugMode)")
-        print("========================================\n")
+        // Test OpenAI API Key (NEVER log the actual key)
+        do {
+            let key = Env.openAIAPIKey
+            Log.debug("OPENAI_API_KEY: [SET] (\(key.count) chars)", category: .general)
+        } catch {
+            Log.error("OPENAI_API_KEY: NOT SET", category: .general)
+        }
+        
+        Log.debug("Collection: \(Env.typesenseCollection)", category: .general)
+        Log.debug("Debug Mode: \(Env.isDebugMode)", category: .general)
+        Log.debug("========================================", category: .general)
+        #endif
     }
 }

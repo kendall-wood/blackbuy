@@ -276,13 +276,12 @@ struct Classifier {
             "Heat Protection Spray"
         ]
         
-        print("🧪 Classifier Test Results:")
+        Log.debug("Classifier Test Results:", category: .scan)
         for testCase in testCases {
             let result = classify(testCase)
-            print("Input: \(testCase)")
-            print("→ Type: \(result.productType), Query: \(result.queryString), Confidence: \(result.confidence)")
-            print("→ Matched: \(result.matchedKeywords)")
-            print("")
+            Log.debug("Input: \(testCase)", category: .scan)
+            Log.debug("Type: \(result.productType), Query: \(result.queryString), Confidence: \(result.confidence)", category: .scan)
+            Log.debug("Matched: \(result.matchedKeywords)", category: .scan)
         }
     }
 }

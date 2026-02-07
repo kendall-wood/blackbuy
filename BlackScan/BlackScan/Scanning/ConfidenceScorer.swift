@@ -143,7 +143,7 @@ class ConfidenceScorer {
         // If product NAME contains target type → HIGH SCORE
         if productNameLower.contains(targetLower) {
             if Env.isDebugMode {
-                print("   ✅ Product NAME contains target: '\(productName)' contains '\(target.type)' = 0.95")
+                Log.debug("Product NAME contains target: '\(productName)' contains '\(target.type)' = 0.95", category: .scan)
             }
             return 0.95 // High confidence - name is very reliable
         }
@@ -154,7 +154,7 @@ class ConfidenceScorer {
         let commonWords = nameWords.intersection(targetWords)
         if commonWords.count >= 2 { // At least 2 words match
             if Env.isDebugMode {
-                print("   ✅ Product NAME has \(commonWords.count) matching words: \(commonWords) = 0.90")
+                Log.debug("Product NAME has \(commonWords.count) matching words: \(commonWords) = 0.90", category: .scan)
             }
             return 0.90
         }
@@ -168,7 +168,7 @@ class ConfidenceScorer {
             let maxLength = max(productLower.count, targetLower.count)
             let ratio = Double(matchLength) / Double(maxLength)
             if Env.isDebugMode {
-                print("   🎯 Direct substring match in product_type: '\(productType)' vs '\(target.type)' = \(0.85 + ratio * 0.15)")
+                Log.debug("Direct substring match in product_type: '\(productType)' vs '\(target.type)' = \(0.85 + ratio * 0.15)", category: .scan)
             }
             return 0.85 + (ratio * 0.15) // 0.85 to 1.0
         }
@@ -183,7 +183,7 @@ class ConfidenceScorer {
         // Exact match after normalization
         if normProductLower == normTargetLower {
             if Env.isDebugMode {
-                print("   🎯 Exact match after normalization")
+                Log.debug("Exact match after normalization", category: .scan)
             }
             return 1.0
         }
@@ -194,7 +194,7 @@ class ConfidenceScorer {
             let maxLength = max(normProductLower.count, normTargetLower.count)
             let ratio = Double(matchLength) / Double(maxLength)
             if Env.isDebugMode {
-                print("   🎯 Substring match after normalization: '\(normalizedProduct)' vs '\(normalizedTarget)' = \(0.85 + ratio * 0.15)")
+                Log.debug("Substring match after normalization: '\(normalizedProduct)' vs '\(normalizedTarget)' = \(0.85 + ratio * 0.15)", category: .scan)
             }
             return 0.85 + (ratio * 0.15)
         }
@@ -202,7 +202,7 @@ class ConfidenceScorer {
         // Synonym match
         if productTaxonomy.areSynonyms(normalizedProduct, normalizedTarget) {
             if Env.isDebugMode {
-                print("   🎯 Synonym match")
+                Log.debug("Synonym match", category: .scan)
             }
             return 0.80
         }
@@ -212,7 +212,7 @@ class ConfidenceScorer {
            let targetCat = productTaxonomy.getCategory(target.type),
            productCat.lowercased() == targetCat.lowercased() {
             if Env.isDebugMode {
-                print("   🎯 Same category: \(productCat)")
+                Log.debug("Same category: \(productCat)", category: .scan)
             }
             return 0.60
         }
@@ -224,13 +224,13 @@ class ConfidenceScorer {
         if !typeCommonWords.isEmpty {
             let overlapRatio = Double(typeCommonWords.count) / Double(max(productTypeWords.count, typeTargetWords.count))
             if Env.isDebugMode {
-                print("   🎯 Word overlap: \(typeCommonWords) = \(0.3 + overlapRatio * 0.3)")
+                Log.debug("Word overlap: \(typeCommonWords) = \(0.3 + overlapRatio * 0.3)", category: .scan)
             }
             return 0.3 + (overlapRatio * 0.3) // 0.3 to 0.6
         }
         
         if Env.isDebugMode {
-            print("   ❌ No match: '\(productType)' vs '\(target.type)'")
+            Log.error("No match: '\(productType)' vs '\(target.type)'", category: .scan)
         }
         return 0.0
     }
