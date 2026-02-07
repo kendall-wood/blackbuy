@@ -20,6 +20,7 @@ struct ScanView: View {
     @State private var capturedImage: UIImage?
     @State private var shouldCapturePhoto = false
     @State private var selectedDetailProduct: Product?
+    @State private var showingScanHistory = false
     
     // Default initializer for binding
     init(selectedTab: Binding<AppTab> = .constant(.scan)) {
@@ -170,7 +171,7 @@ struct ScanView: View {
                     Spacer()
                     
                     HStack {
-                        Button(action: { selectedTab = .saved }) {
+                        Button(action: { showingScanHistory = true }) {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
@@ -313,6 +314,9 @@ struct ScanView: View {
         }
         .sheet(isPresented: $isShowingResults) {
             resultsSheet
+        }
+        .fullScreenCover(isPresented: $showingScanHistory) {
+            RecentScansView()
         }
         .onChange(of: capturedImage) { _, newImage in
             if let image = newImage {

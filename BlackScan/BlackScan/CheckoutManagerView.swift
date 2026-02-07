@@ -383,129 +383,136 @@ struct CartProductRow: View {
     }
 }
 
-/// Scan History View (accessed from floating button)
-struct ScanHistoryView: View {
+// MARK: - Recent Scans View
+
+/// Dedicated recent scans page accessed from scan view history button
+struct RecentScansView: View {
     
     @EnvironmentObject var scanHistoryManager: ScanHistoryManager
     @Environment(\.dismiss) var dismiss
     
+    private let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MMM d, yyyy"
+        return f
+    }()
+    
+    private let timeFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "h:mm a"
+        return f
+    }()
+    
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            AppHeader(centerContent: .logo, onBack: { dismiss() })
+            AppHeader(centerContent: .title("Recent Scans"), onBack: { dismiss() })
             
             // Content
-            ScrollView {
-                VStack(spacing: 0) {
-                    if scanHistoryManager.scanHistory.isEmpty {
-                        emptyStateView
-                    } else {
-                        historyList
+            if scanHistoryManager.scanHistory.isEmpty {
+                Spacer()
+                VStack(spacing: 16) {
+                    Image(systemName: "clock.arrow.circlepath")
+                        .font(.system(size: 48))
+                        .foregroundColor(Color(.systemGray3))
+                    
+                    Text("No Recent Scans")
+                        .font(DS.sectionHeader)
+                        .foregroundColor(.black)
+                    
+                    Text("Products you scan will appear here")
+                        .font(DS.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                Spacer()
+            } else {
+                List {
+                    ForEach(scanHistoryManager.scanHistory) { entry in
+                        RecentScanRow(
+                            entry: entry,
+                            dateFormatter: dateFormatter,
+                            timeFormatter: timeFormatter
+                        )
+                        .listRowInsets(EdgeInsets(top: 8, leading: DS.horizontalPadding, bottom: 8, trailing: DS.horizontalPadding))
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                    }
+                    .onDelete { indexSet in
+                        for index in indexSet {
+                            scanHistoryManager.removeScan(scanHistoryManager.scanHistory[index])
+                        }
                     }
                 }
+                .listStyle(.plain)
+                .background(DS.cardBackground)
             }
-            .background(DS.cardBackground)
         }
         .background(DS.cardBackground)
     }
-    
-    // MARK: - Empty State
-    
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "clock")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
-            
-            Text("No Scan History")
-                .font(DS.sectionHeader)
-                .foregroundColor(.black)
-            
-            Text("Your scanned products will appear here")
-                .font(DS.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding(.horizontal, 40)
-        .padding(.vertical, 80)
-    }
-    
-    // MARK: - History List
-    
-    private var historyList: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Scan History")
-                .font(.system(size: 20, weight: .medium))
-                .foregroundColor(.black)
-                .padding(.horizontal, DS.horizontalPadding)
-                .padding(.top, 20)
-            
-            VStack(spacing: 12) {
-                ForEach(scanHistoryManager.scanHistory.reversed()) { entry in
-                    ScanHistoryCard(entry: entry)
-                }
-            }
-            .padding(.horizontal, DS.horizontalPadding)
-            .padding(.bottom, 40)
-        }
-    }
 }
 
-// MARK: - Scan History Card
-
-struct ScanHistoryCard: View {
+/// Single row in the recent scans list
+struct RecentScanRow: View {
     let entry: ScanHistoryEntry
-    @Environment(\.dismiss) var dismiss
+    let dateFormatter: DateFormatter
+    let timeFormatter: DateFormatter
+    
     @State private var showingSearch = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Timestamp
-            Text(entry.timestamp, style: .date)
-                .font(.system(size: 12, weight: .regular))
-                .foregroundColor(Color(.systemGray))
-            + Text(" at ")
-                .font(.system(size: 12, weight: .regular))
-                .foregroundColor(Color(.systemGray))
-            + Text(entry.timestamp, style: .time)
-                .font(.system(size: 12, weight: .regular))
-                .foregroundColor(Color(.systemGray))
-            
-            HStack(spacing: 12) {
+        Button(action: { showingSearch = true }) {
+            HStack(spacing: 14) {
+                // Scan icon
+                ZStack {
+                    Circle()
+                        .fill(DS.brandBlue.opacity(0.1))
+                        .frame(width: 44, height: 44)
+                    
+                    Image(systemName: "barcode.viewfinder")
+                        .font(.system(size: 20))
+                        .foregroundColor(DS.brandBlue)
+                }
+                
+                // Scan details
                 VStack(alignment: .leading, spacing: 4) {
                     Text(entry.classifiedProduct ?? entry.recognizedText)
-                        .font(.system(size: 15, weight: .medium))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.black)
-                        .lineLimit(2)
+                        .lineLimit(1)
+                    
+                    HStack(spacing: 6) {
+                        Text(dateFormatter.string(from: entry.timestamp))
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(Color(.systemGray))
+                        
+                        Text("•")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(.systemGray3))
+                        
+                        Text(timeFormatter.string(from: entry.timestamp))
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(Color(.systemGray))
+                    }
                     
                     Text("\(entry.resultCount) products found")
-                        .font(DS.caption)
+                        .font(.system(size: 12, weight: .regular))
                         .foregroundColor(Color(.systemGray2))
                 }
                 
                 Spacer()
                 
-                // Shop button
-                Button(action: { showingSearch = true }) {
-                    HStack(spacing: 4) {
-                        Text("Shop")
-                            .font(.system(size: 13, weight: .medium))
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .medium))
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(DS.brandGradient)
-                    .cornerRadius(DS.radiusSmall)
-                }
-                .buttonStyle(.plain)
+                // Arrow
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(Color(.systemGray3))
             }
+            .padding(14)
+            .background(DS.cardBackground)
+            .cornerRadius(DS.radiusMedium)
+            .dsCardShadow()
         }
-        .padding(12)
-        .background(DS.cardBackground)
-        .cornerRadius(DS.radiusMedium)
-        .dsCardShadow()
+        .buttonStyle(.plain)
         .fullScreenCover(isPresented: $showingSearch) {
             SearchView(initialSearchText: entry.classifiedProduct ?? entry.recognizedText)
         }
