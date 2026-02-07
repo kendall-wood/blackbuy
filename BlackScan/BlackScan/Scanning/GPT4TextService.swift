@@ -33,7 +33,7 @@ class GPT4TextService {
     // MARK: - Public API
     
     /// Analyze OCR text and extract structured product data
-    /// Cost: ~$0.001 per call (10x cheaper than Vision API)
+    /// Cost: ~$0.0003 per call (gpt-4o-mini, ~20x cheaper than Vision API)
     /// - Parameter ocrText: Text extracted from product label via OCR
     /// - Returns: ProductAnalysis with extracted data
     func analyzeOCRText(_ ocrText: String) async throws -> ProductAnalysis {
@@ -139,7 +139,7 @@ class GPT4TextService {
         """
         
         let payload: [String: Any] = [
-            "model": "gpt-4",
+            "model": "gpt-4o-mini",
             "messages": [
                 [
                     "role": "system",

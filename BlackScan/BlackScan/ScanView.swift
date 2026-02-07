@@ -63,11 +63,11 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 54, height: 54)
+                                    .frame(width: 58, height: 58)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 22))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
@@ -92,11 +92,11 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 54, height: 54)
+                                    .frame(width: 58, height: 58)
                                     .dsButtonShadow()
                                 
-                                Image(systemName: "person.fill")
-                                    .font(.system(size: 20))
+                                Image(systemName: "person.crop.circle")
+                                    .font(.system(size: 24))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
@@ -113,12 +113,14 @@ struct ScanView: View {
                     Image("logo")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(height: 26)
+                        .frame(height: 24)
+                        .shadow(color: Color.black.opacity(0.4), radius: 6, x: 0, y: 2)
                     
                     Text("Scan any product to\nfind your black-owned option")
                         .font(.system(size: 13, weight: .regular))
                         .foregroundColor(.white.opacity(0.85))
                         .multilineTextAlignment(.center)
+                        .shadow(color: Color.black.opacity(0.35), radius: 4, x: 0, y: 1)
                     
                     Spacer()
                 }
@@ -157,15 +159,40 @@ struct ScanView: View {
                         .font(.system(size: 12))
                         .foregroundColor(Color(.systemGray))
                     
-                    // Inline Results Card
-                    if isShowingResults {
-                        inlineResultsCard
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    // View Products button (appears after scan)
+                    if scanState == .results && !scanResults.isEmpty {
+                        Button(action: {
+                            isShowingResults = true
+                        }) {
+                            HStack(spacing: 14) {
+                                Image(systemName: "sparkles")
+                                    .font(.system(size: 26, weight: .medium))
+                                    .foregroundColor(.white.opacity(0.9))
+                                
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("View \(scanResults.count)+ Products")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.white)
+                                    
+                                    if let productType = lastAnalysis?.productType {
+                                        Text("Black-owned \(productType)")
+                                            .font(.system(size: 13, weight: .regular))
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 16)
+                            .background(DS.brandGradient)
+                            .cornerRadius(DS.radiusPill)
+                            .dsButtonShadow()
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 6)
+                        .transition(.opacity)
                     }
                     
-                    if !isShowingResults {
-                        Spacer()
-                    }
+                    Spacer()
                 }
                 
                 // Bottom Left - History Button
@@ -177,11 +204,11 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 54, height: 54)
+                                    .frame(width: 58, height: 58)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "clock.arrow.circlepath")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 22))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
@@ -200,21 +227,21 @@ struct ScanView: View {
                     HStack {
                         Spacer()
                         
-                        VStack(alignment: .trailing, spacing: 14) {
+                        VStack(alignment: .trailing, spacing: 18) {
                             // Checkout Manager (aligned right edge with shop button)
                             Button(action: { selectedTab = .checkout }) {
                                 ZStack(alignment: .topTrailing) {
                                     ZStack {
                                         Circle()
                                             .fill(Color.white)
-                                            .frame(width: 54, height: 54)
+                                            .frame(width: 58, height: 58)
                                             .dsButtonShadow()
                                         
                                         Image("cart_icon")
                                             .renderingMode(.template)
                                             .resizable()
                                             .scaledToFit()
-                                            .frame(width: 26, height: 26)
+                                            .frame(width: 28, height: 28)
                                             .foregroundColor(DS.brandBlue)
                                     }
                                     
@@ -233,16 +260,16 @@ struct ScanView: View {
                             .buttonStyle(.plain)
                             
                             // Heart and Shop row
-                            HStack(spacing: 14) {
+                            HStack(spacing: 18) {
                                 Button(action: { selectedTab = .saved }) {
                                     ZStack {
                                         Circle()
                                             .fill(Color.white)
-                                            .frame(width: 54, height: 54)
+                                            .frame(width: 58, height: 58)
                                             .dsButtonShadow()
                                         
                                         Image(systemName: "heart")
-                                            .font(.system(size: 20))
+                                            .font(.system(size: 22))
                                             .foregroundColor(DS.brandBlue)
                                     }
                                 }
@@ -252,11 +279,11 @@ struct ScanView: View {
                                     ZStack {
                                         Circle()
                                             .fill(Color.white)
-                                            .frame(width: 54, height: 54)
+                                            .frame(width: 58, height: 58)
                                             .dsButtonShadow()
                                         
                                         Image(systemName: "storefront")
-                                            .font(.system(size: 20))
+                                            .font(.system(size: 22))
                                             .foregroundColor(DS.brandBlue)
                                     }
                                 }
@@ -268,53 +295,11 @@ struct ScanView: View {
                     .padding(.bottom, 80)
                 }
                 
-                // Results Button (renders last = on top of everything)
-                if scanState == .results && !scanResults.isEmpty {
-                    VStack {
-                        Spacer()
-                        
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                isShowingResults = true
-                            }
-                        }) {
-                            HStack(spacing: 0) {
-                                Image(systemName: "list.bullet")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(.white)
-                                    .frame(width: 44)
-                                    .padding(.leading, 6)
-                                
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text("View \(scanResults.count)+ Products")
-                                        .font(.system(size: 18, weight: .bold))
-                                        .foregroundColor(.white)
-                                    
-                                    if let productType = lastAnalysis?.productType {
-                                        Text("Black-owned \(productType)")
-                                            .font(.system(size: 14, weight: .regular))
-                                            .foregroundColor(.white.opacity(0.9))
-                                    }
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.white)
-                                    .padding(.trailing, 18)
-                            }
-                            .frame(width: geometry.size.width * 0.88, height: 75)
-                            .background(DS.brandGradient)
-                            .cornerRadius(20)
-                            .dsButtonShadow()
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.bottom, 140)
-                    }
-                    .zIndex(10)
-                }
+                
             }
+        }
+        .sheet(isPresented: $isShowingResults) {
+            resultsSheet
         }
         .fullScreenCover(isPresented: $showingScanHistory) {
             RecentScansView(onSearchInShop: { query in
@@ -677,9 +662,6 @@ struct ScanView: View {
             await MainActor.run {
                 scanResults = filteredResults
                 scanState = .results
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    isShowingResults = true
-                }
             }
             
         } catch {
@@ -853,122 +835,77 @@ struct ScanView: View {
         )
     }
     
-    // MARK: - Inline Results Card
+    // MARK: - Results Sheet
     
-    private var inlineResultsCard: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    if let analysis = lastAnalysis {
-                        HStack(spacing: 0) {
-                            Text("Found: ")
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(.black)
-                            Text(analysis.productType)
-                                .font(.system(size: 18, weight: .bold))
+    private var resultsSheet: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                // Header
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        if let analysis = lastAnalysis {
+                            HStack(spacing: 0) {
+                                Text("Found: ")
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(.black)
+                                Text(analysis.productType)
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(.black)
+                            }
+                            
+                            if !scanResults.isEmpty, let topResult = scanResults.first {
+                                Text("\(topResult.confidencePercentage)% match confidence")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(confidenceColor(topResult.confidenceScore))
+                            }
+                            
+                            Text("Black-owned alternatives to \(analysis.productType)")
+                                .font(.system(size: 15))
+                                .foregroundColor(Color(.systemGray))
+                                .padding(.top, 2)
+                        } else {
+                            Text("Search Results")
+                                .font(.system(size: 22, weight: .bold))
                                 .foregroundColor(.black)
                         }
-                        
-                        if !scanResults.isEmpty, let topResult = scanResults.first {
-                            Text("\(topResult.confidencePercentage)% match confidence")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(confidenceColor(topResult.confidenceScore))
-                        }
-                        
-                        Text("Black-owned alternatives to \(analysis.productType)")
-                            .font(.system(size: 13))
-                            .foregroundColor(Color(.systemGray))
-                            .padding(.top, 1)
-                    } else if searchError != nil {
-                        Text("Search Error")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.black)
-                    } else {
-                        Text("No Matches Found")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.black)
                     }
-                }
-                
-                Spacer()
-                
-                Button(action: {
-                    withAnimation(.easeInOut(duration: 0.25)) {
+                    
+                    Spacer()
+                    
+                    Button(action: {
                         isShowingResults = false
-                    }
-                    scanState = .initial
-                    scanResults = []
-                    lastAnalysis = nil
-                    capturedImage = nil
-                    searchError = nil
-                }) {
-                    Text("Done")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(DS.brandBlue)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
-            
-            // Content
-            if let error = searchError {
-                // Error state
-                VStack(spacing: 10) {
-                    Text(error)
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(.systemGray))
-                        .multilineTextAlignment(.center)
-                    
-                    Button("Try Again") {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            isShowingResults = false
-                        }
                         scanState = .initial
                         scanResults = []
+                        lastAnalysis = nil
+                        capturedImage = nil
                         searchError = nil
+                    }) {
+                        Text("Done")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(DS.brandBlue)
+                            .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
                     }
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(DS.brandBlue)
+                    .buttonStyle(.plain)
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, DS.horizontalPadding)
+                .padding(.top, 20)
                 .padding(.bottom, 16)
-            } else if scanResults.isEmpty {
-                // Empty state
-                VStack(spacing: 10) {
-                    Text("Try scanning again with better lighting or a clearer view.")
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(.systemGray))
-                        .multilineTextAlignment(.center)
-                    
-                    Button("Scan Again") {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            isShowingResults = false
-                        }
-                        scanState = .initial
-                        scanResults = []
-                    }
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(DS.brandBlue)
-                }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
-            } else {
-                // Product results
+                
                 Divider()
                 
-                HStack {
-                    Text("Showing \(scanResults.count) products")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color(.systemGray))
-                    Spacer()
+                if !scanResults.isEmpty {
+                    HStack {
+                        Text("Showing \(scanResults.count) products")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                        Spacer()
+                    }
+                    .padding(.horizontal, DS.horizontalPadding)
+                    .padding(.top, 12)
+                    .padding(.bottom, 4)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 10)
-                .padding(.bottom, 6)
                 
+                // Product grid
                 ScrollView {
                     LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
                         ForEach(scanResults) { scoredProduct in
@@ -981,20 +918,44 @@ struct ScanView: View {
                             )
                         }
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.top, 8)
-                    .padding(.bottom, 16)
+                    .padding(.horizontal, DS.horizontalPadding)
+                    .padding(.top, 12)
+                    
+                    // See all results in Shop
+                    if let productType = lastAnalysis?.productType {
+                        Button(action: {
+                            isShowingResults = false
+                            scanState = .initial
+                            pendingShopSearch = productType
+                            selectedTab = .shop
+                        }) {
+                            HStack(spacing: 6) {
+                                Text("See all \(productType) results")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundColor(DS.brandBlue)
+                                
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(DS.brandBlue)
+                            }
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 14)
+                            .background(Color.white)
+                            .cornerRadius(DS.radiusPill)
+                            .dsButtonShadow()
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 8)
+                    }
+                    
+                    Spacer().frame(height: 80)
                 }
             }
+            .background(DS.cardBackground)
+            .navigationBarHidden(true)
         }
-        .background(
-            RoundedRectangle(cornerRadius: DS.radiusLarge)
-                .fill(Color.white)
-                .shadow(color: Color.black.opacity(0.15), radius: 16, x: 0, y: -4)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: DS.radiusLarge))
-        .padding(.horizontal, 12)
-        .padding(.top, 8)
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
         .sheet(item: $selectedDetailProduct) { product in
             ProductDetailView(product: product)
                 .environmentObject(typesenseClient)

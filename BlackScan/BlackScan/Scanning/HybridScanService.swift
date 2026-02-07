@@ -2,8 +2,8 @@ import Foundation
 import UIKit
 
 /// Hybrid scanning service that intelligently chooses between:
-/// - Cheap: Multi-frame OCR + GPT-4 Text API (~$0.001 per scan)
-/// - Expensive: OpenAI Vision API (~$0.01 per scan)
+/// - Cheap: Multi-frame OCR + GPT-4o-mini Text API (~$0.0003 per scan)
+/// - Expensive: OpenAI GPT-4o Vision API (~$0.006 per scan)
 /// 
 /// Strategy: Try cheap first, fallback to expensive if quality is low
 class HybridScanService {
@@ -22,8 +22,8 @@ class HybridScanService {
     }
     
     enum ScanMethod {
-        case ocrPlusText  // OCR + GPT-4 Text (~$0.001)
-        case vision       // GPT-4 Vision (~$0.01)
+        case ocrPlusText  // OCR + GPT-4o-mini Text (~$0.0003)
+        case vision       // GPT-4o Vision (~$0.006)
         
         var displayName: String {
             switch self {
@@ -34,8 +34,8 @@ class HybridScanService {
         
         var estimatedCost: Double {
             switch self {
-            case .ocrPlusText: return 0.001
-            case .vision: return 0.01
+            case .ocrPlusText: return 0.0003
+            case .vision: return 0.006
             }
         }
     }

@@ -235,6 +235,20 @@ struct ShopView: View {
                 .onTapGesture { showSearchDropdown = false }
             
             VStack(spacing: 0) {
+                // Close button
+                HStack {
+                    Spacer()
+                    Button(action: { showSearchDropdown = false }) {
+                        Text("Close")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(Color(.systemGray))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 10)
+                .padding(.bottom, 2)
+                
                 ForEach(Array(searchResults.prefix(3).enumerated()), id: \.element.id) { index, product in
                     Button(action: {
                         selectedProduct = product
