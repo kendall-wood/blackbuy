@@ -4,6 +4,7 @@ import SwiftUI
 struct ShopView: View {
     
     @Binding var selectedTab: AppTab
+    @Binding var pendingShopSearch: String?
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
@@ -104,6 +105,10 @@ struct ShopView: View {
         }
         .onAppear {
             loadAllProducts()
+            handlePendingSearch()
+        }
+        .onChange(of: pendingShopSearch) { _, _ in
+            handlePendingSearch()
         }
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
@@ -636,6 +641,15 @@ struct ShopView: View {
     
     // MARK: - Search Actions
     
+    /// Picks up a search query passed from another tab (e.g. Recent Scans)
+    private func handlePendingSearch() {
+        if let query = pendingShopSearch {
+            pendingShopSearch = nil
+            searchText = query
+            commitSearch()
+        }
+    }
+    
     /// Called when user presses return or taps "See all" — commits the search to a grid
     private func commitSearch() {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -929,7 +943,7 @@ struct IdentifiableString: Identifiable {
 }
 
 #Preview {
-    ShopView(selectedTab: .constant(.shop))
+    ShopView(selectedTab: .constant(.shop), pendingShopSearch: .constant(nil))
         .environmentObject(SavedProductsManager())
         .environmentObject(SavedCompaniesManager())
         .environmentObject(CartManager())

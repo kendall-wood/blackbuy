@@ -3,6 +3,7 @@ import SwiftUI
 /// Main container view that manages navigation between all app screens
 struct MainTabView: View {
     @State private var selectedTab: AppTab = .scan
+    @State private var pendingShopSearch: String? = nil
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
@@ -17,9 +18,9 @@ struct MainTabView: View {
             case .saved:
                 SavedView(selectedTab: $selectedTab)
             case .scan:
-                ScanView(selectedTab: $selectedTab)
+                ScanView(selectedTab: $selectedTab, pendingShopSearch: $pendingShopSearch)
             case .shop:
-                ShopView(selectedTab: $selectedTab)
+                ShopView(selectedTab: $selectedTab, pendingShopSearch: $pendingShopSearch)
             case .checkout:
                 CheckoutManagerView(selectedTab: $selectedTab)
             }

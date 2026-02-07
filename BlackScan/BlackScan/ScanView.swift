@@ -8,6 +8,7 @@ struct ScanView: View {
     // MARK: - State Properties
     
     @Binding var selectedTab: AppTab
+    @Binding var pendingShopSearch: String?
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var cartManager: CartManager
     @State private var isShowingResults = false
@@ -23,8 +24,9 @@ struct ScanView: View {
     @State private var showingScanHistory = false
     
     // Default initializer for binding
-    init(selectedTab: Binding<AppTab> = .constant(.scan)) {
+    init(selectedTab: Binding<AppTab> = .constant(.scan), pendingShopSearch: Binding<String?> = .constant(nil)) {
         self._selectedTab = selectedTab
+        self._pendingShopSearch = pendingShopSearch
     }
     
     // Scanning states for button UI
@@ -316,7 +318,11 @@ struct ScanView: View {
             resultsSheet
         }
         .fullScreenCover(isPresented: $showingScanHistory) {
-            RecentScansView()
+            RecentScansView(onSearchInShop: { query in
+                showingScanHistory = false
+                pendingShopSearch = query
+                selectedTab = .shop
+            })
         }
         .onChange(of: capturedImage) { _, newImage in
             if let image = newImage {

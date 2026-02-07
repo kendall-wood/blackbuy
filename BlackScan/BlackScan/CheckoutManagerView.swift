@@ -388,6 +388,9 @@ struct CartProductRow: View {
 /// Dedicated recent scans page accessed from scan view history button
 struct RecentScansView: View {
     
+    /// Callback when user taps a scan row to search in the shop
+    var onSearchInShop: ((String) -> Void)? = nil
+    
     @EnvironmentObject var scanHistoryManager: ScanHistoryManager
     @Environment(\.dismiss) var dismiss
     
@@ -432,7 +435,11 @@ struct RecentScansView: View {
                         RecentScanRow(
                             entry: entry,
                             dateFormatter: dateFormatter,
-                            timeFormatter: timeFormatter
+                            timeFormatter: timeFormatter,
+                            onTapped: {
+                                let query = entry.classifiedProduct ?? entry.recognizedText
+                                onSearchInShop?(query)
+                            }
                         )
                         .listRowInsets(EdgeInsets(top: 8, leading: DS.horizontalPadding, bottom: 8, trailing: DS.horizontalPadding))
                         .listRowSeparator(.hidden)
@@ -457,11 +464,10 @@ struct RecentScanRow: View {
     let entry: ScanHistoryEntry
     let dateFormatter: DateFormatter
     let timeFormatter: DateFormatter
-    
-    @State private var showingSearch = false
+    var onTapped: (() -> Void)? = nil
     
     var body: some View {
-        Button(action: { showingSearch = true }) {
+        Button(action: { onTapped?() }) {
             HStack(spacing: 14) {
                 // Scan icon
                 ZStack {
@@ -513,9 +519,6 @@ struct RecentScanRow: View {
             .dsCardShadow()
         }
         .buttonStyle(.plain)
-        .fullScreenCover(isPresented: $showingSearch) {
-            SearchView(initialSearchText: entry.classifiedProduct ?? entry.recognizedText)
-        }
     }
 }
 
