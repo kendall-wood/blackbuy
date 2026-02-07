@@ -834,18 +834,31 @@ struct ScanView: View {
     
     private var sheetHeader: some View {
         VStack(spacing: 0) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
                     if let analysis = lastAnalysis {
-                        Text("\(scanResults.count) Black-owned \(analysis.productType)")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.black)
+                        // "Found: Shampoo"
+                        HStack(spacing: 0) {
+                            Text("Found: ")
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundColor(.black)
+                            Text(analysis.productType)
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundColor(.black)
+                        }
                         
+                        // Confidence % in color
                         if !scanResults.isEmpty, let topResult = scanResults.first {
                             Text("\(topResult.confidencePercentage)% match confidence")
-                                .font(.system(size: 14, weight: .regular))
-                                .foregroundColor(Color(.systemGray))
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(confidenceColor(topResult.confidenceScore))
                         }
+                        
+                        // "Black-owned alternatives to Shampoo"
+                        Text("Black-owned alternatives to \(analysis.productType)")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(Color(.systemGray))
+                            .padding(.top, 2)
                     } else {
                         Text("Search Results")
                             .font(.system(size: 22, weight: .bold))
@@ -874,12 +887,25 @@ struct ScanView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, DS.horizontalPadding)
             .padding(.top, 20)
             .padding(.bottom, 16)
             
             Divider()
                 .background(Color(.systemGray5))
+            
+            // "Showing X products" below divider
+            if !scanResults.isEmpty {
+                HStack {
+                    Text("Showing \(scanResults.count) products")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color(.systemGray))
+                    Spacer()
+                }
+                .padding(.horizontal, DS.horizontalPadding)
+                .padding(.top, 12)
+                .padding(.bottom, 4)
+            }
         }
         .background(DS.cardBackground)
     }
