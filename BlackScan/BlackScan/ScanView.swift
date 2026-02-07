@@ -562,46 +562,6 @@ struct ScanView: View {
         }
     }
     
-    private var buttonText: String {
-        switch scanState {
-        case .initial:
-            return "Start Scanning"
-        case .capturing:
-            return "Scanning..."
-        case .analyzing:
-            return "Scanning..."
-        case .searching:
-            return "Scanning..."
-        case .results:
-            let count = scanResults.count
-            if let productType = lastAnalysis?.productType {
-                return "Found \(count) \(productType) Result\(count == 1 ? "" : "s")"
-            } else {
-                return "Found \(count) Result\(count == 1 ? "" : "s")"
-            }
-        }
-    }
-    
-    private var buttonBackgroundColor: Color {
-        switch scanState {
-        case .initial:
-            return .white
-        case .capturing, .analyzing, .searching:
-            return .green
-        case .results:
-            return DS.brandBlue // Blue
-        }
-    }
-    
-    private var buttonTextColor: Color {
-        switch scanState {
-        case .initial:
-            return DS.brandBlue // Blue
-        case .capturing, .analyzing, .searching, .results:
-            return .white
-        }
-    }
-    
     // MARK: - Button Action
     
     private func handleButtonTap() {
@@ -997,97 +957,6 @@ struct ScanView: View {
         }
     }
     
-    // MARK: - Simple Accurate Scoring (Trust Typesense)
-    
-    /// Score products accurately based on what matters (no fake base scores)
-    /// Philosophy: Typesense found them, so they're relevant. Just rank them honestly.
-    private func scoreProductsSimple(
-        products: [Product],
-        targetType: String,
-        targetForm: String?
-    ) -> [ScoredProduct] {
-        Log.debug("Scoring \(products.count) products", category: .scan)
-        
-        let scored = products.map { product -> ScoredProduct in
-            var score: Double = 0.0
-            
-            let targetLower = targetType.lowercased()
-            let nameLower = product.name.lowercased()
-            
-            // TIER 1: Product NAME match (60% weight)
-            // Most reliable signal - if name says "Hand Sanitizer", it IS one
-            let nameScore: Double
-            if nameLower.contains(targetLower) {
-                // Name contains full target
-                nameScore = 1.0
-            } else {
-                // Check word overlap
-                let targetWords = Set(targetLower.split(separator: " ").map(String.init))
-                let nameWords = Set(nameLower.split(separator: " ").map(String.init))
-                let overlap = targetWords.intersection(nameWords)
-                
-                if overlap.count >= 2 {
-                    // At least 2 words match (e.g., "Hand" + "Sanitizer")
-                    nameScore = 0.80
-                } else if overlap.count == 1 {
-                    // Only 1 word matches
-                    nameScore = 0.40
-                } else {
-                    // No match - but Typesense found it, so give some credit
-                    nameScore = 0.20
-                }
-            }
-            score += nameScore * 0.60
-            
-            // TIER 2: Form match (25% weight)
-            let formScore: Double
-            if let targetForm = targetForm, let productForm = product.form {
-                let targetFormLower = targetForm.lowercased()
-                let productFormLower = productForm.lowercased()
-                
-                if targetFormLower == productFormLower {
-                    formScore = 1.0  // Perfect match
-                } else if targetFormLower.contains(productFormLower) || productFormLower.contains(targetFormLower) {
-                    formScore = 0.80  // Partial match (e.g., "gel" in "spray gel")
-                } else if isFormCompatible(targetFormLower, productFormLower) {
-                    formScore = 0.60  // Compatible (e.g., spray/mist)
-                } else {
-                    formScore = 0.30  // Different but not a dealbreaker
-                }
-            } else {
-                formScore = 0.50  // Unknown form = neutral
-            }
-            score += formScore * 0.25
-            
-            // TIER 3: Typesense ranking (15% weight)
-            // Higher in search results = more relevant
-            // (We'd need search position for this, so approximate for now)
-            let searchRankScore = 0.80  // Assume good if Typesense found it
-            score += searchRankScore * 0.15
-            
-            // Final score
-            Log.debug("\(product.name): \(Int(score * 100))%", category: .scan)
-            
-            return ScoredProduct(
-                id: product.id,
-                product: product,
-                confidenceScore: score,
-                breakdown: ScoreBreakdown(
-                    productTypeScore: nameScore,  // Use name score as "product type"
-                    formScore: formScore,
-                    brandScore: 0.80,  // Neutral
-                    ingredientScore: 0.80,  // Neutral
-                    sizeScore: 0.80,  // Neutral
-                    visualScore: 0.80
-                ),
-                explanation: "Name: \(Int(nameScore * 100))%, Form: \(Int(formScore * 100))%"
-            )
-        }
-        
-        // Sort by score (highest first)
-        return scored.sorted { $0.confidenceScore > $1.confidenceScore }
-    }
-    
     /// Check if two forms are compatible (e.g., spray/mist)
     private func isFormCompatible(_ form1: String, _ form2: String) -> Bool {
         let compatibleGroups: [[String]] = [
@@ -1457,9 +1326,12 @@ struct ScanGlowOverlay: View {
     var hasProducts: Bool = false
     @State private var pulse = false
     
-    /// The device's display corner radius (reads from UIScreen private key, falls back to 44)
+    /// The device's display corner radius (uses public API on iOS 16.4+, falls back to 44)
     private var screenRadius: CGFloat {
-        UIScreen.main.value(forKey: "_displayCornerRadius") as? CGFloat ?? 44
+        if #available(iOS 16.4, *) {
+            return UIScreen.main.displayCornerRadius
+        }
+        return 44
     }
     
     private var glowColor: Color {

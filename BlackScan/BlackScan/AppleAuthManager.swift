@@ -111,6 +111,12 @@ class AppleAuthManager: NSObject, ObservableObject {
         return "?"
     }
     
+    /// Handle a successful Apple Sign In from the SwiftUI SignInWithAppleButton
+    func handleSignInSuccess(userId: String, name: String?, email: String?) {
+        saveUserCredentials(userId: userId, name: name, email: email)
+        Log.info("Apple Sign In successful", category: .auth)
+    }
+    
     // MARK: - Private Methods
     
     /// Save user credentials to Keychain (secure storage)

@@ -72,5 +72,8 @@ struct MainTabView: View {
         .environmentObject(SavedCompaniesManager())
         .environmentObject(CartManager())
         .environmentObject(AppleAuthManager())
+        .environmentObject(ScanHistoryManager())
+        .environmentObject(ToastManager())
         .environmentObject(ProductCacheManager())
+        .environmentObject(NetworkMonitor())
 }

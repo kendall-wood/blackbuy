@@ -1,224 +1,172 @@
-# BlackScan - AI-Enhanced Product Scanner
+# BlackScan - AI-Powered Product Scanner
 
-A production-ready SwiftUI iOS app for scanning products and discovering Black-owned alternatives using advanced AI classification and semantic search.
+A SwiftUI iOS app that scans any product label using GPT-4 Vision and finds Black-owned alternatives via Typesense search.
 
-## 🎯 Performance Benchmarks
+## Features
 
-### **Classification Accuracy**
-- **AI-Enhanced Detection**: 95%+ accuracy with GPT-4o-mini
-- **Product Recognition**: Identifies 200+ product types across all categories
-- **Brand Detection**: Recognizes mainstream brands (Burt's Bees, Dove, Pantene, etc.)
-- **Confidence Scoring**: Intelligent calibration with visual feature support
-
-### **Search Performance**
-- **Database**: 6,404 Black-owned products across 80+ categories
-- **Search Speed**: ~200ms average response time
-- **Result Quality**: 46 lip balm products vs 2 with previous complex queries
-- **Coverage**: Beauty, Personal Care, Home Care, Fashion, Books, etc.
-
-### **User Experience**
-- **Scan Speed**: 2-3 seconds to stable result
-- **Shop Search**: <0.8s response time with smart debouncing
-- **Image Loading**: Instant cached loading with optimized placeholders
-- **Auto-Stop**: Scanning stops automatically when product found
-- **No Flickering**: Result stabilization prevents UI jumping
-- **Intuitive Flow**: Scan → Find → View → Scan Again
+- **AI Scan**: Point camera at any product label — GPT-4 Vision identifies the product type, form, and ingredients, then finds matching Black-owned alternatives
+- **Shop**: Browse by category, search products and brands, featured brands carousel
+- **Cart**: Checkout manager with company-grouped items, quantity controls, and direct "Buy" links to store websites
+- **Saved**: Save favorite products and companies for quick access
+- **Profile**: Apple Sign In, data export (GDPR), full data deletion, privacy policy link
+- **Offline Detection**: Network monitor with auto-dismissing offline banner
+- **Scan History**: View and revisit previous scans
 
 ## Architecture
 
-- **iOS App**: SwiftUI + VisionKit + Apple Vision framework
-- **AI Classification**: OpenAI GPT-4o-mini with bulletproof fallbacks
-- **Data Pipeline**: Python normalizer with 87k→6.4k product optimization
-- **Search Backend**: Typesense Cloud with semantic query enhancement
-- **Focus**: Black-owned product discovery with professional UX
+| Layer | Technology |
+|-------|-----------|
+| UI | SwiftUI (iOS 17+, light mode) |
+| AI Vision | OpenAI GPT-4o via REST API |
+| OCR Fallback | VisionKit + on-device hybrid scan pipeline |
+| Search | Typesense Cloud (semantic + faceted search) |
+| Auth | Apple Sign In (ASAuthorizationController) |
+| Storage | Keychain (credentials), UserDefaults (cart, saved items, preferences) |
+| Security | TLS 1.2+, input sanitization, image URL validation, network retry with backoff |
+| Config | xcconfig-injected secrets via Info.plist |
 
-## Quick Start (10 Steps)
+## Project Structure
 
-### 1. Setup Product Data
-```bash
-# Put your 87k+ product JSON file here:
-cp /path/to/your/combined_complete_and_classified_products.json data-normalizer/input_products.json
+```
+BlackScan/
+├── BlackScanApp.swift                  # @main entry, environment objects, splash
+├── MainTabView.swift                   # Tab-less navigation (scan, shop, saved, profile, checkout)
+│
+├── BlackScan/
+│   ├── ScanView.swift                  # Camera UI, scan button states, results sheet
+│   ├── ShopView.swift                  # Search, categories, featured products grid
+│   ├── SavedView.swift                 # Saved products & companies
+│   ├── ProfileView.swift               # Apple Sign In, settings, data export/deletion
+│   ├── CheckoutManagerView.swift       # Cart grouped by company, quantity controls
+│   ├── ProductDetailView.swift         # Product detail with similar products
+│   ├── CompanyView.swift               # All products from a single company
+│   ├── AllFeaturedProductsView.swift   # Full featured products listing
+│   ├── CameraScanView.swift            # Legacy camera scanning view
+│   ├── LaunchScreenView.swift          # Splash screen
+│   ├── LiveScannerView.swift           # VisionKit DataScanner wrapper
+│   │
+│   ├── Models.swift                    # Product, TypesenseSearchResponse, etc.
+│   ├── CartItem.swift                  # Cart item model
+│   ├── Item.swift                      # Generic item model
+│   ├── DesignSystem.swift              # DS tokens, AppTab, AppHeader, toast system
+│   ├── ProductCard.swift               # UnifiedProductCard used across the app
+│   ├── ImageCache.swift                # NSCache image cache + CachedAsyncImage view
+│   │
+│   ├── Env.swift                       # Environment config (Typesense, OpenAI, backend)
+│   ├── TestEnv.swift                   # Startup validation for env vars
+│   ├── TypesenseClient.swift           # Typesense search API client
+│   ├── OpenAIVisionService.swift       # GPT-4 Vision product analysis
+│   ├── Classifier.swift                # Rule-based fallback classifier
+│   ├── ProductCacheManager.swift       # Pre-fetches featured products at launch
+│   ├── CartManager.swift               # Cart state + UserDefaults persistence
+│   ├── SavedProductsManager.swift      # Saved products persistence
+│   ├── SavedCompaniesManager.swift     # Saved companies persistence
+│   ├── ScanHistoryManager.swift        # Scan history persistence
+│   ├── AppleAuthManager.swift          # Apple Sign In + Keychain credential storage
+│   ├── UserAuthService.swift           # Anonymous user auth service
+│   ├── FeedbackManager.swift           # Issue reporting to backend
+│   │
+│   ├── Scanning/                       # Hybrid scan pipeline
+│   │   ├── HybridScanService.swift     # Orchestrates OCR vs Vision API
+│   │   ├── AdvancedClassifier.swift    # Multi-signal product classification
+│   │   ├── ConfidenceScorer.swift      # Scoring models (ScoredProduct, etc.)
+│   │   ├── MultiFrameOCRService.swift  # On-device OCR aggregation
+│   │   ├── GPT4TextService.swift       # GPT-4 text-only fallback
+│   │   ├── ProductTaxonomy.swift       # Product type normalization + synonyms
+│   │   ├── FormTaxonomy.swift          # Form normalization (gel, cream, etc.)
+│   │   ├── BrandDatabase.swift         # Known brand lookups
+│   │   ├── IngredientDatabase.swift    # Ingredient recognition
+│   │   └── SizeExtractor.swift         # Size/volume parsing
+│   │
+│   ├── Security/                       # Security & validation
+│   │   ├── InputValidator.swift        # Search/feedback sanitization, URL validation
+│   │   ├── NetworkSecurity.swift       # Retry logic, secure URLSession config
+│   │   ├── SecureStorage.swift         # Keychain wrapper
+│   │   ├── NetworkMonitor.swift        # NWPathMonitor connectivity tracking
+│   │   └── LogManager.swift            # Production-safe logging (stripped in Release)
+│   │
+│   ├── Info.plist                      # Env var placeholders for xcconfig injection
+│   ├── BlackScan.entitlements          # Apple Sign In capability
+│   ├── PrivacyInfo.xcprivacy           # Privacy manifest (required by App Store)
+│   └── Assets.xcassets/                # App icons, images, colors
+│
+├── Configuration/
+│   └── Secrets.xcconfig.template       # Template for API keys
+│
+├── BlackScanTests/
+└── BlackScanUITests/
 ```
 
-### 2. Run Data Normalizer
+## Setup
+
+### 1. Configure Secrets
+
+```bash
+cp Configuration/Secrets.xcconfig.template Configuration/Secrets.xcconfig
+```
+
+Edit `Secrets.xcconfig` with your values:
+
+```
+TYPESENSE_HOST = your-cluster.a1.typesense.net
+TYPESENSE_API_KEY = your-search-only-api-key
+OPENAI_API_KEY = sk-your-openai-key
+BACKEND_URL = https://your-backend.com
+```
+
+The xcconfig file is git-ignored. Values are injected into Info.plist at build time.
+
+### 2. Product Data
+
 ```bash
 cd data-normalizer
-python3 normalize.py
+python3 normalize.py    # Creates normalized_products.json from raw input
 ```
-This creates `normalized_products.json` with clean taxonomy.
 
-### 3. Create Typesense Collection
+### 3. Import to Typesense
+
 ```bash
-# Set your environment variables
 export TYPESENSE_HOST="https://your-cluster.a1.typesense.net"
 export TYPESENSE_API_KEY="your-admin-api-key"
 
-# Create collection with schema
+# Create collection
 curl -X POST "${TYPESENSE_HOST}/collections" \
   -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}" \
   -H "Content-Type: application/json" \
   -d @infra/typesense_products_schema.json
 
-# Verify collection was created
-curl -X GET "${TYPESENSE_HOST}/collections/products" \
-  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}"
-```
-
-### 4. Import Normalized Products
-```bash
-# Import products to Typesense (upsert mode)
+# Import products
 curl -X POST "${TYPESENSE_HOST}/collections/products/documents/import?action=upsert" \
   -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}" \
   -H "Content-Type: application/jsonl" \
   --data-binary @data-normalizer/normalized_products.json
-
-# Check import status
-curl -X GET "${TYPESENSE_HOST}/collections/products/documents/search?q=*" \
-  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}"
 ```
 
-### 5. Configure Xcode Environment
-- Open `ios/BlackScan.xcodeproj` in Xcode
-- Edit scheme → Environment Variables:
-  - `TYPESENSE_HOST` = `your-cluster.a1.typesense.net`  
-  - `TYPESENSE_API_KEY` = `your-search-api-key` (search-only, not admin)
+### 4. Build & Run
 
-### 6. Build on Physical Device
-Camera scanning requires a physical iPhone (iOS 17+).
+- Open `BlackScan.xcodeproj` in Xcode
+- Select a physical device (camera required for scanning)
+- Build and run (Cmd+R)
 
-### 7. Test Scan Flow
-- Open app → Scan tab
-- Point camera at product text/barcode
-- Bottom sheet should appear with Black-owned products
+## App Store Compliance
 
-### 8. Test Shop Flow  
-- Shop tab → search by brand or product type
-- Grid of product cards with "Buy" links
-
-### 9. Optimize (Optional)
-```bash
-# Update synonym maps and re-run normalizer
-vim data-normalizer/maps/product_type_synonyms.json
-python3 data-normalizer/normalize.py
-# Re-import to Typesense
-```
-
-### 10. Success Metrics ✅
-
-**Current Implementation Status:**
-- ✅ **AI Classification**: GPT-4o-mini integration complete
-- ✅ **Result Stabilization**: No more UI flickering 
-- ✅ **Auto-Stop Scanning**: Professional UX flow
-- ✅ **Search Optimization**: 23x improvement in result quality (2→46 products)
-- ✅ **Shop Performance**: 80% faster search with smart debouncing & image optimization
-- ✅ **6,404 Products**: Successfully imported and searchable
-- ✅ **Production Ready**: Comprehensive error handling and fallbacks
-
-**Tested Product Categories:**
-- ✅ Lip Balm (46 products found)
-- ✅ Deodorant (detected Dove, found alternatives)
-- ✅ Hair Care Products
-- ✅ Skincare Products
-- ✅ Body Care Products
-
-### Next Features
-- Saved persistence (UserDefaults → Supabase)
-- User authentication & profiles
-- Product reviews and ratings
-- Barcode scanning enhancement
-
-## Project Structure
-
-```
-blackscan/
-├── ios/
-│   ├── BlackScan.xcodeproj
-│   └── BlackScan/
-│       ├── BlackScanApp.swift      # TabView (Scan, Shop, Saved)
-│       ├── Models.swift            # Product, TypesenseHit, etc.
-│       ├── TypesenseClient.swift   # Search API client
-│       ├── Env.swift              # Environment variables
-│       ├── Classifier.swift       # OCR text → product type
-│       ├── LiveScannerView.swift  # VisionKit camera scanner
-│       ├── ScanView.swift         # Camera + bottom sheet results
-│       ├── ProductCard.swift      # Reusable product card component
-│       ├── ShopView.swift         # Search + grid results
-│       └── SavedView.swift        # Saved items (placeholder)
-├── data-normalizer/
-│   ├── normalize.py              # Main normalizer script
-│   ├── input_products.json       # Your 87k+ raw products (symlink/copy)
-│   ├── normalized_products.json  # Clean output for Typesense
-│   └── maps/
-│       ├── product_type_synonyms.json
-│       └── main_category_map.json
-├── infra/
-│   └── typesense_products_schema.json
-├── .env.example                  # Template for environment variables
-└── README.md
-```
-
-## Development Notes
-
-- **Target**: iOS 17, SwiftUI, VisionKit + Vision for OCR
-- **No heavy frameworks**: AsyncImage for now (Nuke later)
-- **Small commits**: "feat(scanner): add LiveScannerView", etc.
-- **UX from PRD**: Camera scan → classify → slide-up results; history; Shop with search & cards; consistent card design; external "Buy" links
+| Requirement | Status |
+|-------------|--------|
+| Privacy Manifest (`PrivacyInfo.xcprivacy`) | Declares collected data types, API reasons, no tracking |
+| Camera Permission (`NSCameraUsageDescription`) | Clear purpose string in build settings |
+| Account Deletion | Profile > Delete All My Data (clears Keychain, UserDefaults, all managers) |
+| Data Export | Profile > Export My Data (JSON with all user data) |
+| Apple Sign In Entitlement | Configured in `.entitlements` |
+| No Private APIs | Public `UIScreen.main.displayCornerRadius` with fallback |
+| Production Logging | Debug/info/warning stripped in Release; errors redacted |
+| Secure Credential Storage | iOS Keychain with `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` |
+| Network Security | TLS 1.2 minimum, HTTPS-only image loading, input sanitization |
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in your Typesense credentials:
-
-```bash
-TYPESENSE_HOST=your-cluster.a1.typesense.net
-TYPESENSE_API_KEY=your-search-api-key
-```
-
-**Note**: Use search-only API key in the iOS app, not admin key.
-
-## Typesense API Examples
-
-### Collection Management
-```bash
-# List all collections
-curl -X GET "${TYPESENSE_HOST}/collections" \
-  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}"
-
-# Delete collection (if needed)
-curl -X DELETE "${TYPESENSE_HOST}/collections/products" \
-  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}"
-
-# Get collection stats
-curl -X GET "${TYPESENSE_HOST}/stats.json" \
-  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}"
-```
-
-### Search Examples
-```bash
-# Search for "shampoo" products
-curl -X GET "${TYPESENSE_HOST}/collections/products/documents/search" \
-  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}" \
-  -G \
-  -d "q=shampoo" \
-  -d "query_by=name,product_type,company,tags" \
- \
-  -d "facet_by=main_category,product_type,form,company" \
-  -d "sort_by=price:asc"
-
-# Filter by Hair Care category
-curl -X GET "${TYPESENSE_HOST}/collections/products/documents/search" \
-  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}" \
-  -G \
-  -d "q=*" \
-  -d "query_by=name,product_type,company,tags" \
-  -d "filter_by=main_category:=Hair Care" \
-  -d "per_page=20"
-
-# Search with price range
-curl -X GET "${TYPESENSE_HOST}/collections/products/documents/search" \
-  -H "X-TYPESENSE-API-KEY: ${TYPESENSE_API_KEY}" \
-  -G \
-  -d "q=curl cream" \
-  -d "query_by=name,product_type,tags" \
-  -d "filter_by=price:[10..50]" \
-  -d "sort_by=price:desc"
-```
+| Key | Description |
+|-----|-------------|
+| `TYPESENSE_HOST` | Typesense cluster URL |
+| `TYPESENSE_API_KEY` | Search-only API key (not admin) |
+| `OPENAI_API_KEY` | OpenAI API key for GPT-4 Vision |
+| `BACKEND_URL` | Backend URL for feedback submissions |

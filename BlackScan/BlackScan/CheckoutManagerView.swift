@@ -33,12 +33,6 @@ struct CheckoutManagerView: View {
                             .foregroundColor(Color(.systemGray))
                         
                         Spacer()
-                        
-                        DSSortButton(label: "Sort") {
-                            Button("By Company") { }
-                            Button("By Price") { }
-                            Button("By Name") { }
-                        }
                     }
                     .padding(.horizontal, DS.horizontalPadding)
                     .padding(.top, 8)

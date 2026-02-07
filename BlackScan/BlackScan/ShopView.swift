@@ -460,7 +460,7 @@ struct ShopView: View {
                     .padding(.top, 8)
                     .padding(.bottom, 14)
                 }
-                .onChange(of: selectedCategory) { newCategory in
+                .onChange(of: selectedCategory) { _, newCategory in
                     if let cat = newCategory {
                         withAnimation {
                             proxy.scrollTo(cat, anchor: .leading)

@@ -130,15 +130,34 @@ struct ProfileView: View {
                     request.requestedScopes = [.fullName, .email]
                 },
                 onCompletion: { result in
-                    // Handled by AuthManager
+                    switch result {
+                    case .success(let authorization):
+                        if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
+                            let userId = credential.user
+                            let fullName = credential.fullName
+                            let email = credential.email
+                            
+                            var displayName: String?
+                            if let givenName = fullName?.givenName, let familyName = fullName?.familyName {
+                                displayName = "\(givenName) \(familyName)"
+                            } else if let givenName = fullName?.givenName {
+                                displayName = givenName
+                            }
+                            
+                            authManager.handleSignInSuccess(userId: userId, name: displayName, email: email)
+                        }
+                    case .failure(let error):
+                        if let authError = error as? ASAuthorizationError, authError.code == .canceled {
+                            Log.debug("User cancelled sign in", category: .auth)
+                        } else {
+                            Log.error("Apple Sign In failed", category: .auth)
+                        }
+                    }
                 }
             )
             .frame(height: 48)
             .cornerRadius(DS.radiusMedium)
             .padding(.horizontal, 40)
-            .onTapGesture {
-                authManager.signIn()
-            }
         }
         .padding(.vertical, 20)
         .background(
@@ -245,7 +264,7 @@ struct ProfileView: View {
                     title: "Privacy Policy",
                     showChevron: true,
                     action: {
-                        if let url = URL(string: "https://kendall-wood.github.io/blackbuy/privacy-policy/") {
+                        if let url = URL(string: "https://kendall-wood.github.io/blackbuy-privacy/") {
                             UIApplication.shared.open(url)
                         }
                     }
