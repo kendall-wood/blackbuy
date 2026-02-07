@@ -918,15 +918,9 @@ struct ScanView: View {
                     lastAnalysis = nil
                     capturedImage = nil
                 }) {
-                    ZStack {
-                        Circle()
-                            .fill(Color(.systemGray6))
-                            .frame(width: 32, height: 32)
-                        
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color(.systemGray))
-                    }
+                    Text("Done")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(DS.brandBlue)
                 }
                 .buttonStyle(.plain)
             }
