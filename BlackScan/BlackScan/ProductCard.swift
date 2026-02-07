@@ -85,19 +85,16 @@ struct UnifiedProductCard: View {
             .padding(.horizontal, 12)
             .padding(.top, 12)
             .padding(.bottom, 6)
-            .contentShape(Rectangle())
-            .onTapGesture { onCardTapped?() }
             
             // Company and product name
             VStack(alignment: .leading, spacing: 2) {
-                // Company name
+                // Company name — tappable to open company view
                 if let onCompanyTapped = onCompanyTapped {
                     Button(action: onCompanyTapped) {
                         Text(product.company)
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(DS.brandBlue)
                             .lineLimit(1)
-                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .buttonStyle(.plain)
                 } else {
@@ -148,6 +145,8 @@ struct UnifiedProductCard: View {
         .background(DS.cardBackground)
         .cornerRadius(DS.radiusLarge)
         .dsCardShadow()
+        .contentShape(Rectangle())
+        .onTapGesture { onCardTapped?() }
     }
 }
 

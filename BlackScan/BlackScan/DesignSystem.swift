@@ -308,6 +308,8 @@ enum ToastType {
 class ToastManager: ObservableObject {
     @Published var currentToast: ToastType? = nil
     @Published var isVisible: Bool = false
+    /// Screen-coordinate frame of the toast pill, used by ToastWindow for hit testing
+    @Published var toastFrame: CGRect = .zero
     
     private var dismissTask: Task<Void, Never>?
     
@@ -328,6 +330,7 @@ class ToastManager: ObservableObject {
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 if !Task.isCancelled {
                     currentToast = nil
+                    toastFrame = .zero
                 }
             }
         }
@@ -357,8 +360,6 @@ struct ToastOverlay: View {
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundColor(.black)
                         
-                        Spacer()
-                        
                         Image(systemName: "chevron.right")
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(Color(.systemGray3))
@@ -366,13 +367,20 @@ struct ToastOverlay: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 14)
                     .background(
-                        RoundedRectangle(cornerRadius: DS.radiusPill)
-                            .fill(Color.white)
-                            .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
+                        GeometryReader { geo in
+                            RoundedRectangle(cornerRadius: DS.radiusPill)
+                                .fill(Color.white)
+                                .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
+                                .onAppear {
+                                    toastManager.toastFrame = geo.frame(in: .global)
+                                }
+                                .onChange(of: geo.frame(in: .global)) { newFrame in
+                                    toastManager.toastFrame = newFrame
+                                }
+                        }
                     )
                 }
                 .buttonStyle(.plain)
-                .padding(.horizontal, 24)
                 .padding(.top, 56)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
@@ -425,19 +433,29 @@ struct OfflineBannerOverlay: View {
 // MARK: - Toast Window (renders above all sheets/covers)
 
 /// A passthrough window that sits above everything but doesn't block touches.
-/// Intercepts touches on actual toast content; passes through transparent areas.
+/// Uses the ToastManager's frame to decide which touches to intercept.
 class ToastWindow: UIWindow {
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        guard let hitView = super.hitTest(point, with: event) else { return nil }
+    /// Reference to the toast manager for frame-based hit testing
+    weak var toastManager: ToastManager?
+    /// Optional reference for offline banner frame (non-interactive, always passes through)
+    var isPassthroughOnly = false
+    
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        // Offline banner window — always pass through (no tap interaction needed)
+        if isPassthroughOnly { return false }
         
-        // If the hit landed on the window itself or the root hosting view,
-        // it means the user tapped the transparent background — pass through.
-        // Any deeper subview means SwiftUI rendered actual content there (the toast pill).
-        if hitView === self || hitView === rootViewController?.view {
-            return nil
-        }
+        // Only intercept taps that land on the actual toast pill
+        guard let manager = toastManager else { return false }
         
-        return hitView
+        // Must be on main thread to read @Published safely
+        let frame = manager.toastFrame
+        let visible = manager.isVisible
+        
+        guard visible, !frame.isEmpty else { return false }
+        
+        // Convert point to screen coordinates and check against toast frame
+        let screenPoint = convert(point, to: nil)
+        return frame.contains(screenPoint)
     }
 }
 
@@ -459,13 +477,14 @@ class ToastWindowManager {
         
         let window = ToastWindow(windowScene: scene)
         window.rootViewController = hostingController
+        window.toastManager = toastManager
         window.isHidden = false
         window.windowLevel = .alert + 1  // Above everything
         window.backgroundColor = .clear
         
         self.toastWindow = window
         
-        // Offline banner window (slightly below toast)
+        // Offline banner window (non-interactive, always passes through)
         let offlineView = OfflineBannerOverlay()
             .environmentObject(networkMonitor)
         
@@ -474,6 +493,7 @@ class ToastWindowManager {
         
         let offlineWin = ToastWindow(windowScene: scene)
         offlineWin.rootViewController = offlineHosting
+        offlineWin.isPassthroughOnly = true
         offlineWin.isHidden = false
         offlineWin.windowLevel = .alert  // Just below the toast window
         offlineWin.backgroundColor = .clear
