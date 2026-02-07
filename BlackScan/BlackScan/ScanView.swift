@@ -42,10 +42,6 @@ struct ScanView: View {
     
     // MARK: - UI Configuration
     
-    private let resultSheetDetents: Set<PresentationDetent> = [
-        .fraction(0.45),
-        .large
-    ]
     
     var body: some View {
         GeometryReader { geometry in
@@ -132,7 +128,7 @@ struct ScanView: View {
                 }
                 .multilineTextAlignment(.center)
                 
-                // Center - Scan Button
+                // Center - Scan Button + Inline Results
                 VStack(spacing: 10) {
                     Spacer()
                         .frame(height: geometry.size.height * 0.45)
@@ -165,7 +161,15 @@ struct ScanView: View {
                         .font(.system(size: 12))
                         .foregroundColor(Color(.systemGray))
                     
-                    Spacer()
+                    // Inline Results Card
+                    if isShowingResults {
+                        inlineResultsCard
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                    
+                    if !isShowingResults {
+                        Spacer()
+                    }
                 }
                 
                 // Bottom Left - History Button
@@ -274,7 +278,9 @@ struct ScanView: View {
                         Spacer()
                         
                         Button(action: {
-                            isShowingResults = true
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                isShowingResults = true
+                            }
                         }) {
                             HStack(spacing: 0) {
                                 Image(systemName: "list.bullet")
@@ -313,9 +319,6 @@ struct ScanView: View {
                     .zIndex(10)
                 }
             }
-        }
-        .sheet(isPresented: $isShowingResults) {
-            resultsSheet
         }
         .fullScreenCover(isPresented: $showingScanHistory) {
             RecentScansView(onSearchInShop: { query in
@@ -677,9 +680,10 @@ struct ScanView: View {
             
             await MainActor.run {
                 scanResults = filteredResults
-                // Show results even if filtered count is low
-                // User can see what was found and make their own judgment
                 scanState = .results
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isShowingResults = true
+                }
             }
             
         } catch {
@@ -853,58 +857,40 @@ struct ScanView: View {
         )
     }
     
-    // MARK: - Results Sheet
+    // MARK: - Inline Results Card
     
-    private var resultsSheet: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                sheetHeader
-                
-                if let error = searchError {
-                    errorContent(error)
-                } else if scanResults.isEmpty {
-                    emptyResultsContent
-                } else {
-                    successResultsContent
-                }
-            }
-            .background(DS.cardBackground)
-            .navigationBarHidden(true)
-        }
-        .presentationDetents(resultSheetDetents)
-        .presentationDragIndicator(.visible)
-    }
-    
-    private var sheetHeader: some View {
+    private var inlineResultsCard: some View {
         VStack(spacing: 0) {
+            // Header
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
                     if let analysis = lastAnalysis {
-                        // "Found: Shampoo"
                         HStack(spacing: 0) {
                             Text("Found: ")
-                                .font(.system(size: 22, weight: .bold))
+                                .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.black)
                             Text(analysis.productType)
-                                .font(.system(size: 22, weight: .bold))
+                                .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.black)
                         }
                         
-                        // Confidence % in color
                         if !scanResults.isEmpty, let topResult = scanResults.first {
                             Text("\(topResult.confidencePercentage)% match confidence")
-                                .font(.system(size: 13, weight: .medium))
+                                .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(confidenceColor(topResult.confidenceScore))
                         }
                         
-                        // "Black-owned alternatives to Shampoo"
                         Text("Black-owned alternatives to \(analysis.productType)")
-                            .font(.system(size: 15, weight: .regular))
+                            .font(.system(size: 13))
                             .foregroundColor(Color(.systemGray))
-                            .padding(.top, 2)
+                            .padding(.top, 1)
+                    } else if searchError != nil {
+                        Text("Search Error")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.black)
                     } else {
-                        Text("Search Results")
-                            .font(.system(size: 22, weight: .bold))
+                        Text("No Matches Found")
+                            .font(.system(size: 18, weight: .bold))
                             .foregroundColor(.black)
                     }
                 }
@@ -912,122 +898,107 @@ struct ScanView: View {
                 Spacer()
                 
                 Button(action: {
-                    isShowingResults = false
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        isShowingResults = false
+                    }
                     scanState = .initial
                     scanResults = []
                     lastAnalysis = nil
                     capturedImage = nil
+                    searchError = nil
                 }) {
                     Text("Done")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(DS.brandBlue)
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, DS.horizontalPadding)
-            .padding(.top, 20)
-            .padding(.bottom, 16)
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 12)
             
-            Divider()
-                .background(Color(.systemGray5))
-            
-            // "Showing X products" below divider
-            if !scanResults.isEmpty {
+            // Content
+            if let error = searchError {
+                // Error state
+                VStack(spacing: 10) {
+                    Text(error)
+                        .font(.system(size: 14))
+                        .foregroundColor(Color(.systemGray))
+                        .multilineTextAlignment(.center)
+                    
+                    Button("Try Again") {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            isShowingResults = false
+                        }
+                        scanState = .initial
+                        scanResults = []
+                        searchError = nil
+                    }
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(DS.brandBlue)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
+            } else if scanResults.isEmpty {
+                // Empty state
+                VStack(spacing: 10) {
+                    Text("Try scanning again with better lighting or a clearer view.")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color(.systemGray))
+                        .multilineTextAlignment(.center)
+                    
+                    Button("Scan Again") {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            isShowingResults = false
+                        }
+                        scanState = .initial
+                        scanResults = []
+                    }
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(DS.brandBlue)
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
+            } else {
+                // Product results
+                Divider()
+                
                 HStack {
                     Text("Showing \(scanResults.count) products")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(Color(.systemGray))
                     Spacer()
                 }
-                .padding(.horizontal, DS.horizontalPadding)
-                .padding(.top, 12)
-                .padding(.bottom, 4)
-            }
-        }
-        .background(DS.cardBackground)
-    }
-    
-    private func errorContent(_ error: String) -> some View {
-        VStack(spacing: 16) {
-            Spacer()
-            
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 48))
-                .foregroundColor(.orange)
-            
-            Text("Search Error")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.black)
-            
-            Text(error)
-                .font(DS.body)
-                .foregroundColor(Color(.systemGray))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-            
-            Button("Try Again") {
-                isShowingResults = false
-                scanState = .initial
-                scanResults = []
-                searchError = nil
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(DS.cardBackground)
-    }
-    
-    private var emptyResultsContent: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 48))
-                .foregroundColor(Color(.systemGray))
-            
-            Text("No Matches Found")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.black)
-            
-            Text("Try scanning again with better lighting or a clearer view of the product label.")
-                .font(DS.body)
-                .foregroundColor(Color(.systemGray))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
-            
-            Button("Scan Again") {
-                isShowingResults = false
-                scanState = .initial
-                scanResults = []
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(DS.cardBackground)
-    }
-    
-    private var successResultsContent: some View {
-        ScrollView {
-            LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
-                ForEach(scanResults) { scoredProduct in
-                    UnifiedProductCard(
-                        product: scoredProduct.product,
-                        showHeart: false,
-                        onCardTapped: {
-                            selectedDetailProduct = scoredProduct.product
+                .padding(.horizontal, 16)
+                .padding(.top, 10)
+                .padding(.bottom, 6)
+                
+                ScrollView {
+                    LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
+                        ForEach(scanResults) { scoredProduct in
+                            UnifiedProductCard(
+                                product: scoredProduct.product,
+                                showHeart: false,
+                                onCardTapped: {
+                                    selectedDetailProduct = scoredProduct.product
+                                }
+                            )
                         }
-                    )
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+                    .padding(.bottom, 16)
                 }
             }
-            .padding(.horizontal, DS.horizontalPadding)
-            .padding(.top, 20)
-            .padding(.bottom, 100)
         }
-        .background(DS.cardBackground)
+        .background(
+            RoundedRectangle(cornerRadius: DS.radiusLarge)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.15), radius: 16, x: 0, y: -4)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: DS.radiusLarge))
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
         .sheet(item: $selectedDetailProduct) { product in
             ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
