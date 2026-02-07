@@ -302,8 +302,7 @@ struct ProfileView: View {
         }
         .buttonStyle(.plain)
     }
-}
-
+    
     // MARK: - Privacy Actions
     
     /// Delete all user data (GDPR/App Store compliance)
