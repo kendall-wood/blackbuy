@@ -5,6 +5,7 @@ import AuthenticationServices
 struct ProfileView: View {
     
     @Binding var selectedTab: AppTab
+    var previousTab: AppTab = .scan
     @EnvironmentObject var authManager: AppleAuthManager
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
@@ -13,7 +14,7 @@ struct ProfileView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            AppHeader(centerContent: .title("Profile"), onBack: { selectedTab = .scan })
+            AppHeader(centerContent: .title("Profile"), onBack: { selectedTab = previousTab })
             
             // Content
             ScrollView {
@@ -25,9 +26,6 @@ struct ProfileView: View {
                     if !authManager.isSignedIn {
                         signInSection
                     }
-                    
-                    // Quick Stats
-                    statsSection
                     
                     // Settings Section
                     settingsSection
@@ -113,57 +111,6 @@ struct ProfileView: View {
         .padding(.horizontal, DS.horizontalPadding)
     }
     
-    // MARK: - Stats Section
-    
-    private var statsSection: some View {
-        HStack(spacing: 12) {
-            statCard(
-                icon: "heart.fill",
-                count: savedProductsManager.savedProducts.count,
-                label: "Saved",
-                color: DS.brandRed
-            )
-            
-            statCard(
-                icon: "building.2.fill",
-                count: savedCompaniesManager.savedCompanies.count,
-                label: "Brands",
-                color: DS.brandBlue
-            )
-            
-            statCard(
-                icon: "cart.fill",
-                count: cartManager.totalItemCount,
-                label: "In Cart",
-                color: Color(.systemGreen)
-            )
-        }
-        .padding(.horizontal, DS.horizontalPadding)
-    }
-    
-    private func statCard(icon: String, count: Int, label: String, color: Color) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundColor(color)
-            
-            Text("\(count)")
-                .font(.system(size: 22, weight: .bold))
-                .foregroundColor(.black)
-            
-            Text(label)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color(.systemGray))
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: DS.radiusMedium)
-                .fill(Color.white)
-                .dsCardShadow()
-        )
-    }
-    
     // MARK: - Settings Section
     
     private var settingsSection: some View {
@@ -177,10 +124,9 @@ struct ProfileView: View {
                 // Clear Saved Products
                 settingsRow(
                     icon: "heart.slash",
-                    iconColor: Color(.systemOrange),
+                    iconColor: DS.brandBlue,
                     title: "Clear Saved Products",
                     subtitle: "\(savedProductsManager.savedProducts.count) items",
-                    isDestructive: false,
                     action: { savedProductsManager.clearAllSavedProducts() }
                 )
                 
@@ -190,10 +136,9 @@ struct ProfileView: View {
                 // Clear Cart
                 settingsRow(
                     icon: "cart.badge.minus",
-                    iconColor: Color(.systemOrange),
+                    iconColor: DS.brandBlue,
                     title: "Clear Cart",
                     subtitle: "\(cartManager.totalItemCount) items",
-                    isDestructive: false,
                     action: { cartManager.clearCart() }
                 )
             }
@@ -244,7 +189,6 @@ struct ProfileView: View {
         iconColor: Color,
         title: String,
         subtitle: String? = nil,
-        isDestructive: Bool = false,
         showChevron: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
@@ -259,7 +203,7 @@ struct ProfileView: View {
                 
                 Text(title)
                     .font(.system(size: 16, weight: .regular))
-                    .foregroundColor(isDestructive ? DS.brandRed : .black)
+                    .foregroundColor(.black)
                 
                 Spacer()
                 
