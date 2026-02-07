@@ -62,7 +62,7 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 48, height: 48)
+                                    .frame(width: 54, height: 54)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
@@ -91,7 +91,7 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 48, height: 48)
+                                    .frame(width: 54, height: 54)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "person.fill")
@@ -216,7 +216,7 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 48, height: 48)
+                                    .frame(width: 54, height: 54)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "clock.arrow.circlepath")
@@ -243,7 +243,7 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 48, height: 48)
+                                    .frame(width: 54, height: 54)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "heart")
@@ -257,7 +257,7 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 48, height: 48)
+                                    .frame(width: 54, height: 54)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "storefront")
