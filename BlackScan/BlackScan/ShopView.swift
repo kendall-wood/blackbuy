@@ -67,7 +67,34 @@ struct ShopView: View {
             ZStack {
                 VStack(spacing: 0) {
                     // Header
-                    AppHeader(centerContent: .logo, onBack: { selectedTab = .scan })
+                    AppHeader(
+                        centerContent: .logo,
+                        onBack: { selectedTab = .scan },
+                        trailingContent: AnyView(
+                            Button(action: { selectedTab = .checkout }) {
+                                ZStack(alignment: .topTrailing) {
+                                    Image("cart_icon")
+                                        .renderingMode(.template)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 24, height: 24)
+                                        .foregroundColor(DS.brandBlue)
+                                        .frame(width: 44, height: 44)
+                                    
+                                    if cartManager.totalItemCount > 0 {
+                                        Text("\(cartManager.totalItemCount)")
+                                            .font(.system(size: 11, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .frame(minWidth: 18, minHeight: 18)
+                                            .background(DS.brandBlue)
+                                            .clipShape(Circle())
+                                            .offset(x: 2, y: 2)
+                                    }
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        )
+                    )
                     
                     // Search bar
                     searchBar
