@@ -125,18 +125,16 @@ struct UnifiedProductCard: View {
                         Button(action: { onAddToCart?() }) {
                             Image(systemName: isInCart ? "checkmark" : "plus")
                                 .font(.system(size: 14, weight: .medium))
-                                .foregroundColor(.white)
+                                .foregroundColor(isInCart ? .white : DS.brandBlue)
                                 .frame(width: 28, height: 28)
                                 .background(
-                                    Group {
-                                        if isInCart {
-                                            Circle().fill(DS.brandGreen)
-                                        } else {
-                                            Circle().fill(DS.brandGradient)
-                                        }
-                                    }
+                                    Circle().fill(isInCart ? DS.brandBlue : Color.white)
                                 )
                                 .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(isInCart ? Color.clear : DS.brandBlue, lineWidth: 1.5)
+                                )
                         }
                         .buttonStyle(.plain)
                     }
