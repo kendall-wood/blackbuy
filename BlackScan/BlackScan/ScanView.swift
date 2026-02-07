@@ -62,17 +62,17 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 50, height: 50)
+                                    .frame(width: 60, height: 60)
                                     .dsButtonShadow()
                                 
-                                Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill") // keep fill for flashlight state
-                                    .font(.system(size: 20))
+                                Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                                    .font(.system(size: 24))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
                         .padding(.leading, 20)
-                        .padding(.top, 20)
+                        .padding(.top, 80)
                         
                         Spacer()
                     }
@@ -91,17 +91,17 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 50, height: 50)
+                                    .frame(width: 60, height: 60)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "person.fill")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 24))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
                         .padding(.trailing, 20)
-                        .padding(.top, 20)
+                        .padding(.top, 80)
                     }
                     
                     Spacer()
@@ -216,17 +216,17 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 50, height: 50)
+                                    .frame(width: 60, height: 60)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "clock.arrow.circlepath")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 24))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
                         .padding(.leading, 20)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 80)
                         
                         Spacer()
                     }
@@ -236,18 +236,18 @@ struct ScanView: View {
                 VStack {
                     Spacer()
                     
-                    HStack(spacing: 12) {
+                    HStack(spacing: 14) {
                         Spacer()
                         
                         Button(action: { selectedTab = .saved }) {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 50, height: 50)
+                                    .frame(width: 60, height: 60)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "heart")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 24))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
@@ -257,18 +257,18 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 50, height: 50)
+                                    .frame(width: 60, height: 60)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "storefront")
-                                    .font(.system(size: 20))
+                                    .font(.system(size: 24))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
                         .buttonStyle(.plain)
                         .padding(.trailing, 20)
                     }
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 80)
                 }
             }
         }
