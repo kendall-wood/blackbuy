@@ -1326,13 +1326,9 @@ struct ScanGlowOverlay: View {
     var hasProducts: Bool = false
     @State private var pulse = false
     
-    /// The device's display corner radius (uses public API on iOS 16.4+, falls back to 44)
-    private var screenRadius: CGFloat {
-        if #available(iOS 16.4, *) {
-            return UIScreen.main.displayCornerRadius
-        }
-        return 44
-    }
+    /// The device's display corner radius.
+    /// 44pt closely matches modern iPhones (X and later).
+    private let screenRadius: CGFloat = 44
     
     private var glowColor: Color {
         isResults && hasProducts ? DS.brandBlue : DS.brandBlue
