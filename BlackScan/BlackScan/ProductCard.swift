@@ -88,8 +88,8 @@ struct UnifiedProductCard: View {
             .contentShape(Rectangle())
             .onTapGesture { onCardTapped?() }
             
-            // Product info
-            VStack(alignment: .leading, spacing: 4) {
+            // Company and product name
+            VStack(alignment: .leading, spacing: 2) {
                 // Company name
                 if let onCompanyTapped = onCompanyTapped {
                     Button(action: onCompanyTapped) {
@@ -112,35 +112,38 @@ struct UnifiedProductCard: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.black)
                     .lineLimit(2)
-                    .padding(.bottom, 4)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 6)
+            
+            Spacer(minLength: 10)
+            
+            // Price and add-to-cart button
+            HStack(alignment: .bottom) {
+                Text(product.formattedPrice)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.black)
                 
-                // Price and add-to-cart button
-                HStack {
-                    Text(product.formattedPrice)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.black)
-                    
-                    Spacer()
-                    
-                    if showAddToCart {
-                        Button(action: { onAddToCart?() }) {
-                            Image(systemName: isInCart ? "checkmark" : "plus")
-                                .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(isInCart ? .white : DS.brandBlue)
-                                .frame(width: 34, height: 34)
-                                .background(
-                                    Circle().fill(isInCart ? DS.brandBlue : Color.white)
-                                )
-                                .clipShape(Circle())
-                                .dsCardShadow()
-                        }
-                        .buttonStyle(.plain)
+                Spacer()
+                
+                if showAddToCart {
+                    Button(action: { onAddToCart?() }) {
+                        Image(systemName: isInCart ? "checkmark" : "plus")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(isInCart ? .white : DS.brandBlue)
+                            .frame(width: 34, height: 34)
+                            .background(
+                                Circle().fill(isInCart ? DS.brandBlue : Color.white)
+                            )
+                            .clipShape(Circle())
+                            .dsCardShadow()
                     }
+                    .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 10)
-            .padding(.bottom, 16)
-            .padding(.top, 6)
+            .padding(.leading, 12)
+            .padding(.trailing, 0)
+            .padding(.bottom, 10)
         }
         .background(DS.cardBackground)
         .cornerRadius(DS.radiusLarge)
