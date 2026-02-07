@@ -122,24 +122,37 @@ class OpenAIVisionService {
         
         {
           "brand": "Brand name (e.g., Garnier, Dove, CeraVe)",
-          "product_type": "Main product category (e.g., Curl Defining Gel, Hand Sanitizer, Body Lotion, Shampoo, Deodorant)",
-          "form": "Dispensing method (e.g., spray, gel, cream, oil, stick, bar, liquid, foam, powder)",
+          "product_type": "Main product category from the list below",
+          "form": "Physical form (e.g., spray, gel, cream, oil, stick, bar, liquid, foam, powder, balm)",
           "size": "Size with unit (e.g., 8.5 fl oz, 250ml, 16 oz)",
           "ingredients": ["Key ingredients mentioned on the label"],
           "confidence": 0.95,
           "raw_text": "All visible text on the label"
         }
         
-        IMPORTANT RULES:
-        1. "product_type" should be the MAIN product category, not an ingredient
-           - Example: If it says "Curl Gel with Coconut Water", product_type is "Curl Defining Gel", NOT "Coconut Water"
-           - Example: If it says "Hand Sanitizer Gel", product_type is "Hand Sanitizer", form is "gel"
+        VALID PRODUCT TYPES — you MUST pick the closest match from this list:
+        • Hair: Shampoo, Conditioner, Leave-In Conditioner, Hair Oil, Hair Mask, Hair Cream, Hair Gel, Hair Butter, Edge Control, Deep Conditioner, Hair Serum, Curl Cream, Styling Gel, Hair Balm
+        • Skin: Facial Cleanser, Face Serum, Face Cream, Face Mask, Face Oil, Toner, Eye Cream, Moisturizer, Facial Mist, Facial Scrub, Sunscreen
+        • Body: Hand Sanitizer, Body Butter, Body Oil, Body Scrub, Body Wash, Body Lotion, Bar Soap, Deodorant, Body Balm, Hand Soap, Liquid Soap, Body Gloss, Sugar Scrub
+        • Lips: Lip Balm, Lip Gloss, Lipstick, Lip Scrub, Liquid Lipstick
+        • Makeup: Foundation, Mascara, Eyeshadow, Eyeshadow Palette, Blush, Highlighter, Bronzer, Primer, Eyeliner, Brow Gel, Nail Polish, Gel Polish, Concealer, False Eyelashes
+        • Fragrance: Perfume, Eau de Parfum, Perfume Oil
+        • Men: Beard Oil, Beard Balm, Beard Conditioner
+        • Other: Scented Candle, Vitamins, Dietary Supplements, Tea, Cleaning Products
         
-        2. "form" is how the product is dispensed (spray, gel, cream, oil, stick, bar, etc)
+        CRITICAL RULES:
+        1. "product_type" is the PRODUCT CATEGORY, never an ingredient or marketing claim.
+           ✓ "Curl Gel with Coconut Water" → product_type: "Hair Gel"
+           ✓ "Shea Butter Body Cream" → product_type: "Body Butter"
+           ✓ "Vitamin E Body Lotion" → product_type: "Body Lotion"
+           ✓ "Hand Sanitizer Gel" → product_type: "Hand Sanitizer", form: "gel"
+           ✗ NEVER return an ingredient (coconut water, shea butter, aloe vera) as product_type
+        
+        2. "form" is how the product is physically dispensed — SEPARATE from product_type.
         
         3. "ingredients" are KEY ingredients listed (like "coconut water", "shea butter", "vitamin E")
         
-        4. "confidence" should be 0.0-1.0 based on how clear the label is
+        4. "confidence" should be 0.0-1.0 based on label clarity and your certainty
         
         5. Extract ALL visible text into "raw_text"
         
@@ -149,6 +162,10 @@ class OpenAIVisionService {
         let payload: [String: Any] = [
             "model": Env.openAIVisionModel,
             "messages": [
+                [
+                    "role": "system",
+                    "content": "You are an expert product label analyzer. You identify product categories accurately from images. You never confuse ingredients or marketing claims with the actual product type."
+                ],
                 [
                     "role": "user",
                     "content": [

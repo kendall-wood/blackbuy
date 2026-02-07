@@ -107,29 +107,43 @@ class GPT4TextService {
         
         {
           "brand": "Brand name (e.g., Garnier, Dove, CeraVe, Purell)",
-          "product_type": "Main product category (e.g., Hand Sanitizer, Body Lotion, Shampoo)",
-          "form": "Dispensing method (e.g., gel, spray, cream, oil, stick, liquid, foam, powder)",
+          "product_type": "Main product category from the list below",
+          "form": "Physical form (e.g., gel, spray, cream, oil, stick, liquid, foam, powder, bar, balm)",
           "size": "Size with unit (e.g., 8.5 fl oz, 250ml, 16 oz)",
           "ingredients": ["Key ingredients mentioned"],
           "confidence": 0.95,
           "raw_text": "Original OCR text (cleaned up)"
         }
         
-        IMPORTANT RULES:
-        1. OCR may have errors - use context to infer correct words
-           Example: "COMANT" → likely "GARNIER" based on context
+        VALID PRODUCT TYPES — you MUST pick the closest match from this list:
+        • Hair: Shampoo, Conditioner, Leave-In Conditioner, Hair Oil, Hair Mask, Hair Cream, Hair Gel, Hair Butter, Edge Control, Deep Conditioner, Hair Serum, Curl Cream, Styling Gel, Hair Balm
+        • Skin: Facial Cleanser, Face Serum, Face Cream, Face Mask, Face Oil, Toner, Eye Cream, Moisturizer, Facial Mist, Facial Scrub, Sunscreen
+        • Body: Hand Sanitizer, Body Butter, Body Oil, Body Scrub, Body Wash, Body Lotion, Bar Soap, Deodorant, Body Balm, Hand Soap, Liquid Soap, Body Gloss, Sugar Scrub
+        • Lips: Lip Balm, Lip Gloss, Lipstick, Lip Scrub, Liquid Lipstick
+        • Makeup: Foundation, Mascara, Eyeshadow, Eyeshadow Palette, Blush, Highlighter, Bronzer, Primer, Eyeliner, Brow Gel, Nail Polish, Gel Polish, Concealer, False Eyelashes
+        • Fragrance: Perfume, Eau de Parfum, Perfume Oil
+        • Men: Beard Oil, Beard Balm, Beard Conditioner
+        • Other: Scented Candle, Vitamins, Dietary Supplements, Tea, Cleaning Products
         
-        2. "product_type" should be the MAIN category, not ingredients
-           Example: "Hand Sanitizer Gel" → product_type is "Hand Sanitizer"
+        CRITICAL RULES:
+        1. "product_type" is the PRODUCT CATEGORY, never an ingredient or marketing claim.
+           ✓ "Coconut Water Curl Gel" → product_type: "Hair Gel"
+           ✓ "Shea Butter Hand Cream" → product_type: "Body Butter"  
+           ✓ "Vitamin E Body Lotion" → product_type: "Body Lotion"
+           ✗ NEVER return an ingredient (coconut water, shea butter, aloe vera) as product_type
         
-        3. "form" is how the product is dispensed (gel, spray, cream, etc)
+        2. OCR may have errors — use context to infer correct words.
+           Example: "COMANT" → likely "GARNIER" based on surrounding text
         
-        4. "confidence" should reflect OCR quality and certainty
-           - High quality OCR + clear product info: 0.9-1.0
-           - Some OCR errors but clear product: 0.7-0.9
-           - Many errors or unclear product: <0.7
+        3. "form" is how the product is physically dispensed (gel, spray, cream, etc.)
+           It is SEPARATE from product_type. Example: "Hand Sanitizer Gel" → product_type: "Hand Sanitizer", form: "gel"
         
-        5. Common brands to recognize: Dove, Garnier, Purell, CeraVe, Neutrogena, L'Oréal, Revlon, Covergirl, Maybelline
+        4. "confidence" should reflect OCR quality and your certainty:
+           - Clear product info, matches a known type: 0.9-1.0
+           - Some OCR errors but product is identifiable: 0.7-0.9
+           - Many errors or unclear what the product is: <0.7
+        
+        5. Common brands: Dove, Garnier, Purell, CeraVe, Neutrogena, L'Oréal, Revlon, Covergirl, Maybelline, Pantene, Olay, Aveeno, Nivea
         
         Return ONLY the JSON, no other text.
         """

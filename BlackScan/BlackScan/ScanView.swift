@@ -684,6 +684,21 @@ struct ScanView: View {
             let targetLower = analysis.productType.lowercased()
             let targetWords = Set(targetLower.split(separator: " ").map(String.init))
             
+            // Resolve taxonomy synonyms for the scanned product type (improves matching)
+            let taxonomySynonyms: Set<String> = {
+                var syns = Set<String>()
+                if let canonical = ProductTaxonomy.shared.normalize(analysis.productType),
+                   let type = ProductTaxonomy.shared.getType(canonical) {
+                    for synonym in type.synonyms {
+                        syns.insert(synonym.lowercased())
+                    }
+                    for variation in type.variations {
+                        syns.insert(variation.lowercased())
+                    }
+                }
+                return syns
+            }()
+            
             // Also check tags for matches (e.g., "sanitizer" tag)
             let scoredResults = results.enumerated().compactMap { (index, product) -> ScoredProduct? in
                 let nameLower = product.name.lowercased()
@@ -750,7 +765,8 @@ struct ScanView: View {
                                           "lotion", "cream", "serum", "oil", "gel", "balm", "butter", 
                                           "mask", "scrub", "toner", "primer", "foundation", "concealer",
                                           "powder", "spray", "foam", "bar", "wipe", "towelette", "treatment",
-                                          "moisturizer", "exfoliant"]
+                                          "moisturizer", "exfoliant", "mist", "gloss", "lipstick", "mascara",
+                                          "eyeliner", "bronzer", "highlighter", "blush", "deodorant"]
                 
                 // Find specific descriptors in target and product (check if word STARTS WITH descriptor)
                 func findDescriptors(in words: Set<String>) -> Set<String> {
@@ -769,8 +785,14 @@ struct ScanView: View {
                 let productSpecific = findDescriptors(in: nameWords)
                 let specificOverlap = targetSpecific.intersection(productSpecific)
                 
+                // Check if product name or productType matches a taxonomy synonym of the scanned type
+                let isTaxonomySynonym = taxonomySynonyms.contains(where: { syn in
+                    nameLower.contains(syn) || productTypeLower.contains(syn)
+                })
+                
                 // CRITICAL: If target has specific descriptors, product MUST match at least one
-                if !targetSpecific.isEmpty && specificOverlap.isEmpty {
+                // (taxonomy synonyms bypass this gate — "Hand Gel" is valid for "Hand Sanitizer")
+                if !targetSpecific.isEmpty && specificOverlap.isEmpty && !isTaxonomySynonym {
                     Log.debug("FILTERED: '\(product.name)' - descriptor mismatch", category: .scan)
                     return nil
                 }
@@ -779,6 +801,9 @@ struct ScanView: View {
                 if nameLower.contains(targetLower) {
                     // Perfect: name contains full target phrase ("Hand Sanitizer")
                     nameScore = 1.0
+                } else if isTaxonomySynonym {
+                    // Taxonomy synonym match (e.g., "Hand Gel" for "Hand Sanitizer")
+                    nameScore = 0.92
                 } else if specificOverlap.count >= 2 {
                     // Excellent: Multiple specific descriptors match (e.g., "leave-in serum" → "hydrating leave-in serum")
                     nameScore = 0.95
@@ -803,17 +828,18 @@ struct ScanView: View {
                     }
                 }
                 
-                // Typesense position score (primary ranking signal - now includes form!)
-                let positionScore = 1.0 - (Double(index) / Double(results.count) * 0.20)
+                // Typesense position score (secondary ranking signal)
+                // Wider range (0.60–1.0) so position is more discriminating between results
+                let positionScore = 1.0 - (Double(index) / Double(results.count) * 0.40)
                 
-                // Form match bonus (explicit boost for matching forms)
+                // Form match bonus
                 let formBonus: Double
                 if let targetForm = analysis.form?.lowercased(),
                    let productForm = product.form?.lowercased() {
                     if targetForm == productForm {
-                        formBonus = 0.10  // +10% for exact form match
+                        formBonus = 0.08  // +8% for exact form match
                     } else if isFormCompatible(targetForm, productForm) {
-                        formBonus = 0.05  // +5% for compatible forms
+                        formBonus = 0.04  // +4% for compatible forms
                     } else {
                         formBonus = 0.0   // No bonus for different forms
                     }
@@ -821,11 +847,19 @@ struct ScanView: View {
                     formBonus = 0.0  // No bonus if form unknown
                 }
                 
-                // Final score: 30% name + 70% position + form bonus
-                let baseScore = (nameScore * 0.30) + (positionScore * 0.70)
-                let finalScore = min(baseScore + formBonus, 1.0)  // Cap at 100%
+                // Product type field match bonus (rewards products whose productType metadata aligns)
+                let typeFieldBonus: Double = {
+                    if productTypeLower == targetLower { return 0.05 }
+                    if ProductTaxonomy.shared.areSynonyms(product.productType, analysis.productType) { return 0.04 }
+                    return 0.0
+                }()
                 
-                Log.debug("#\(index + 1): \(product.name) = \(Int(finalScore * 100))%", category: .scan)
+                // Final score: 55% name quality + 30% position + bonuses
+                // Name match quality is the PRIMARY signal for accuracy
+                let baseScore = (nameScore * 0.55) + (positionScore * 0.30)
+                let finalScore = min(baseScore + formBonus + typeFieldBonus, 1.0)
+                
+                Log.debug("#\(index + 1): \(product.name) = \(Int(finalScore * 100))% (name:\(Int(nameScore * 100)) pos:\(Int(positionScore * 100)))", category: .scan)
                 
                 return ScoredProduct(
                     id: product.id,
@@ -833,13 +867,13 @@ struct ScanView: View {
                     confidenceScore: finalScore,
                     breakdown: ScoreBreakdown(
                         productTypeScore: nameScore,
-                        formScore: formBonus > 0 ? 1.0 : 0.85,  // Show perfect form match
-                        brandScore: 0.85,
+                        formScore: formBonus > 0 ? 1.0 : 0.85,
+                        brandScore: typeFieldBonus > 0 ? 1.0 : 0.85,
                         ingredientScore: 0.85,
                         sizeScore: 0.85,
                         visualScore: 0.85
                     ),
-                    explanation: formBonus > 0 ? "Name: \(Int(nameScore * 100))%, Position: \(Int(positionScore * 100))%, Form: +\(Int(formBonus * 100))%" : "Name: \(Int(nameScore * 100))%, Position: \(Int(positionScore * 100))%"
+                    explanation: "Name: \(Int(nameScore * 100))%, Rank: \(Int(positionScore * 100))%\(formBonus > 0 ? ", Form: +\(Int(formBonus * 100))%" : "")\(typeFieldBonus > 0 ? ", Type: +\(Int(typeFieldBonus * 100))%" : "")"
                 )
             }
             

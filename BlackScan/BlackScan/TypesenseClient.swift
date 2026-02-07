@@ -218,6 +218,29 @@ class TypesenseClient: ObservableObject {
         
         Log.debug("PASS 1 (Specific): Found \(pass1Results.count) candidates for '\(productTypeString)'", category: .network)
         
+        // --- PASS 1.5: Taxonomy Synonym Search (if needed) ---
+        // Uses synonyms from ProductTaxonomy (e.g., "Hand Gel" for "Hand Sanitizer")
+        // to catch products that match semantically but use different naming
+        if allCandidates.count < 20 {
+            if let canonical = ProductTaxonomy.shared.normalize(productTypeString),
+               let type = ProductTaxonomy.shared.getType(canonical),
+               let firstSynonym = type.synonyms.first {
+                
+                let synonymResults = try await performWeightedSearch(
+                    productType: firstSynonym,
+                    form: classification.form?.form,
+                    brand: classification.brand,
+                    candidateCount: 30
+                )
+                
+                let existingIds = Set(allCandidates.map { $0.id })
+                let newResults = synonymResults.filter { !existingIds.contains($0.id) }
+                allCandidates.append(contentsOf: newResults)
+                
+                Log.debug("PASS 1.5 (Synonym '\(firstSynonym)'): Found \(newResults.count) additional candidates", category: .network)
+            }
+        }
+        
         // --- PASS 2: Broader Search (if needed) ---
         if allCandidates.count < 20 {
             // Get category from taxonomy

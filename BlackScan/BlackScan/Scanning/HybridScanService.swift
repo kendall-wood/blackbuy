@@ -76,7 +76,7 @@ class HybridScanService {
                     
                     Log.debug("Hybrid Scan: SUCCESS via OCR + Text API (\(String(format: "%.2f", processingTime))s)", category: .scan)
                     
-                    let analysis = ProductAnalysis(
+                    let rawAnalysis = ProductAnalysis(
                         brand: textAnalysis.brand,
                         productType: textAnalysis.productType,
                         form: textAnalysis.form,
@@ -85,6 +85,9 @@ class HybridScanService {
                         confidence: textAnalysis.confidence,
                         rawText: textAnalysis.rawText
                     )
+                    
+                    // Validate against taxonomy before returning
+                    let analysis = validateAndNormalizeAnalysis(rawAnalysis)
                     
                     return ScanResult(
                         analysis: analysis,
@@ -111,7 +114,7 @@ class HybridScanService {
         
         Log.debug("Hybrid Scan: Complete via Vision API (\(String(format: "%.2f", processingTime))s)", category: .scan)
         
-        let analysis = ProductAnalysis(
+        let rawAnalysis = ProductAnalysis(
             brand: visionAnalysis.brand,
             productType: visionAnalysis.productType,
             form: visionAnalysis.form,
@@ -120,6 +123,9 @@ class HybridScanService {
             confidence: visionAnalysis.confidence,
             rawText: visionAnalysis.rawText
         )
+        
+        // Validate against taxonomy before returning
+        let analysis = validateAndNormalizeAnalysis(rawAnalysis)
         
         return ScanResult(
             analysis: analysis,
@@ -155,7 +161,7 @@ class HybridScanService {
                     
                     Log.debug("Hybrid Scan: Complete via OCR + Text API (\(String(format: "%.2f", processingTime))s)", category: .scan)
                     
-                    let analysis = ProductAnalysis(
+                    let rawAnalysis = ProductAnalysis(
                         brand: textAnalysis.brand,
                         productType: textAnalysis.productType,
                         form: textAnalysis.form,
@@ -164,6 +170,9 @@ class HybridScanService {
                         confidence: textAnalysis.confidence,
                         rawText: textAnalysis.rawText
                     )
+                    
+                    // Validate against taxonomy before returning
+                    let analysis = validateAndNormalizeAnalysis(rawAnalysis)
                     
                     return ScanResult(
                         analysis: analysis,
@@ -192,7 +201,7 @@ class HybridScanService {
         
         Log.debug("Hybrid Scan: Complete via Vision API (\(String(format: "%.2f", processingTime))s)", category: .scan)
         
-        let analysis = ProductAnalysis(
+        let rawAnalysis = ProductAnalysis(
             brand: visionAnalysis.brand,
             productType: visionAnalysis.productType,
             form: visionAnalysis.form,
@@ -202,12 +211,77 @@ class HybridScanService {
             rawText: visionAnalysis.rawText
         )
         
+        // Validate against taxonomy before returning
+        let analysis = validateAndNormalizeAnalysis(rawAnalysis)
+        
         return ScanResult(
             analysis: analysis,
             method: .vision,
             cost: ScanMethod.vision.estimatedCost,
             processingTime: processingTime
         )
+    }
+    
+    // MARK: - Post-Analysis Validation
+    
+    /// Validate and normalize GPT's product analysis against our ProductTaxonomy.
+    /// Catches cases where GPT returns ingredients, marketing terms, or non-standard types.
+    /// Non-destructive: only modifies the result if we find a better match.
+    private func validateAndNormalizeAnalysis(_ analysis: ProductAnalysis) -> ProductAnalysis {
+        let taxonomy = ProductTaxonomy.shared
+        
+        // Check if GPT's product type already maps to a known taxonomy entry
+        if let normalized = taxonomy.normalize(analysis.productType) {
+            // Valid product type — apply canonical name if different
+            if normalized.lowercased() != analysis.productType.lowercased() {
+                Log.debug("Taxonomy: normalized '\(analysis.productType)' → '\(normalized)'", category: .scan)
+                return ProductAnalysis(
+                    brand: analysis.brand,
+                    productType: normalized,
+                    form: analysis.form,
+                    size: analysis.size,
+                    ingredients: analysis.ingredients,
+                    confidence: analysis.confidence,
+                    rawText: analysis.rawText
+                )
+            }
+            return analysis // Already canonical
+        }
+        
+        // GPT returned something not in our taxonomy — attempt correction
+        Log.debug("Taxonomy: '\(analysis.productType)' not found, attempting correction", category: .scan)
+        
+        // Strategy 1: Find best match from the full raw text (most context)
+        if let match = taxonomy.findBestMatch(analysis.rawText), match.confidence >= 0.4 {
+            Log.debug("Taxonomy correction (raw text): '\(analysis.productType)' → '\(match.type.canonical)' (\(Int(match.confidence * 100))%)", category: .scan)
+            return ProductAnalysis(
+                brand: analysis.brand,
+                productType: match.type.canonical,
+                form: analysis.form ?? match.type.typicalForms.first,
+                size: analysis.size,
+                ingredients: analysis.ingredients,
+                confidence: min(analysis.confidence, max(match.confidence, 0.7)),
+                rawText: analysis.rawText
+            )
+        }
+        
+        // Strategy 2: Find match from just the product type string
+        if let match = taxonomy.findBestMatch(analysis.productType), match.confidence >= 0.3 {
+            Log.debug("Taxonomy correction (type text): '\(analysis.productType)' → '\(match.type.canonical)'", category: .scan)
+            return ProductAnalysis(
+                brand: analysis.brand,
+                productType: match.type.canonical,
+                form: analysis.form ?? match.type.typicalForms.first,
+                size: analysis.size,
+                ingredients: analysis.ingredients,
+                confidence: analysis.confidence * 0.9,
+                rawText: analysis.rawText
+            )
+        }
+        
+        // No taxonomy match found — use GPT's output as-is
+        Log.debug("Taxonomy: no match for '\(analysis.productType)', using as-is", category: .scan)
+        return analysis
     }
     
     // MARK: - Error Types
