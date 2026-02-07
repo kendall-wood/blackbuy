@@ -53,10 +53,11 @@ struct UnifiedProductCard: View {
                             Button(action: { onSaveTapped?() }) {
                                 Image(systemName: (heartAlwaysFilled || isSaved) ? "heart.fill" : "heart")
                                     .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor((heartAlwaysFilled || isSaved) ? DS.brandRed : .gray)
+                                    .foregroundColor((heartAlwaysFilled || isSaved) ? DS.brandRed : DS.brandBlue)
                                     .frame(width: 32, height: 32)
                                     .background(Color.white.opacity(0.9))
                                     .clipShape(Circle())
+                                    .dsCircleShadow()
                                     .contentShape(Circle())
                             }
                             .buttonStyle(.plain)
@@ -133,7 +134,7 @@ struct UnifiedProductCard: View {
                                 Circle().fill(isInCart ? DS.brandBlue : Color.white)
                             )
                             .clipShape(Circle())
-                            .dsCardShadow()
+                            .dsCircleShadow()
                     }
                     .buttonStyle(.plain)
                 }
@@ -144,7 +145,7 @@ struct UnifiedProductCard: View {
         }
         .background(DS.cardBackground)
         .cornerRadius(DS.radiusLarge)
-        .dsCardShadow()
+        .dsCardShadow(cornerRadius: DS.radiusLarge)
         .contentShape(Rectangle())
         .onTapGesture { onCardTapped?() }
     }

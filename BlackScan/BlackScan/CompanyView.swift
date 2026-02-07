@@ -67,11 +67,11 @@ struct CompanyView: View {
                     }) {
                         Image(systemName: savedCompaniesManager.isCompanySaved(companyName) ? "heart.fill" : "heart")
                             .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(savedCompaniesManager.isCompanySaved(companyName) ? DS.brandRed : .gray)
+                            .foregroundColor(savedCompaniesManager.isCompanySaved(companyName) ? DS.brandRed : DS.brandBlue)
                             .frame(width: 44, height: 44)
                             .background(DS.cardBackground)
                             .clipShape(Circle())
-                            .dsCardShadow()
+                            .dsCircleShadow()
                     }
                     .buttonStyle(.plain)
                 )

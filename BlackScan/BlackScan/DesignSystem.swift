@@ -27,6 +27,9 @@ enum DS {
     /// Red for hearts and destructive actions.
     static let brandRed = Color.red
     
+    /// Subtle stroke color for cards, circles, and UI borders — muted blue-grey.
+    static let strokeColor = DS.brandBlue.opacity(0.3)
+    
     /// Card and surface background.
     static let cardBackground = Color.white
     
@@ -119,7 +122,24 @@ struct ShadowModifier: ViewModifier {
 
 extension View {
     func dsCardShadow() -> some View {
-        self.shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+        self.overlay(
+            RoundedRectangle(cornerRadius: DS.radiusMedium)
+                .stroke(DS.strokeColor, lineWidth: 1)
+        )
+    }
+    
+    func dsCardShadow(cornerRadius: CGFloat) -> some View {
+        self.overlay(
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(DS.strokeColor, lineWidth: 1)
+        )
+    }
+    
+    func dsCircleShadow() -> some View {
+        self.overlay(
+            Circle()
+                .stroke(DS.strokeColor, lineWidth: 1)
+        )
     }
     
     func dsButtonShadow() -> some View {
@@ -162,7 +182,7 @@ struct AppBackButton: View {
                 Circle()
                     .fill(DS.cardBackground)
                     .frame(width: 44, height: 44)
-                    .dsCardShadow()
+                    .dsCircleShadow()
                 
                 Image(systemName: "chevron.left")
                     .font(.system(size: 18, weight: .semibold))

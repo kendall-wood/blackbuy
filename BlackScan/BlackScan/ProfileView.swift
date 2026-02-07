@@ -163,7 +163,7 @@ struct ProfileView: View {
         .background(
             RoundedRectangle(cornerRadius: DS.radiusLarge)
                 .fill(Color.white)
-                .dsCardShadow()
+                .dsCardShadow(cornerRadius: DS.radiusLarge)
         )
         .padding(.horizontal, DS.horizontalPadding)
     }

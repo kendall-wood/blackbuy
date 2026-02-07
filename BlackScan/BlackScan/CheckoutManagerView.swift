@@ -169,7 +169,7 @@ struct CompanyCartGroup: View {
         }
         .background(DS.cardBackground)
         .cornerRadius(DS.radiusLarge)
-        .dsCardShadow()
+        .dsCardShadow(cornerRadius: DS.radiusLarge)
         .padding(.horizontal, DS.horizontalPadding)
     }
     
@@ -348,19 +348,27 @@ struct CartProductRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             
             // Total Price and Buy Button stacked
-            VStack(spacing: 8) {
+            VStack(spacing: 14) {
                 Text(item.formattedTotalPrice)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.black)
                 
                 Button(action: onBuy) {
-                    Text("Buy")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 7)
-                        .background(DS.brandGradient)
-                        .cornerRadius(DS.radiusSmall)
+                    HStack(spacing: 4) {
+                        Text("Go")
+                            .font(.system(size: 12, weight: .semibold))
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 10, weight: .bold))
+                    }
+                    .foregroundColor(DS.brandBlue)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 7)
+                    .background(Color.white)
+                    .cornerRadius(DS.radiusSmall)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: DS.radiusSmall)
+                            .stroke(DS.strokeColor, lineWidth: 1)
+                    )
                 }
                 .buttonStyle(DSButtonStyle())
             }
@@ -372,7 +380,7 @@ struct CartProductRow: View {
         .cornerRadius(DS.radiusMedium)
         .overlay(
             RoundedRectangle(cornerRadius: DS.radiusMedium)
-                .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                .stroke(DS.strokeColor, lineWidth: 1)
         )
     }
 }

@@ -103,7 +103,7 @@ struct ShopView: View {
                                     Circle()
                                         .fill(DS.cardBackground)
                                         .frame(width: 44, height: 44)
-                                        .dsCardShadow()
+                                        .dsCircleShadow()
                                     
                                     Image("cart_icon")
                                         .renderingMode(.template)
@@ -268,7 +268,7 @@ struct ShopView: View {
             .background(
                 RoundedRectangle(cornerRadius: DS.radiusMedium)
                     .fill(Color.white)
-                    .dsCardShadow()
+                    .dsCardShadow(cornerRadius: DS.radiusMedium)
             )
             .padding(.horizontal, DS.horizontalPadding)
             .padding(.top, 12)
@@ -448,18 +448,17 @@ struct ShopView: View {
                                     .cornerRadius(DS.radiusMedium)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: DS.radiusMedium)
-                                            .stroke(DS.brandBlue, lineWidth: selectedCategory == category ? 2 : 0)
+                                            .stroke(selectedCategory == category ? DS.brandBlue : DS.strokeColor, lineWidth: selectedCategory == category ? 2 : 1)
                                     )
-                                    .dsCardShadow()
                                 }
                                 .buttonStyle(DSButtonStyle())
                                 .id(category)
                         }
                     }
-                    .padding(.horizontal, DS.horizontalPadding)
                     .padding(.top, 8)
                     .padding(.bottom, 14)
                 }
+                .contentMargins(.horizontal, DS.horizontalPadding, for: .scrollContent)
                 .onChange(of: selectedCategory) { _, newCategory in
                     if let cat = newCategory {
                         withAnimation {
@@ -788,8 +787,8 @@ struct ShopView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(Color.white)
-                    .cornerRadius(DS.radiusLarge)
-                    .dsCardShadow()
+                                    .cornerRadius(DS.radiusLarge)
+                    .dsCardShadow(cornerRadius: DS.radiusLarge)
                 }
                 .buttonStyle(DSButtonStyle())
                 .padding(.horizontal, DS.horizontalPadding)
@@ -1087,7 +1086,7 @@ struct FeaturedBrandCircleCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(product.company)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.black)
+                        .foregroundColor(DS.brandBlue)
                         .lineLimit(1)
                         .fixedSize(horizontal: true, vertical: false)
                     
@@ -1102,10 +1101,11 @@ struct FeaturedBrandCircleCard: View {
                 Button(action: onSaveTapped) {
                     Image(systemName: isSaved ? "heart.fill" : "heart")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(isSaved ? DS.brandRed : .gray)
+                        .foregroundColor(isSaved ? DS.brandRed : DS.brandBlue)
                         .frame(width: 32, height: 32)
                         .background(Color.white.opacity(0.9))
                         .clipShape(Circle())
+                        .dsCircleShadow()
                         .contentShape(Circle())
                 }
                 .buttonStyle(.plain)

@@ -271,6 +271,7 @@ struct CompanyCircleCard: View {
                     .frame(width: 32, height: 32)
                     .background(Color.white.opacity(0.9))
                     .clipShape(Circle())
+                    .dsCircleShadow()
             }
             .buttonStyle(.plain)
             .padding(8)

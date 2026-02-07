@@ -86,7 +86,7 @@ struct ProductDetailView: View {
                         .frame(height: 320)
                         .background(Color.white)
                         .cornerRadius(DS.radiusLarge)
-                        .dsCardShadow()
+                        .dsCardShadow(cornerRadius: DS.radiusLarge)
                         
                         // Heart Button
                         Button(action: {
@@ -94,11 +94,11 @@ struct ProductDetailView: View {
                         }) {
                             Image(systemName: savedProductsManager.isProductSaved(product) ? "heart.fill" : "heart")
                                 .font(.system(size: 20, weight: .medium))
-                                .foregroundColor(savedProductsManager.isProductSaved(product) ? DS.brandRed : .gray)
+                                .foregroundColor(savedProductsManager.isProductSaved(product) ? DS.brandRed : DS.brandBlue)
                                 .frame(width: 40, height: 40)
                                 .background(Color.white.opacity(0.95))
                                 .clipShape(Circle())
-                                .dsCardShadow()
+                                .dsCircleShadow()
                         }
                         .buttonStyle(.plain)
                         .padding(16)
