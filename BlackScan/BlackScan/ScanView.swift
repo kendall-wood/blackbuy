@@ -216,11 +216,11 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 60, height: 60)
+                                    .frame(width: 48, height: 48)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "clock.arrow.circlepath")
-                                    .font(.system(size: 24))
+                                    .font(.system(size: 20))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
@@ -243,11 +243,11 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 60, height: 60)
+                                    .frame(width: 48, height: 48)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "heart")
-                                    .font(.system(size: 24))
+                                    .font(.system(size: 20))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
@@ -257,11 +257,11 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 60, height: 60)
+                                    .frame(width: 48, height: 48)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "storefront")
-                                    .font(.system(size: 24))
+                                    .font(.system(size: 20))
                                     .foregroundColor(DS.brandBlue)
                             }
                         }
