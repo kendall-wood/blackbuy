@@ -11,12 +11,10 @@ struct ShopView: View {
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var toastManager: ToastManager
+    @EnvironmentObject var productCacheManager: ProductCacheManager
     
-    // State for different product sections
-    @State private var carouselProducts: [Product] = []
-    @State private var gridProducts: [Product] = []
+    // State for search and category browsing (featured products come from cache)
     @State private var searchResults: [Product] = []
-    @State private var isLoading = false
     @State private var searchError: String?
     @State private var selectedCategory: String? = nil
     @State private var selectedProduct: Product?
@@ -131,9 +129,10 @@ struct ShopView: View {
                 }
             }
             .navigationBarHidden(true)
+            .toolbar(.hidden, for: .navigationBar)
         }
+        .navigationViewStyle(.stack)
         .onAppear {
-            loadAllProducts()
             handlePendingSearch()
         }
         .onChange(of: pendingShopSearch) { _, _ in
@@ -144,7 +143,7 @@ struct ShopView: View {
                 .environmentObject(typesenseClient)
         }
         .fullScreenCover(isPresented: $showingAllFeatured) {
-            AllFeaturedProductsView(excludedProductIds: Set(carouselProducts.map { $0.id } + gridProducts.map { $0.id }))
+            AllFeaturedProductsView(excludedProductIds: Set(productCacheManager.carouselProducts.map { $0.id } + productCacheManager.gridProducts.map { $0.id }))
         }
         .fullScreenCover(item: Binding(
             get: { selectedCompany.map { IdentifiableString(value: $0) } },
@@ -643,16 +642,20 @@ struct ShopView: View {
                 .foregroundColor(.black)
                 .padding(.horizontal, DS.horizontalPadding)
             
-            if !carouselProducts.isEmpty {
+            if !productCacheManager.carouselProducts.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
-                        ForEach(carouselProducts) { product in
+                        ForEach(productCacheManager.carouselProducts) { product in
                             FeaturedBrandCircleCard(
                                 product: product,
                                 isSaved: savedCompaniesManager.isCompanySaved(product.company),
                                 onSaveTapped: {
                                     let wasSaved = savedCompaniesManager.isCompanySaved(product.company)
-                                    savedCompaniesManager.toggleSaveCompany(product.company)
+                                    savedCompaniesManager.toggleSaveCompany(
+                                        product.company,
+                                        imageUrl: product.imageUrl,
+                                        category: product.mainCategory
+                                    )
                                     toastManager.show(wasSaved ? .unsaved : .saved)
                                 },
                                 onCardTapped: {
@@ -679,9 +682,9 @@ struct ShopView: View {
                 .foregroundColor(.black)
                 .padding(.horizontal, DS.horizontalPadding)
             
-            if !gridProducts.isEmpty {
+            if !productCacheManager.gridProducts.isEmpty {
                 LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
-                    ForEach(gridProducts.prefix(100)) { product in
+                    ForEach(productCacheManager.gridProducts.prefix(100)) { product in
                         UnifiedProductCard(
                             product: product,
                             isSaved: savedProductsManager.isProductSaved(product),
@@ -913,49 +916,7 @@ struct ShopView: View {
         }
     }
     
-    // MARK: - Load Products
-    
-    private func loadAllProducts() {
-        print("Loading all products...")
-        
-        isLoading = true
-        searchError = nil
-        
-        Task {
-            do {
-                let allProducts = try await typesenseClient.searchProducts(
-                    query: "*",
-                    page: 1,
-                    perPage: 200
-                )
-                
-                await MainActor.run {
-                    let uniqueCompanies = Array(Set(allProducts.map { $0.company }))
-                    let selectedCompanies = uniqueCompanies.shuffled().prefix(12)
-                    var carousel: [Product] = []
-                    
-                    for company in selectedCompanies {
-                        if let product = allProducts.first(where: { $0.company == company }) {
-                            carousel.append(product)
-                        }
-                    }
-                    
-                    let carouselIds = Set(carousel.map { $0.id })
-                    let remainingProducts = allProducts.filter { !carouselIds.contains($0.id) }
-                    let grid = Array(remainingProducts.shuffled().prefix(12))
-                    
-                    carouselProducts = carousel.shuffled()
-                    gridProducts = grid
-                    isLoading = false
-                }
-            } catch {
-                await MainActor.run {
-                    isLoading = false
-                    searchError = error.localizedDescription
-                }
-            }
-        }
-    }
+    // MARK: - Load Products (handled by ProductCacheManager)
 }
 
 // MARK: - Featured Brand Circle Card
@@ -1039,4 +1000,5 @@ struct IdentifiableString: Identifiable {
         .environmentObject(SavedProductsManager())
         .environmentObject(SavedCompaniesManager())
         .environmentObject(CartManager())
+        .environmentObject(ProductCacheManager())
 }

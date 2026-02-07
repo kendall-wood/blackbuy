@@ -11,6 +11,9 @@ struct BlackScanApp: App {
     @StateObject private var authManager = AppleAuthManager()
     @StateObject private var scanHistoryManager = ScanHistoryManager()
     @StateObject private var toastManager = ToastManager()
+    @StateObject private var productCacheManager = ProductCacheManager()
+    
+    @State private var isReady = false
     
     init() {
         // Validate environment variables on startup
@@ -19,15 +22,34 @@ struct BlackScanApp: App {
     
     var body: some Scene {
         WindowGroup {
-            MainTabView()
-                .environmentObject(cartManager)
-                .environmentObject(savedProductsManager)
-                .environmentObject(savedCompaniesManager)
-                .environmentObject(authManager)
-                .environmentObject(scanHistoryManager)
-                .environmentObject(toastManager)
-                .preferredColorScheme(.light)
+            Group {
+                if isReady {
+                    MainTabView()
+                        .transition(.opacity)
+                } else {
+                    LaunchScreenView()
+                }
+            }
+            .animation(.easeOut(duration: 0.3), value: isReady)
+            .environmentObject(cartManager)
+            .environmentObject(savedProductsManager)
+            .environmentObject(savedCompaniesManager)
+            .environmentObject(authManager)
+            .environmentObject(scanHistoryManager)
+            .environmentObject(toastManager)
+            .environmentObject(productCacheManager)
+            .preferredColorScheme(.light)
+            .task {
+                // Pre-fetch featured products during splash
+                await productCacheManager.loadIfNeeded()
+                
+                // Ensure splash shows for at least 1 second for branding
+                try? await Task.sleep(nanoseconds: 300_000_000)
+                
+                withAnimation {
+                    isReady = true
+                }
+            }
         }
     }
 }
-

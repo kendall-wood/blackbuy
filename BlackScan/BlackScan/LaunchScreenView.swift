@@ -1,25 +1,29 @@
 import SwiftUI
 
 /// Launch screen matching the BlackBuy branding
-/// Clean white background with centered blue "blackbuy" text
+/// White background with centered blue BlackBuy logo
 struct LaunchScreenView: View {
     
     var body: some View {
         ZStack {
-            // White background
             Color.white
                 .ignoresSafeArea(.all)
             
-            // Centered "blackbuy" text
-            Text("blackbuy")
-                .font(.system(size: 48, weight: .medium, design: .default))
-                .foregroundColor(Color(red: 0.0, green: 0.48, blue: 1.0)) // Blue color matching the design
-                .kerning(1.0) // Slight letter spacing for elegance
+            VStack(spacing: 16) {
+                Image("shop_logo")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 40)
+                    .foregroundColor(DS.brandBlue)
+                
+                ProgressView()
+                    .tint(DS.brandBlue)
+                    .scaleEffect(0.8)
+            }
         }
     }
 }
-
-// MARK: - Preview
 
 #Preview("Launch Screen") {
     LaunchScreenView()

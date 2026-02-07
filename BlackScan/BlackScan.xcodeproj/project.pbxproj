@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		03B0200A3F61416B8E09B2B5 /* CartItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BA6B7961A448CCBF2A1334 /* CartItem.swift */; };
 		10CF6117E68F4EFE8620EBD4 /* SavedCompaniesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5FFCED2B95049898237A9ED /* SavedCompaniesManager.swift */; };
+		PCACHE001AAAA000011111111 /* ProductCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PCACHE002BBBB000022222222 /* ProductCacheManager.swift */; };
 		19AA321156484F2EBDF8B168 /* CheckoutManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F7812470F84E339FA49DF4 /* CheckoutManagerView.swift */; };
 		308D736FEEE54EDDAEE2DBF1 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65CA91DF84CE4AE9BF1641EB /* ShopView.swift */; };
 		3159309F4F0E4064915B2335 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513A748DE5B44D519E066756 /* ProfileView.swift */; };
@@ -127,6 +128,7 @@
 		E4ACF8E0E668487081844A6E /* ScanHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanHistoryManager.swift; sourceTree = "<group>"; };
 		F33E971E5C884EFDB7C130BE /* TestEnv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestEnv.swift; sourceTree = "<group>"; };
 		F5FFCED2B95049898237A9ED /* SavedCompaniesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedCompaniesManager.swift; sourceTree = "<group>"; };
+		PCACHE002BBBB000022222222 /* ProductCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductCacheManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -202,6 +204,7 @@
 				29F5F79A5B6B44F28116EA3D /* ProductCard.swift */,
 
 				6D7ADA2BECC04563B73B6CF0 /* ProductDetailView.swift */,
+				PCACHE002BBBB000022222222 /* ProductCacheManager.swift */,
 				513A748DE5B44D519E066756 /* ProfileView.swift */,
 				F5FFCED2B95049898237A9ED /* SavedCompaniesManager.swift */,
 				2B7CDEED77BE4D87A438833E /* SavedProductsManager.swift */,
@@ -419,6 +422,7 @@
 				DB9BCCDD97F9422FB0391341 /* ProductDetailView.swift in Sources */,
 				3159309F4F0E4064915B2335 /* ProfileView.swift in Sources */,
 				10CF6117E68F4EFE8620EBD4 /* SavedCompaniesManager.swift in Sources */,
+				PCACHE001AAAA000011111111 /* ProductCacheManager.swift in Sources */,
 				9626C455B93B4831926AAECE /* SavedProductsManager.swift in Sources */,
 				5CF48CB932F34A94968108C3 /* SavedView.swift in Sources */,
 				7BC94C979D09429DAC131580 /* ScanHistoryManager.swift in Sources */,

@@ -69,7 +69,7 @@ struct SavedView: View {
             // Companies Horizontal Scroll
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
-                    ForEach(savedCompaniesManager.savedCompanies) { company in
+                    ForEach(savedCompaniesManager.sortedByDate) { company in
                         CompanyCircleCard(
                             company: company,
                             typesenseClient: typesenseClient,
@@ -202,6 +202,7 @@ struct CompanyCircleCard: View {
     let typesenseClient: TypesenseClient
     let onUnsave: () -> Void
     
+    @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @State private var productImage: String?
     @State private var mainCategory: String = ""
     
@@ -209,17 +210,27 @@ struct CompanyCircleCard: View {
         ZStack(alignment: .topTrailing) {
             VStack(spacing: 4) {
                 // Company Logo Circle
-                CachedAsyncImage(url: productImage.flatMap { URL(string: $0) }) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    ZStack {
-                        Circle()
-                            .fill(DS.circleFallbackBg)
-                        
-                        ProgressView()
-                            .tint(DS.brandBlue)
+                Group {
+                    if let imageUrl = productImage, let url = URL(string: imageUrl) {
+                        CachedAsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            ZStack {
+                                Circle()
+                                    .fill(DS.circleFallbackBg)
+                                ProgressView()
+                                    .tint(DS.brandBlue)
+                            }
+                        }
+                    } else {
+                        ZStack {
+                            Circle()
+                                .fill(DS.circleFallbackBg)
+                            ProgressView()
+                                .tint(DS.brandBlue)
+                        }
                     }
                 }
                 .frame(width: 80, height: 80)
@@ -265,23 +276,36 @@ struct CompanyCircleCard: View {
             .padding(8)
         }
         .onAppear {
-            loadRandomProduct()
+            // Use cached image if available, otherwise fetch and cache
+            if let cached = company.cachedImageUrl {
+                productImage = cached
+                mainCategory = company.cachedCategory ?? ""
+            } else {
+                fetchAndCacheImage()
+            }
         }
     }
     
-    private func loadRandomProduct() {
+    /// Fetch image from Typesense and cache it in SavedCompaniesManager for next time
+    private func fetchAndCacheImage() {
         Task {
             do {
                 let products = try await typesenseClient.searchProducts(
                     query: company.name,
                     page: 1,
-                    perPage: 10
+                    perPage: 5
                 )
                 
-                if let randomProduct = products.randomElement() {
+                if let product = products.first {
                     await MainActor.run {
-                        productImage = randomProduct.imageUrl
-                        mainCategory = randomProduct.mainCategory
+                        productImage = product.imageUrl
+                        mainCategory = product.mainCategory
+                        // Persist so we don't fetch again
+                        savedCompaniesManager.updateCachedImage(
+                            for: company.name,
+                            imageUrl: product.imageUrl,
+                            category: product.mainCategory
+                        )
                     }
                 }
             } catch {

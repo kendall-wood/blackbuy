@@ -14,7 +14,7 @@ struct ProfileView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            AppHeader(centerContent: .title("Profile"), onBack: onBack)
+            AppHeader(centerContent: .logo, onBack: onBack)
             
             // Content
             ScrollView {

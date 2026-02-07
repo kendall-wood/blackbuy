@@ -108,7 +108,7 @@ struct AllFeaturedProductsView: View {
     
     private var header: some View {
         VStack(alignment: .leading, spacing: 0) {
-            AppHeader(centerContent: .title(""), onBack: { dismiss() })
+            AppHeader(centerContent: .logo, onBack: { dismiss() })
             
             Text("Featured Products")
                 .font(.system(size: 24, weight: .semibold))
@@ -141,6 +141,7 @@ struct AllFeaturedProductsView: View {
                             .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
                     )
                 }
+                .buttonStyle(.plain)
                 
                 Spacer()
             }

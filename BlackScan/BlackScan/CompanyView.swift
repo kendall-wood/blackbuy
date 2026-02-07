@@ -50,39 +50,32 @@ struct CompanyView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header with back button, logo, and heart
-            HStack {
-                AppBackButton(action: { dismiss() })
-                
-                Spacer()
-                
-                Image("logo")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 18)
-                
-                Spacer()
-                
-                // Save brand heart button
-                Button(action: {
-                    let wasSaved = savedCompaniesManager.isCompanySaved(companyName)
-                    savedCompaniesManager.toggleSaveCompany(companyName)
-                    toastManager.show(wasSaved ? .unsaved : .saved)
-                }) {
-                    Image(systemName: savedCompaniesManager.isCompanySaved(companyName) ? "heart.fill" : "heart")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(savedCompaniesManager.isCompanySaved(companyName) ? DS.brandRed : .gray)
-                        .frame(width: 44, height: 44)
-                        .background(DS.cardBackground)
-                        .clipShape(Circle())
-                        .dsCardShadow()
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, DS.horizontalPadding)
-            .padding(.top, 12)
-            .padding(.bottom, 8)
-            .background(DS.cardBackground)
+            // Header with logo and heart
+            AppHeader(
+                centerContent: .logo,
+                onBack: { dismiss() },
+                trailingContent: AnyView(
+                    Button(action: {
+                        let wasSaved = savedCompaniesManager.isCompanySaved(companyName)
+                        let firstProduct = searchResults.first
+                        savedCompaniesManager.toggleSaveCompany(
+                            companyName,
+                            imageUrl: firstProduct?.imageUrl,
+                            category: firstProduct?.mainCategory
+                        )
+                        toastManager.show(wasSaved ? .unsaved : .saved)
+                    }) {
+                        Image(systemName: savedCompaniesManager.isCompanySaved(companyName) ? "heart.fill" : "heart")
+                            .font(.system(size: 22, weight: .medium))
+                            .foregroundColor(savedCompaniesManager.isCompanySaved(companyName) ? DS.brandRed : .gray)
+                            .frame(width: 44, height: 44)
+                            .background(DS.cardBackground)
+                            .clipShape(Circle())
+                            .dsCardShadow()
+                    }
+                    .buttonStyle(.plain)
+                )
+            )
             
             // Company name below header
             Text(companyName)
@@ -90,7 +83,7 @@ struct CompanyView: View {
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, DS.horizontalPadding)
-                .padding(.top, 8)
+                .padding(.top, 20)
                 .padding(.bottom, 16)
                 .background(DS.cardBackground)
             

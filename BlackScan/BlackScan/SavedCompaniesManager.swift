@@ -21,12 +21,16 @@ class SavedCompaniesManager: ObservableObject {
         let name: String
         let dateSaved: Date
         var productCount: Int? // Optional: number of products from this company
+        var cachedImageUrl: String? // Cached product image for fast display
+        var cachedCategory: String? // Cached category for fast display
         
-        init(name: String, productCount: Int? = nil) {
+        init(name: String, productCount: Int? = nil, imageUrl: String? = nil, category: String? = nil) {
             self.id = name
             self.name = name
             self.dateSaved = Date()
             self.productCount = productCount
+            self.cachedImageUrl = imageUrl
+            self.cachedCategory = category
         }
     }
     
@@ -78,26 +82,35 @@ class SavedCompaniesManager: ObservableObject {
     }
     
     /// Toggle save state for a company
-    func toggleSaveCompany(_ companyName: String, productCount: Int? = nil) {
+    func toggleSaveCompany(_ companyName: String, productCount: Int? = nil, imageUrl: String? = nil, category: String? = nil) {
         if isCompanySaved(companyName) {
             removeSavedCompany(companyName)
         } else {
-            saveCompany(companyName, productCount: productCount)
+            saveCompany(companyName, productCount: productCount, imageUrl: imageUrl, category: category)
         }
     }
     
     /// Save a company to favorites
-    func saveCompany(_ companyName: String, productCount: Int? = nil) {
+    func saveCompany(_ companyName: String, productCount: Int? = nil, imageUrl: String? = nil, category: String? = nil) {
         guard !isCompanySaved(companyName) else {
             print("🏢 Company already saved: \(companyName)")
             return
         }
         
-        let savedCompany = SavedCompany(name: companyName, productCount: productCount)
+        let savedCompany = SavedCompany(name: companyName, productCount: productCount, imageUrl: imageUrl, category: category)
         savedCompanies.append(savedCompany)
         saveLocalCompanies()
         
         print("❤️ Saved company: \(companyName)")
+    }
+    
+    /// Update cached image and category for a saved company (called after lazy fetch)
+    func updateCachedImage(for companyName: String, imageUrl: String?, category: String?) {
+        if let index = savedCompanies.firstIndex(where: { $0.name == companyName }) {
+            savedCompanies[index].cachedImageUrl = imageUrl
+            savedCompanies[index].cachedCategory = category
+            saveLocalCompanies()
+        }
     }
     
     /// Remove a saved company
