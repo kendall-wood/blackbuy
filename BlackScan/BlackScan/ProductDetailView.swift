@@ -213,6 +213,7 @@ struct ProductDetailView: View {
             
             // Custom Header (back button and logo)
             VStack(spacing: 0) {
+                Spacer().frame(height: 10)
                 AppHeader(centerContent: .logo, onBack: { dismiss() })
                 Spacer()
             }
