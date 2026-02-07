@@ -109,24 +109,20 @@ struct ScanView: View {
                 }
                 
                 // Top Center - Logo and Subtitle
-                VStack(spacing: 8) {
+                VStack(spacing: 6) {
                     Image("blackscan-logo")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 210, height: 38)
-                        .padding(.top, 100)
+                        .frame(width: 180, height: 32)
                     
-                    Text("Scan any product to")
-                        .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(.white)
-                    +
-                    Text("\nfind your black-owned option")
-                        .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(.white)
+                    Text("Scan any product to\nfind your black-owned option")
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(.white.opacity(0.85))
+                        .multilineTextAlignment(.center)
                     
                     Spacer()
                 }
-                .multilineTextAlignment(.center)
+                .padding(.top, 48)
                 
                 // Center - Scan Button + Inline Results
                 VStack(spacing: 10) {
