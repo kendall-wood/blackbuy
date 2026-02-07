@@ -194,7 +194,7 @@ extension UnifiedProductCard {
 }
 
 #Preview("Grid Layout") {
-    ScrollView {
+    ScrollView(.vertical, showsIndicators: false) {
         LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
             ForEach(Product.sampleProducts) { product in
                 UnifiedProductCard(

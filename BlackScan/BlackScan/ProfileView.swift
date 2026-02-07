@@ -22,7 +22,7 @@ struct ProfileView: View {
             AppHeader(centerContent: .logo, onBack: onBack)
             
             // Content
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 24) {
                     // Avatar and Welcome
                     welcomeSection
@@ -56,7 +56,7 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showExportSheet) {
             NavigationView {
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     Text(exportData)
                         .font(.system(size: 13, design: .monospaced))
                         .padding()

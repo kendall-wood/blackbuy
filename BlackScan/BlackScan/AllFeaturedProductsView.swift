@@ -36,7 +36,7 @@ struct AllFeaturedProductsView: View {
                 header
                 
                 // Content
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
                         ForEach(displayedProducts) { product in
                             UnifiedProductCard(

@@ -19,7 +19,7 @@ struct TypesenseDiagnosticView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: 24) {
                     // Header
                     VStack(spacing: 8) {

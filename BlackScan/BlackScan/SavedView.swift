@@ -27,7 +27,7 @@ struct SavedView: View {
             AppHeader(centerContent: .logo, onBack: onBack)
             
             // Content
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: DS.sectionSpacing) {
                     // Saved Companies Section
                     if !savedCompaniesManager.savedCompanies.isEmpty {

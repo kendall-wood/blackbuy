@@ -133,6 +133,10 @@ extension Notification.Name {
     /// Posted when a view wants to navigate to the Shop and search for a term.
     /// The `object` should be a `String` containing the search query.
     static let searchInShop = Notification.Name("searchInShop")
+    
+    /// Posted when a view wants to navigate to the Shop and select a category row.
+    /// The `object` should be a `String` containing the category name (e.g., "Hair Care").
+    static let navigateToCategory = Notification.Name("navigateToCategory")
 }
 
 // MARK: - App Tab Enum

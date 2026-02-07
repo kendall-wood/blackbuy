@@ -98,23 +98,28 @@ struct ShopView: View {
                         onBack: onBack,
                         trailingContent: AnyView(
                             Button(action: { selectedTab = .checkout }) {
-                                ZStack(alignment: .topTrailing) {
+                                ZStack {
+                                    Circle()
+                                        .fill(DS.cardBackground)
+                                        .frame(width: 44, height: 44)
+                                        .dsCardShadow()
+                                    
                                     Image("cart_icon")
                                         .renderingMode(.template)
                                         .resizable()
                                         .scaledToFit()
-                                        .frame(width: 24, height: 24)
+                                        .frame(width: 22, height: 22)
                                         .foregroundColor(DS.brandBlue)
-                                        .frame(width: 44, height: 44)
-                                    
+                                }
+                                .overlay(alignment: .topTrailing) {
                                     if cartManager.totalItemCount > 0 {
                                         Text("\(cartManager.totalItemCount)")
-                                            .font(.system(size: 11, weight: .bold))
+                                            .font(.system(size: 12, weight: .bold))
                                             .foregroundColor(.white)
-                                            .frame(minWidth: 18, minHeight: 18)
+                                            .frame(minWidth: 20, minHeight: 20)
                                             .background(DS.brandBlue)
                                             .clipShape(Circle())
-                                            .offset(x: 2, y: 2)
+                                            .offset(x: 4, y: -4)
                                     }
                                 }
                             }
@@ -126,7 +131,7 @@ struct ShopView: View {
                     searchBar
                     
                     // Main Content
-                    ScrollView {
+                    ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: DS.sectionSpacing) {
                             // Categories Section
                             categoriesSection
@@ -163,6 +168,17 @@ struct ShopView: View {
         }
         .onChange(of: pendingShopSearch) { _, _ in
             handlePendingSearch()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToCategory)) { notification in
+            if let category = notification.object as? String {
+                handleCategoryNavigation(category)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .searchInShop)) { notification in
+            if let query = notification.object as? String {
+                searchText = query
+                commitSearch()
+            }
         }
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
@@ -761,6 +777,20 @@ struct ShopView: View {
     }
     
     // MARK: - Search Actions
+    
+    /// Navigate to the Shop and select a category row (e.g. from ProductDetailView chip)
+    private func handleCategoryNavigation(_ category: String) {
+        // Clear any active search
+        searchText = ""
+        activeSearchQuery = nil
+        searchResults = []
+        
+        // Select the category and load its products
+        withAnimation(.easeOut(duration: 0.25)) {
+            selectedCategory = category
+        }
+        loadCategoryProducts(category)
+    }
     
     /// Picks up a search query passed from another tab (e.g. Recent Scans)
     private func handlePendingSearch() {

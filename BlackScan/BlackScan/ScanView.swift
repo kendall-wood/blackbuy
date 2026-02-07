@@ -246,7 +246,7 @@ struct ScanView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.leading, 20)
-                        .padding(.top, 40)
+                        .padding(.top, 30)
                         
                         Spacer()
                     }
@@ -275,7 +275,7 @@ struct ScanView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.trailing, 20)
-                        .padding(.top, 40)
+                        .padding(.top, 24)
                     }
                     
                     Spacer()
@@ -297,7 +297,7 @@ struct ScanView: View {
                     
                     Spacer()
                 }
-                .padding(.top, 52)
+                .padding(.top, 36)
                 
                 // Center - Scan Button + Inline Results
                 VStack(spacing: 10) {
@@ -447,40 +447,39 @@ struct ScanView: View {
                     HStack {
                         Spacer()
                         
-                        VStack(alignment: .trailing, spacing: 18) {
+                        VStack(alignment: .trailing, spacing: 24) {
                             // Checkout Manager (aligned right edge with shop button)
                             Button(action: { selectedTab = .checkout }) {
-                                ZStack(alignment: .topTrailing) {
-                                    ZStack {
-                                        Circle()
-                                            .fill(Color.white)
-                                            .frame(width: 58, height: 58)
-                                            .dsButtonShadow()
-                                        
-                                        Image("cart_icon")
-                                            .renderingMode(.template)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 28, height: 28)
-                                            .foregroundColor(DS.brandBlue)
-                                    }
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 58, height: 58)
+                                        .dsButtonShadow()
                                     
-                                    // Quantity badge
+                                    Image("cart_icon")
+                                        .renderingMode(.template)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 28, height: 28)
+                                        .foregroundColor(DS.brandBlue)
+                                }
+                                .overlay(alignment: .topTrailing) {
+                                    // Quantity badge — overlay so it doesn't affect layout alignment
                                     if cartManager.totalItemCount > 0 {
                                         Text("\(cartManager.totalItemCount)")
-                                            .font(.system(size: 12, weight: .bold))
+                                            .font(.system(size: 13, weight: .bold))
                                             .foregroundColor(.white)
-                                            .frame(minWidth: 20, minHeight: 20)
+                                            .frame(minWidth: 24, minHeight: 24)
                                             .background(DS.brandBlue)
                                             .clipShape(Circle())
-                                            .offset(x: 4, y: -4)
+                                            .offset(x: 2, y: -6)
                                     }
                                 }
                             }
                             .buttonStyle(.plain)
                             
                             // Heart and Shop row
-                            HStack(spacing: 18) {
+                            HStack(spacing: 24) {
                                 Button(action: { selectedTab = .saved }) {
                                     ZStack {
                                         Circle()
@@ -1228,7 +1227,7 @@ struct ScanView: View {
                 }
                 
                 // Product grid
-                ScrollView {
+                ScrollView(.vertical, showsIndicators: false) {
                     LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
                         ForEach(scanResults) { scoredProduct in
                             UnifiedProductCard(

@@ -81,12 +81,16 @@ def map_main_category(categories, subcategories, main_category_map):
         else:
             all_cats.append(subcategories)
     
-    # Try to match against our map
+    # Try to match against our map using word-boundary matching
+    # Sort keys longest-first so "men's care" matches before "men"
+    sorted_keys = sorted(main_category_map.keys(), key=len, reverse=True)
     for cat in all_cats:
         cat_normalized = normalize_text(cat)
-        for key, mapped in main_category_map.items():
-            if key in cat_normalized:
-                return mapped
+        for key in sorted_keys:
+            # Use word boundary regex to prevent "men" matching inside "women", "supplement", etc.
+            pattern = r'(?:^|[\s,;/\-])' + re.escape(key) + r'(?:$|[\s,;/\-])'
+            if re.search(pattern, cat_normalized) or cat_normalized == key:
+                return main_category_map[key]
     
     # Default fallback
     return "Other"
@@ -127,6 +131,20 @@ def extract_tags(name, description="", categories=None):
     
     return list(tags)
 
+def infer_category_from_name(name, description, main_category_map):
+    """Fallback: infer main_category from product name/description text"""
+    text = normalize_text(f"{name} {description}")
+    
+    # Name-based signals — check multi-word keys first (longest first)
+    sorted_keys = sorted(main_category_map.keys(), key=len, reverse=True)
+    for key in sorted_keys:
+        pattern = r'(?:^|[\s,;/\-])' + re.escape(key) + r'(?:$|[\s,;/\-\'s])'
+        if re.search(pattern, text):
+            return main_category_map[key]
+    
+    return "Other"
+
+
 def normalize_product(product, main_category_map, product_type_synonyms):
     """Normalize a single product to clean schema"""
     
@@ -153,6 +171,11 @@ def normalize_product(product, main_category_map, product_type_synonyms):
     
     # Apply taxonomy mapping
     main_category = map_main_category(categories, subcategories, main_category_map)
+    
+    # If category mapping returned "Other", try to infer from product name/description
+    if main_category == "Other":
+        main_category = infer_category_from_name(name, description, main_category_map)
+    
     product_type = map_product_type(name, description, categories, product_type_synonyms)
     form = extract_form(name, description)
     set_bundle = detect_set_bundle(name, description)

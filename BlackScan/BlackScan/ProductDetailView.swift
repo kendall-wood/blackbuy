@@ -71,7 +71,7 @@ struct ProductDetailView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
                     // Product Image with rounded corners, padding, and heart button
                     ZStack(alignment: .topTrailing) {
@@ -138,7 +138,7 @@ struct ProductDetailView: View {
                         // Category chips
                         FlowLayout(spacing: 8) {
                             if !product.mainCategory.isEmpty && product.mainCategory != "Other" {
-                                Button(action: { searchInShop(product.mainCategory) }) {
+                                Button(action: { navigateToCategory(product.mainCategory) }) {
                                     CategoryChip(text: product.mainCategory, isPrimary: true)
                                 }
                                 .buttonStyle(.plain)
@@ -275,6 +275,12 @@ struct ProductDetailView: View {
     private func searchInShop(_ query: String) {
         dismiss()
         NotificationCenter.default.post(name: .searchInShop, object: query)
+    }
+    
+    /// Dismiss and navigate to Shop with the corresponding category row selected
+    private func navigateToCategory(_ category: String) {
+        dismiss()
+        NotificationCenter.default.post(name: .navigateToCategory, object: category)
     }
     
     private func loadSimilarProducts() {

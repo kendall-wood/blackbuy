@@ -24,7 +24,7 @@ struct CheckoutManagerView: View {
                 .padding(.bottom, 16)
             
             // Content
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(spacing: DS.sectionSpacing) {
                     // Item Count and Sort
                     HStack {

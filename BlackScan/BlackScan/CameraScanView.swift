@@ -207,7 +207,7 @@ struct ScanResultsSheet: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 20) {
                     // Header with classification info
                     if let classification = classification {

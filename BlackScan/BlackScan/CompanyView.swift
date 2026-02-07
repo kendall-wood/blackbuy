@@ -89,7 +89,7 @@ struct CompanyView: View {
                 .background(DS.cardBackground)
             
             // Content
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 if isLoading {
                     loadingView
                 } else if searchResults.isEmpty && !isLoading {

@@ -434,15 +434,15 @@ class TypesenseClient: ObservableObject {
         var filters: [String] = []
         
         if let productType = parameters.productType {
-            filters.append("product_type:=\(productType)")
+            filters.append("product_type:=`\(productType)`")
         }
         
         if let mainCategory = parameters.mainCategory {
-            filters.append("main_category:=\(mainCategory)")
+            filters.append("main_category:=`\(mainCategory)`")
         }
         
         if let company = parameters.company {
-            filters.append("company:=\(company)")
+            filters.append("company:=`\(company)`")
         }
         
         // Add price range filter
