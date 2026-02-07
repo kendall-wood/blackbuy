@@ -60,6 +60,9 @@ fastlane/test_output
 .env.local
 *.env
 
+# API keys config (use Secrets.xcconfig.template to create your own)
+**/Secrets.xcconfig
+
 # Backup files
 *_backup/
 *_backup_*/

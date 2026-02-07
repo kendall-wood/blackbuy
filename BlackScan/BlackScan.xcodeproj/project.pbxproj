@@ -111,6 +111,7 @@
 		98171DA12E6D61A600A323C7 /* BlackScan.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlackScan.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98171DAA2E6D61A700A323C7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B8F3A1C2D7E04A91F0C26E3D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		E7A1B3D5C8F24E60A9D0317B /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		98171DAD2E6D61A700A323C7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		98171DB32E6D61A700A323C7 /* BlackScanTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlackScanTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		98171DB72E6D61A700A323C7 /* BlackScanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackScanTests.swift; sourceTree = "<group>"; };
@@ -177,7 +178,16 @@
 				98171DB62E6D61A700A323C7 /* BlackScanTests */,
 				98171DC02E6D61A700A323C7 /* BlackScanUITests */,
 				98171DA22E6D61A600A323C7 /* Products */,
+				F3B2C4D6A1E73F82D5094E1A /* Configuration */,
 			);
+			sourceTree = "<group>";
+		};
+		F3B2C4D6A1E73F82D5094E1A /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				E7A1B3D5C8F24E60A9D0317B /* Secrets.xcconfig */,
+			);
+			path = Configuration;
 			sourceTree = "<group>";
 		};
 		98171DA22E6D61A600A323C7 /* Products */ = {
@@ -626,6 +636,7 @@
 		};
 		98171DC82E6D61A700A323C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E7A1B3D5C8F24E60A9D0317B /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -636,6 +647,7 @@
 				DEVELOPMENT_TEAM = H9RD8ZZXHD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BlackScan/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "BlackScan uses your camera to scan product labels and find matching Black-owned alternatives.";
@@ -658,6 +670,7 @@
 		};
 		98171DC92E6D61A700A323C7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E7A1B3D5C8F24E60A9D0317B /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -668,6 +681,7 @@
 				DEVELOPMENT_TEAM = H9RD8ZZXHD;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BlackScan/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "BlackScan uses your camera to scan product labels and find matching Black-owned alternatives.";

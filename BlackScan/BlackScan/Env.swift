@@ -1,16 +1,33 @@
 import Foundation
 
 /// Environment configuration for BlackScan app
-/// Reads Typesense credentials from Xcode scheme environment variables
+/// Reads credentials from Info.plist (injected via Secrets.xcconfig at build time).
+/// Falls back to Xcode scheme environment variables for development convenience.
 struct Env {
+    
+    // MARK: - Private Helper
+    
+    /// Reads a required config value. Checks Info.plist first (xcconfig-injected),
+    /// then falls back to process environment variables (Xcode scheme).
+    private static func requiredValue(for key: String) -> String {
+        // 1. Info.plist (populated from Secrets.xcconfig at build time — works in App Store builds)
+        if let value = Bundle.main.infoDictionary?[key] as? String, !value.isEmpty, !value.hasPrefix("$(") {
+            return value
+        }
+        
+        // 2. Process environment (Xcode scheme env vars — works in debug runs)
+        if let value = ProcessInfo.processInfo.environment[key], !value.isEmpty {
+            return value
+        }
+        
+        fatalError("\(key) not configured. Set up Configuration/Secrets.xcconfig (see Secrets.xcconfig.template).")
+    }
     
     // MARK: - Typesense Configuration
     
     /// Typesense host URL (e.g., "https://your-cluster.a1.typesense.net")
     static let typesenseHost: String = {
-        guard let host = ProcessInfo.processInfo.environment["TYPESENSE_HOST"] else {
-            fatalError("TYPESENSE_HOST environment variable not set. Please configure in Xcode scheme.")
-        }
+        let host = requiredValue(for: "TYPESENSE_HOST")
         
         // Ensure host starts with https://
         if host.hasPrefix("http://") || host.hasPrefix("https://") {
@@ -22,15 +39,7 @@ struct Env {
     
     /// Typesense API key (search-only key, not admin key)
     static let typesenseApiKey: String = {
-        guard let apiKey = ProcessInfo.processInfo.environment["TYPESENSE_API_KEY"] else {
-            fatalError("TYPESENSE_API_KEY environment variable not set. Please configure in Xcode scheme.")
-        }
-        
-        guard !apiKey.isEmpty else {
-            fatalError("TYPESENSE_API_KEY environment variable is empty. Please provide a valid search API key.")
-        }
-        
-        return apiKey
+        return requiredValue(for: "TYPESENSE_API_KEY")
     }()
     
     /// Typesense collection name (fixed as 'products')
@@ -40,13 +49,7 @@ struct Env {
     
     /// Backend URL for feedback and analytics (required)
     static let backendURL: String = {
-        guard let url = ProcessInfo.processInfo.environment["BACKEND_URL"] else {
-            fatalError("BACKEND_URL environment variable not set. Please configure in Xcode scheme.")
-        }
-        
-        guard !url.isEmpty else {
-            fatalError("BACKEND_URL environment variable is empty. Please provide a valid backend URL.")
-        }
+        let url = requiredValue(for: "BACKEND_URL")
         
         // Ensure URL starts with https://
         if url.hasPrefix("http://") || url.hasPrefix("https://") {
@@ -58,17 +61,9 @@ struct Env {
     
     // MARK: - OpenAI Configuration
     
-    /// OpenAI API key for GPT-4 Vision (from environment variable)
+    /// OpenAI API key for GPT-4 Vision
     static let openAIAPIKey: String = {
-        guard let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] else {
-            fatalError("OPENAI_API_KEY environment variable not set. Please configure in Xcode scheme.")
-        }
-        
-        guard !apiKey.isEmpty else {
-            fatalError("OPENAI_API_KEY environment variable is empty. Please provide a valid OpenAI API key.")
-        }
-        
-        return apiKey
+        return requiredValue(for: "OPENAI_API_KEY")
     }()
     
     /// OpenAI Vision API endpoint
