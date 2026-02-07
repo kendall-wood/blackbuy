@@ -555,9 +555,9 @@ struct ScanView: View {
     private var scanButtonIcon: String {
         switch scanState {
         case .initial:
-            return "barcode.viewfinder"
+            return "camera.viewfinder"
         case .capturing, .analyzing, .searching:
-            return "barcode.viewfinder" // Hidden by opacity, but keeps layout stable
+            return "camera.viewfinder" // Hidden by opacity, but keeps layout stable
         case .results:
             return "arrow.counterclockwise"
         }
@@ -935,11 +935,32 @@ struct ScanView: View {
                 )
             }
             
-            // Sort by score, limit to 2 per company for variety, show top 20
-            let sortedResults = scoredResults.sorted { $0.confidenceScore > $1.confidenceScore }
+            // Sort by score with tier-based shuffling for variety in ordering.
+            // Products within the same ~3% confidence band are shuffled so repeat scans
+            // show different orderings while keeping high-confidence matches near the top.
+            let tierSize = 0.03
+            let tieredResults: [ScoredProduct] = {
+                let sorted = scoredResults.sorted { $0.confidenceScore > $1.confidenceScore }
+                var result: [ScoredProduct] = []
+                var tierStart = 0
+                while tierStart < sorted.count {
+                    let tierFloor = sorted[tierStart].confidenceScore - tierSize
+                    var tierEnd = tierStart
+                    while tierEnd < sorted.count && sorted[tierEnd].confidenceScore >= tierFloor {
+                        tierEnd += 1
+                    }
+                    var tier = Array(sorted[tierStart..<tierEnd])
+                    tier.shuffle()
+                    result.append(contentsOf: tier)
+                    tierStart = tierEnd
+                }
+                return result
+            }()
+            
+            // Limit to 2 per company for variety, show top 20
             var companyCounts: [String: Int] = [:]
             var filteredResults: [ScoredProduct] = []
-            for result in sortedResults {
+            for result in tieredResults {
                 let company = result.product.company
                 let count = companyCounts[company, default: 0]
                 if count < 2 {
