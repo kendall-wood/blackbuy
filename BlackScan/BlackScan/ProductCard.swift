@@ -131,10 +131,7 @@ struct UnifiedProductCard: View {
                                     Circle().fill(isInCart ? DS.brandBlue : Color.white)
                                 )
                                 .clipShape(Circle())
-                                .overlay(
-                                    Circle()
-                                        .stroke(isInCart ? Color.clear : DS.brandBlue, lineWidth: 1.5)
-                                )
+                                .dsCardShadow()
                         }
                         .buttonStyle(.plain)
                     }
