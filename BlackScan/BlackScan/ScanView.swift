@@ -122,7 +122,7 @@ struct ScanView: View {
                     
                     Spacer()
                 }
-                .padding(.top, 60)
+                .padding(.top, 52)
                 
                 // Center - Scan Button + Inline Results
                 VStack(spacing: 10) {

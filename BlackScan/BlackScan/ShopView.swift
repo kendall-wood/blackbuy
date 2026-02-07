@@ -281,13 +281,13 @@ struct ShopView: View {
                     }
                 }
                 
-                // "See all results" row
+                // "See X results" row
                 if searchResults.count > 0 {
                     Button(action: {
                         commitSearch()
                     }) {
                         HStack(spacing: 6) {
-                            Text("See all results")
+                            Text("See \(searchResults.count) results")
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(DS.brandBlue)
                             
