@@ -25,6 +25,21 @@ struct ShopView: View {
     @State private var searchTask: Task<Void, Never>?
     @State private var showSearchDropdown = false
     
+    // Category browsing state
+    @State private var categoryProducts: [Product] = []
+    @State private var displayedCategoryProducts: [Product] = []
+    @State private var isCategoryLoading = false
+    @State private var categorySortOrder: CategorySortOrder = .relevant
+    @State private var categoryPage = 0
+    private let categoryPageSize = 24
+    
+    enum CategorySortOrder: String, CaseIterable {
+        case relevant = "Relevant"
+        case priceLowToHigh = "Price: Low to High"
+        case priceHighToLow = "Price: High to Low"
+        case nameAZ = "Name: A-Z"
+    }
+    
     private let categories = [
         "Hair Care",
         "Skincare",
@@ -57,11 +72,14 @@ struct ShopView: View {
                             categoriesSection
                                 .padding(.top, 16)
                             
-                            // Featured Brands Section
-                            featuredBrandsSection
-                            
-                            // Featured Products Grid
-                            featuredProductsSection
+                            if selectedCategory != nil {
+                                // Category browsing mode
+                                categoryBrowseSection
+                            } else {
+                                // Default: Featured Brands + Products
+                                featuredBrandsSection
+                                featuredProductsSection
+                            }
                         }
                         .padding(.bottom, 40)
                     }
@@ -94,6 +112,7 @@ struct ShopView: View {
         )) { company in
             CompanyView(companyName: company.value)
                 .environmentObject(savedProductsManager)
+                .environmentObject(savedCompaniesManager)
                 .environmentObject(cartManager)
         }
     }
@@ -259,16 +278,27 @@ struct ShopView: View {
                 HStack(spacing: 12) {
                     ForEach(categories, id: \.self) { category in
                         Button(action: {
-                            selectedCategory = category
-                            searchByCategory(category)
+                            if selectedCategory == category {
+                                // Deselect
+                                selectedCategory = nil
+                                categoryProducts = []
+                                displayedCategoryProducts = []
+                            } else {
+                                selectedCategory = category
+                                loadCategoryProducts(category)
+                            }
                         }) {
                             Text(category)
-                                .font(.system(size: 15, weight: .medium))
+                                .font(.system(size: 15, weight: selectedCategory == category ? .semibold : .medium))
                                 .foregroundColor(DS.brandBlue)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 10)
                                 .background(Color.white)
                                 .cornerRadius(DS.radiusMedium)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: DS.radiusMedium)
+                                        .stroke(DS.brandBlue, lineWidth: selectedCategory == category ? 2 : 0)
+                                )
                                 .dsCardShadow()
                         }
                         .buttonStyle(.plain)
@@ -276,6 +306,122 @@ struct ShopView: View {
                 }
                 .padding(.horizontal, DS.horizontalPadding)
                 .padding(.vertical, 8)
+            }
+        }
+    }
+    
+    // MARK: - Category Browse Section
+    
+    private var categoryBrowseSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Filter button
+            HStack {
+                Menu {
+                    ForEach(CategorySortOrder.allCases, id: \.self) { order in
+                        Button(action: {
+                            categorySortOrder = order
+                            applyCategorySort()
+                        }) {
+                            HStack {
+                                Text(order.rawValue)
+                                if categorySortOrder == order {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "line.3.horizontal.decrease")
+                            .font(.system(size: 13, weight: .medium))
+                        Text("Filter")
+                            .font(.system(size: 14, weight: .medium))
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: DS.radiusSmall)
+                            .fill(Color.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: DS.radiusSmall)
+                                    .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
+                            )
+                    )
+                }
+                .buttonStyle(.plain)
+                
+                Spacer()
+            }
+            .padding(.horizontal, DS.horizontalPadding)
+            
+            // Showing count
+            Text("Showing \(displayedCategoryProducts.count) of \(categoryProducts.count) products")
+                .font(.system(size: 13, weight: .regular))
+                .foregroundColor(Color(.systemGray))
+                .padding(.horizontal, DS.horizontalPadding)
+            
+            if isCategoryLoading {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                    Text("Loading...")
+                        .font(DS.body)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 60)
+            } else if displayedCategoryProducts.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 40))
+                        .foregroundColor(Color(.systemGray3))
+                    Text("No products found")
+                        .font(DS.body)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 60)
+            } else {
+                // Product grid
+                LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
+                    ForEach(displayedCategoryProducts) { product in
+                        UnifiedProductCard(
+                            product: product,
+                            isSaved: savedProductsManager.isProductSaved(product),
+                            isInCart: cartManager.isInCart(product),
+                            onCardTapped: { selectedProduct = product },
+                            onSaveTapped: {
+                                savedProductsManager.isProductSaved(product)
+                                    ? savedProductsManager.removeSavedProduct(product)
+                                    : savedProductsManager.saveProduct(product)
+                            },
+                            onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) },
+                            onCompanyTapped: { selectedCompany = product.company }
+                        )
+                    }
+                }
+                .padding(.horizontal, DS.horizontalPadding)
+                
+                // Load More button
+                if displayedCategoryProducts.count < categoryProducts.count {
+                    Button(action: loadMoreCategoryProducts) {
+                        Text("Load More")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(DS.brandBlue)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(
+                                RoundedRectangle(cornerRadius: DS.radiusMedium)
+                                    .stroke(DS.brandBlue, lineWidth: 2)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, DS.horizontalPadding)
+                    .padding(.top, 8)
+                }
             }
         }
     }
@@ -332,11 +478,9 @@ struct ShopView: View {
                             isInCart: cartManager.isInCart(product),
                             onCardTapped: { selectedProduct = product },
                             onSaveTapped: {
-                                if savedProductsManager.isProductSaved(product) {
-                                    savedProductsManager.removeSavedProduct(product)
-                                } else {
-                                    savedProductsManager.saveProduct(product)
-                                }
+                                savedProductsManager.isProductSaved(product)
+                                    ? savedProductsManager.removeSavedProduct(product)
+                                    : savedProductsManager.saveProduct(product)
                             },
                             onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) },
                             onCompanyTapped: { selectedCompany = product.company }
@@ -348,11 +492,64 @@ struct ShopView: View {
         }
     }
     
-    // MARK: - Search Category
+    // MARK: - Category Loading
     
-    private func searchByCategory(_ category: String) {
-        searchText = category
-        showingSearch = true
+    private func loadCategoryProducts(_ category: String) {
+        isCategoryLoading = true
+        categoryProducts = []
+        displayedCategoryProducts = []
+        categoryPage = 0
+        categorySortOrder = .relevant
+        
+        Task {
+            do {
+                let products = try await typesenseClient.searchProducts(
+                    query: category,
+                    page: 1,
+                    perPage: 200
+                )
+                
+                let filtered = products.filter { $0.mainCategory == category }
+                
+                await MainActor.run {
+                    categoryProducts = filtered
+                    loadMoreCategoryProducts()
+                    isCategoryLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    isCategoryLoading = false
+                }
+                print("Error loading category products: \(error)")
+            }
+        }
+    }
+    
+    private func loadMoreCategoryProducts() {
+        let sorted = sortedCategoryProducts
+        let start = displayedCategoryProducts.count
+        let end = min(start + categoryPageSize, sorted.count)
+        
+        if start < sorted.count {
+            displayedCategoryProducts.append(contentsOf: sorted[start..<end])
+        }
+    }
+    
+    private func applyCategorySort() {
+        displayedCategoryProducts = Array(sortedCategoryProducts.prefix(displayedCategoryProducts.count))
+    }
+    
+    private var sortedCategoryProducts: [Product] {
+        switch categorySortOrder {
+        case .relevant:
+            return categoryProducts
+        case .priceLowToHigh:
+            return categoryProducts.sorted { $0.price < $1.price }
+        case .priceHighToLow:
+            return categoryProducts.sorted { $0.price > $1.price }
+        case .nameAZ:
+            return categoryProducts.sorted { $0.name < $1.name }
+        }
     }
     
     // MARK: - Perform Search
