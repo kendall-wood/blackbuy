@@ -226,97 +226,90 @@ struct ShopView: View {
     // MARK: - Search Dropdown (autocomplete suggestions)
     
     private var searchDropdown: some View {
-        GeometryReader { geometry in
+        VStack(spacing: 0) {
+            // Spacer to push dropdown below search bar
+            // Header (~56) + search bar (~60) + padding + gap
+            Color.clear
+                .frame(height: 118)
+                .contentShape(Rectangle())
+                .onTapGesture { showSearchDropdown = false }
+            
             VStack(spacing: 0) {
-                // Spacer to push dropdown right below the search bar
-                // Header (~56) + search bar (~60) + padding
-                Color.clear
-                    .frame(height: 108)
-                
-                VStack(spacing: 0) {
-                    ForEach(Array(searchResults.prefix(6).enumerated()), id: \.element.id) { index, product in
-                        Button(action: {
-                            selectedProduct = product
-                            showSearchDropdown = false
-                        }) {
-                            HStack(spacing: 12) {
-                                CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                } placeholder: {
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .fill(Color(.systemGray6))
-                                }
-                                .frame(width: 40, height: 40)
-                                .clipShape(RoundedRectangle(cornerRadius: 6))
-                                
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(product.name)
-                                        .font(.system(size: 14, weight: .medium))
-                                        .foregroundColor(.black)
-                                        .lineLimit(1)
-                                    
-                                    Text(product.company)
-                                        .font(.system(size: 12))
-                                        .foregroundColor(Color(.systemGray))
-                                        .lineLimit(1)
-                                }
-                                
-                                Spacer()
-                                
-                                Text(product.formattedPrice)
-                                    .font(.system(size: 13, weight: .semibold))
+                ForEach(Array(searchResults.prefix(5).enumerated()), id: \.element.id) { index, product in
+                    Button(action: {
+                        selectedProduct = product
+                        showSearchDropdown = false
+                    }) {
+                        HStack(spacing: 14) {
+                            CachedAsyncImage(url: URL(string: product.imageUrl)) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color(.systemGray6))
+                            }
+                            .frame(width: 48, height: 48)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(product.name)
+                                    .font(.system(size: 15, weight: .medium))
                                     .foregroundColor(.black)
-                            }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                        }
-                        .buttonStyle(.plain)
-                        
-                        if index < min(searchResults.count, 6) - 1 {
-                            Divider()
-                                .padding(.leading, 66)
-                        }
-                    }
-                    
-                    // "See all" row
-                    if searchResults.count > 0 {
-                        Divider()
-                        
-                        Button(action: {
-                            commitSearch()
-                        }) {
-                            HStack {
-                                Text("See all results")
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(DS.brandBlue)
+                                    .lineLimit(1)
                                 
-                                Image(systemName: "arrow.right")
-                                    .font(.system(size: 12, weight: .medium))
+                                Text(product.company)
+                                    .font(.system(size: 13))
                                     .foregroundColor(DS.brandBlue)
+                                    .lineLimit(1)
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
+                            
+                            Spacer()
+                            
+                            Text(product.formattedPrice)
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.black)
                         }
-                        .buttonStyle(.plain)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                    .buttonStyle(.plain)
+                    
+                    if index < min(searchResults.count, 5) - 1 {
+                        Divider()
+                            .padding(.leading, 78)
                     }
                 }
-                .background(Color.white)
-                .cornerRadius(DS.radiusMedium)
-                .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
-                .padding(.horizontal, DS.horizontalPadding)
                 
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
-                Color.black.opacity(0.2)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        showSearchDropdown = false
+                // "See all results" row
+                if searchResults.count > 0 {
+                    Button(action: {
+                        commitSearch()
+                    }) {
+                        HStack(spacing: 8) {
+                            Text("See all results")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(DS.brandBlue)
+                            
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(DS.brandBlue)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(DS.brandBlue.opacity(0.05))
                     }
-            )
+                    .buttonStyle(.plain)
+                }
+            }
+            .background(Color.white)
+            .cornerRadius(DS.radiusLarge)
+            .shadow(color: Color.black.opacity(0.1), radius: 16, x: 0, y: 6)
+            .padding(.horizontal, DS.horizontalPadding)
+            
+            Spacer()
+                .contentShape(Rectangle())
+                .onTapGesture { showSearchDropdown = false }
         }
     }
     
