@@ -182,7 +182,7 @@ struct ProductDetailView: View {
                                     }
                                 }
                                 .padding(.horizontal, DS.horizontalPadding)
-                                .padding(.top, 4)
+                                .padding(.top, 8)
                                 .padding(.bottom, 12)
                             }
                         }
@@ -247,8 +247,8 @@ struct ProductDetailView: View {
                             .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
                     }
                     .buttonStyle(.plain)
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 20)
+                    .padding(.trailing, 24)
+                    .padding(.bottom, 24)
                 }
             }
         }

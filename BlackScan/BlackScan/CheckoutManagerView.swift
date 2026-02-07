@@ -20,8 +20,8 @@ struct CheckoutManagerView: View {
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, DS.horizontalPadding)
-                .padding(.top, 12)
-                .padding(.bottom, 20)
+                .padding(.top, 24)
+                .padding(.bottom, 16)
             
             // Content
             ScrollView {
@@ -88,7 +88,7 @@ struct CheckoutManagerView: View {
                 .foregroundColor(.secondary)
         }
         .padding(.horizontal, 40)
-        .padding(.vertical, 80)
+        .padding(.vertical, 60)
     }
     
     // MARK: - Total Bar
@@ -414,10 +414,11 @@ struct RecentScansView: View {
             
             // Page title
             Text("Recent Scans")
-                .font(.system(size: 24, weight: .semibold))
+                .font(DS.pageTitle)
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, DS.horizontalPadding)
+                .padding(.top, 24)
                 .padding(.bottom, 16)
             
             // Content

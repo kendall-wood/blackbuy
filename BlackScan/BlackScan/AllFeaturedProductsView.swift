@@ -65,7 +65,7 @@ struct AllFeaturedProductsView: View {
                             )
                         }
                     }
-                    .padding(DS.gridSpacing)
+                    .padding(.horizontal, DS.horizontalPadding)
                     
                     // Showing count
                     Text("Showing \(displayedProducts.count) of \(allProducts.count) products")
@@ -77,13 +77,12 @@ struct AllFeaturedProductsView: View {
                     if displayedProducts.count < allProducts.count {
                         Button(action: loadMore) {
                             Text("Load More")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(DS.brandBlue)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(Color.white)
-                                .cornerRadius(DS.radiusLarge)
-                                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+                                .frame(height: 48)
+                                .background(DS.brandGradient)
+                                .cornerRadius(DS.radiusMedium)
                         }
                         .buttonStyle(.plain)
                         .padding(.horizontal, DS.horizontalPadding)
@@ -111,37 +110,22 @@ struct AllFeaturedProductsView: View {
             AppHeader(centerContent: .logo, onBack: { dismiss() })
             
             Text("Featured Products")
-                .font(.system(size: 24, weight: .semibold))
+                .font(DS.pageTitle)
                 .foregroundColor(.black)
                 .padding(.horizontal, DS.horizontalPadding)
-                .padding(.bottom, 12)
+                .padding(.top, 24)
+                .padding(.bottom, 16)
             
             // Sort Button
             HStack {
-                Menu {
+                DSSortButton(label: "Sort") {
                     ForEach(SortOrder.allCases, id: \.self) { order in
                         Button(order.rawValue) {
                             sortOrder = order
                             sortProducts()
                         }
                     }
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.up.arrow.down")
-                            .font(.system(size: 13, weight: .medium))
-                        Text("Sort")
-                            .font(.system(size: 14, weight: .medium))
-                    }
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: DS.radiusSmall)
-                            .fill(Color.white)
-                            .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
-                    )
                 }
-                .buttonStyle(.plain)
                 
                 Spacer()
             }

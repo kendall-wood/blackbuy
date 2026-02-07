@@ -37,7 +37,7 @@ struct SavedView: View {
                     // Saved Products Section
                     savedProductsSection
                 }
-                .padding(.top, 20)
+                .padding(.top, 24)
                 .padding(.bottom, 40)
             }
             .background(DS.cardBackground)
@@ -266,9 +266,9 @@ struct CompanyCircleCard: View {
             // Heart Button
             Button(action: onUnsave) {
                 Image(systemName: "heart.fill")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(DS.brandRed)
-                    .frame(width: 28, height: 28)
+                    .frame(width: 32, height: 32)
                     .background(Color.white.opacity(0.9))
                     .clipShape(Circle())
             }

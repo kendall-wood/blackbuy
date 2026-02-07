@@ -68,8 +68,8 @@ enum DS {
     
     // MARK: - Typography
     
-    /// 28pt bold -- page titles like "Checkout Manager".
-    static let pageTitle: Font = .system(size: 28, weight: .bold)
+    /// 24pt semibold -- page titles like "Checkout Manager".
+    static let pageTitle: Font = .system(size: 24, weight: .semibold)
     
     /// 18pt semibold -- section headers like "Featured Brands".
     static let sectionHeader: Font = .system(size: 18, weight: .semibold)

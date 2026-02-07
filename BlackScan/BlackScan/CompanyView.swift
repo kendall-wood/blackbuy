@@ -79,12 +79,13 @@ struct CompanyView: View {
             
             // Company name below header
             Text(companyName)
-                .font(.system(size: 28, weight: .semibold))
+                .font(DS.pageTitle)
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, DS.horizontalPadding)
-                .padding(.top, 20)
+                .padding(.top, 24)
                 .padding(.bottom, 16)
+
                 .background(DS.cardBackground)
             
             // Content
@@ -98,7 +99,7 @@ struct CompanyView: View {
                         // Available Products header with Sort Button
                         HStack(alignment: .center) {
                             Text("Available Products")
-                                .font(.system(size: 20, weight: .medium))
+                                .font(DS.sectionHeader)
                                 .foregroundColor(.black)
                             
                             Spacer()
@@ -177,20 +178,20 @@ struct CompanyView: View {
     // MARK: - Empty State
     
     private var emptyStateView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             Spacer()
             
             Image(systemName: "building.2")
-                .font(.system(size: 64))
-                .foregroundColor(Color(.systemGray2))
+                .font(.system(size: 48))
+                .foregroundColor(Color(.systemGray3))
             
             Text("No Products Found")
-                .font(.system(size: 22, weight: .medium))
+                .font(DS.sectionHeader)
                 .foregroundColor(.black)
             
             Text("We couldn't find any products from \(companyName)")
-                .font(.system(size: 16, weight: .regular))
-                .foregroundColor(Color(.systemGray))
+                .font(DS.body)
+                .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             

@@ -104,7 +104,7 @@ struct ShopView: View {
                         VStack(spacing: DS.sectionSpacing) {
                             // Categories Section
                             categoriesSection
-                                .padding(.top, 16)
+                                .padding(.top, 24)
                             
                             if activeSearchQuery != nil {
                                 // Search results mode
@@ -331,7 +331,7 @@ struct ShopView: View {
     // MARK: - Categories Section
     
     private var categoriesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Categories")
                 .font(DS.sectionHeader)
                 .foregroundColor(.black)
@@ -384,10 +384,10 @@ struct ShopView: View {
     // MARK: - Search Results Section (grid, like category browse)
     
     private var searchResultsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             // Sort button
             HStack {
-                Menu {
+                DSSortButton(label: "Sort") {
                     ForEach(SortOrder.allCases, id: \.self) { order in
                         Button(action: {
                             searchSortOrder = order
@@ -401,28 +401,7 @@ struct ShopView: View {
                             }
                         }
                     }
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.up.arrow.down")
-                            .font(.system(size: 13, weight: .medium))
-                        Text("Sort")
-                            .font(.system(size: 14, weight: .medium))
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 10, weight: .medium))
-                    }
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: DS.radiusSmall)
-                            .fill(Color.white)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: DS.radiusSmall)
-                                    .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
-                            )
-                    )
                 }
-                .buttonStyle(.plain)
                 
                 Spacer()
             }
@@ -445,9 +424,9 @@ struct ShopView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 60)
             } else if displayedSearchProducts.isEmpty {
-                VStack(spacing: 12) {
+                VStack(spacing: 16) {
                     Image(systemName: "magnifyingglass")
-                        .font(.system(size: 40))
+                        .font(.system(size: 48))
                         .foregroundColor(Color(.systemGray3))
                     Text("No results found")
                         .font(DS.body)
@@ -510,10 +489,10 @@ struct ShopView: View {
     // MARK: - Category Browse Section
     
     private var categoryBrowseSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             // Sort button
             HStack {
-                Menu {
+                DSSortButton(label: "Sort") {
                     ForEach(SortOrder.allCases, id: \.self) { order in
                         Button(action: {
                             categorySortOrder = order
@@ -527,28 +506,7 @@ struct ShopView: View {
                             }
                         }
                     }
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.up.arrow.down")
-                            .font(.system(size: 13, weight: .medium))
-                        Text("Sort")
-                            .font(.system(size: 14, weight: .medium))
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 10, weight: .medium))
-                    }
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: DS.radiusSmall)
-                            .fill(Color.white)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: DS.radiusSmall)
-                                    .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
-                            )
-                    )
                 }
-                .buttonStyle(.plain)
                 
                 Spacer()
             }
@@ -571,9 +529,9 @@ struct ShopView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 60)
             } else if displayedCategoryProducts.isEmpty {
-                VStack(spacing: 12) {
+                VStack(spacing: 16) {
                     Image(systemName: "magnifyingglass")
-                        .font(.system(size: 40))
+                        .font(.system(size: 48))
                         .foregroundColor(Color(.systemGray3))
                     Text("No products found")
                         .font(DS.body)
@@ -729,7 +687,7 @@ struct ShopView: View {
                     .padding(.vertical, 16)
                     .background(Color.white)
                     .cornerRadius(DS.radiusLarge)
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+                    .dsCardShadow()
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, DS.horizontalPadding)
@@ -961,7 +919,7 @@ struct FeaturedBrandCircleCard: View {
                 )
                 
                 // Name and category
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(product.company)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.black)

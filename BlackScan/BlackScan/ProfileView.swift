@@ -152,7 +152,7 @@ struct ProfileView: View {
     // MARK: - Settings Section
     
     private var settingsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Settings")
                 .font(DS.sectionHeader)
                 .foregroundColor(.black)
@@ -192,7 +192,7 @@ struct ProfileView: View {
     // MARK: - Privacy Section
     
     private var privacySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Your Data")
                 .font(DS.sectionHeader)
                 .foregroundColor(.black)
@@ -232,7 +232,7 @@ struct ProfileView: View {
     // MARK: - Legal Section
     
     private var legalSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Legal")
                 .font(DS.sectionHeader)
                 .foregroundColor(.black)
