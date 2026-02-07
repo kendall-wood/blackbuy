@@ -124,7 +124,11 @@ struct CompanyView: View {
                                         savedProductsManager.toggleSaveProduct(product)
                                     },
                                     onAddToCart: {
-                                        cartManager.addToCart(product)
+                                        if cartManager.isInCart(product) {
+                                            cartManager.removeFromCart(product)
+                                        } else {
+                                            cartManager.addToCart(product)
+                                        }
                                     }
                                 )
                             }

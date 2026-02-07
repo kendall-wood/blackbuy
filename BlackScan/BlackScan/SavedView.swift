@@ -143,7 +143,7 @@ struct SavedView: View {
                     heartAlwaysFilled: true,
                     onCardTapped: { selectedProduct = product },
                     onSaveTapped: { savedProductsManager.removeSavedProduct(product) },
-                    onAddToCart: { cartManager.addToCart(product) }
+                    onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) }
                 )
             }
         }

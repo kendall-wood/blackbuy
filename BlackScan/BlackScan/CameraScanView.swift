@@ -232,7 +232,7 @@ struct ScanResultsSheet: View {
                                 numberBadge: index + 1,
                                 onCardTapped: { selectedProduct = product },
                                 onSaveTapped: { savedProductsManager.toggleSaveProduct(product) },
-                                onAddToCart: { cartManager.addToCart(product) }
+                                onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) }
                             )
                         }
                     }

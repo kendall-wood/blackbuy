@@ -338,7 +338,7 @@ struct ShopView: View {
                                     savedProductsManager.saveProduct(product)
                                 }
                             },
-                            onAddToCart: { cartManager.addToCart(product) },
+                            onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) },
                             onCompanyTapped: { selectedCompany = product.company }
                         )
                     }

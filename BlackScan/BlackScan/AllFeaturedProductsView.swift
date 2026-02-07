@@ -44,7 +44,7 @@ struct AllFeaturedProductsView: View {
                                 isInCart: cartManager.isInCart(product),
                                 onCardTapped: { selectedProduct = product },
                                 onSaveTapped: { savedProductsManager.toggleSaveProduct(product) },
-                                onAddToCart: { cartManager.addToCart(product) }
+                                onAddToCart: { cartManager.isInCart(product) ? cartManager.removeFromCart(product) : cartManager.addToCart(product) }
                             )
                         }
                     }
