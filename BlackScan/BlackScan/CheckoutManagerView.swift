@@ -127,6 +127,11 @@ struct CompanyCartGroup: View {
     
     let group: CartItemGroup
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var savedProductsManager: SavedProductsManager
+    @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
+    @EnvironmentObject var toastManager: ToastManager
+    @StateObject private var typesenseClient = TypesenseClient()
+    @State private var selectedProduct: Product? = nil
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -160,6 +165,9 @@ struct CompanyCartGroup: View {
                         },
                         onBuy: {
                             openProductURL(entry.item.product.productUrl)
+                        },
+                        onProductTapped: {
+                            selectedProduct = entry.item.product
                         }
                     )
                 }
@@ -171,6 +179,14 @@ struct CompanyCartGroup: View {
         .cornerRadius(DS.radiusLarge)
         .dsCardShadow(cornerRadius: DS.radiusLarge)
         .padding(.horizontal, DS.horizontalPadding)
+        .fullScreenCover(item: $selectedProduct) { product in
+            ProductDetailView(product: product)
+                .environmentObject(savedProductsManager)
+                .environmentObject(savedCompaniesManager)
+                .environmentObject(cartManager)
+                .environmentObject(typesenseClient)
+                .environmentObject(toastManager)
+        }
     }
     
     private func openProductURL(_ urlString: String) {
@@ -187,6 +203,7 @@ struct CartProductRow: View {
     let onQuantityChange: (Int) -> Void
     let onRemove: () -> Void
     let onBuy: () -> Void
+    let onProductTapped: () -> Void
     
     @State private var dragOffset: CGFloat = 0
     @State private var isShowingActions = false
@@ -282,26 +299,33 @@ struct CartProductRow: View {
     
     private var cardContent: some View {
         HStack(alignment: .center, spacing: 10) {
-            // Product Image
-            CachedAsyncImage(url: URL(string: item.product.imageUrl)) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-            } placeholder: {
-                Color.white.overlay(ProgressView())
+            // Product Image (tappable)
+            Button(action: onProductTapped) {
+                CachedAsyncImage(url: URL(string: item.product.imageUrl)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                } placeholder: {
+                    Color.white.overlay(ProgressView())
+                }
+                .frame(width: 64, height: 64)
+                .background(Color.white)
+                .cornerRadius(DS.radiusSmall)
+                .clipped()
             }
-            .frame(width: 64, height: 64)
-            .background(Color.white)
-            .cornerRadius(DS.radiusSmall)
-            .clipped()
+            .buttonStyle(.plain)
             
             // Product Info
             VStack(alignment: .leading, spacing: 3) {
-                Text(item.product.name)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.black)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
+                Button(action: onProductTapped) {
+                    Text(item.product.name)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.black)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                }
+                .buttonStyle(.plain)
                 
                 Text(item.product.formattedPrice)
                     .font(.system(size: 13, weight: .regular))
