@@ -102,7 +102,7 @@ struct ScanView: View {
                         ZStack {
                             Circle()
                                 .fill(Color.white)
-                                .frame(width: 58, height: 58)
+                                .frame(width: 60, height: 60)
                                 .dsButtonShadow()
                             
                             Image(systemName: "person.crop.circle")
@@ -154,7 +154,7 @@ struct ScanView: View {
                         ZStack {
                             Circle()
                                 .fill(Color.white)
-                                .frame(width: 58, height: 58)
+                                .frame(width: 60, height: 60)
                                 .dsButtonShadow()
                             
                             Image(systemName: "storefront")
@@ -168,7 +168,7 @@ struct ScanView: View {
                         ZStack {
                             Circle()
                                 .fill(Color.white)
-                                .frame(width: 58, height: 58)
+                                .frame(width: 60, height: 60)
                                 .dsButtonShadow()
                             
                             Image(systemName: "heart")
@@ -182,7 +182,7 @@ struct ScanView: View {
                         ZStack {
                             Circle()
                                 .fill(Color.white)
-                                .frame(width: 58, height: 58)
+                                .frame(width: 60, height: 60)
                                 .dsButtonShadow()
                             
                             Image("cart_icon")
@@ -236,7 +236,7 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 58, height: 58)
+                                    .frame(width: 60, height: 60)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: flashlightOn ? "flashlight.on.fill" : "flashlight.off.fill")
@@ -246,7 +246,7 @@ struct ScanView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.leading, 20)
-                        .padding(.top, 30)
+                        .padding(.top, 20)
                         
                         Spacer()
                     }
@@ -265,7 +265,7 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 58, height: 58)
+                                    .frame(width: 60, height: 60)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "person.crop.circle")
@@ -275,29 +275,29 @@ struct ScanView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.trailing, 20)
-                        .padding(.top, 24)
+                        .padding(.top, 20)
                     }
                     
                     Spacer()
                 }
                 
                 // Top Center - Logo and Subtitle
-                VStack(spacing: 24) {
+                VStack(spacing: 20) {
                     Image("logo")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(height: 24)
                         .shadow(color: Color.black.opacity(0.4), radius: 6, x: 0, y: 2)
+                        .padding(.top, 37)
                     
                     Text("Scan any product to\nfind your black-owned option")
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(.white.opacity(0.85))
+                        .font(.system(size: 13, weight: .light))
+                        .foregroundColor(.white.opacity(0.5))
                         .multilineTextAlignment(.center)
                         .shadow(color: Color.black.opacity(0.35), radius: 4, x: 0, y: 1)
                     
                     Spacer()
                 }
-                .padding(.top, 36)
                 
                 // Center - Scan Button + Inline Results
                 VStack(spacing: 10) {
@@ -335,8 +335,9 @@ struct ScanView: View {
                     .disabled(scanState == .capturing || scanState == .analyzing || scanState == .searching)
                     
                     Text("Shake to report issue")
-                        .font(.system(size: 12))
-                        .foregroundColor(Color(.systemGray))
+                        .font(.system(size: 12, weight: .light))
+                        .foregroundColor(.white.opacity(0.5))
+                        .shadow(color: Color.black.opacity(0.35), radius: 4, x: 0, y: 1)
                     
                     // View Products button (appears after scan)
                     if scanState == .results && !scanResults.isEmpty {
@@ -424,7 +425,7 @@ struct ScanView: View {
                             ZStack {
                                 Circle()
                                     .fill(Color.white)
-                                    .frame(width: 58, height: 58)
+                                    .frame(width: 60, height: 60)
                                     .dsButtonShadow()
                                 
                                 Image(systemName: "clock.arrow.circlepath")
@@ -434,7 +435,7 @@ struct ScanView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.leading, 20)
-                        .padding(.bottom, 80)
+                        .padding(.bottom, 40)
                         
                         Spacer()
                     }
@@ -453,7 +454,7 @@ struct ScanView: View {
                                 ZStack {
                                     Circle()
                                         .fill(Color.white)
-                                        .frame(width: 58, height: 58)
+                                        .frame(width: 60, height: 60)
                                         .dsButtonShadow()
                                     
                                     Image("cart_icon")
@@ -484,7 +485,7 @@ struct ScanView: View {
                                     ZStack {
                                         Circle()
                                             .fill(Color.white)
-                                            .frame(width: 58, height: 58)
+                                            .frame(width: 60, height: 60)
                                             .dsButtonShadow()
                                         
                                         Image(systemName: "heart")
@@ -498,7 +499,7 @@ struct ScanView: View {
                                     ZStack {
                                         Circle()
                                             .fill(Color.white)
-                                            .frame(width: 58, height: 58)
+                                            .frame(width: 60, height: 60)
                                             .dsButtonShadow()
                                         
                                         Image(systemName: "storefront")
@@ -511,7 +512,7 @@ struct ScanView: View {
                         }
                         .padding(.trailing, 20)
                     }
-                    .padding(.bottom, 80)
+                    .padding(.bottom, 40)
                 }
                 
                 

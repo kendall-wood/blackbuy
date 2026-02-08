@@ -233,32 +233,30 @@ struct CompanyCircleCard: View {
                         }
                     }
                 }
-                .frame(width: 80, height: 80)
+                .frame(width: 72, height: 72)
                 .clipShape(Circle())
                 .overlay(
                     Circle()
-                        .stroke(DS.brandBlue.opacity(0.2), lineWidth: 2)
+                        .stroke(DS.brandBlue.opacity(0.2), lineWidth: 1.5)
                 )
-                .padding(.top, 12)
+                .padding(.top, 10)
                 
                 // Company Name
                 Text(company.name)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
-                    .frame(height: 40, alignment: .top)
+                    .frame(height: 34, alignment: .top)
                     .padding(.horizontal, 8)
-                
-                Spacer()
                 
                 // Category
                 Text(mainCategory.isEmpty ? "Brand" : mainCategory)
                     .font(.system(size: 11, weight: .regular))
                     .foregroundColor(Color(.systemGray))
-                    .padding(.bottom, 12)
+                    .padding(.bottom, 10)
             }
-            .frame(maxWidth: .infinity, minHeight: 170)
+            .frame(maxWidth: .infinity, minHeight: 140)
             .background(DS.cardBackground)
             .cornerRadius(DS.radiusMedium)
             .dsCardShadow()
