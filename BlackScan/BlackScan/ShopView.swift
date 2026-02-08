@@ -588,11 +588,12 @@ struct ShopView: View {
                     Button(action: loadMoreSearchProducts) {
                         Text("Load More")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(DS.brandBlue)
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
-                            .background(DS.brandGradient)
+                            .background(Color.white)
                             .cornerRadius(DS.radiusMedium)
+                            .dsCardShadow(cornerRadius: DS.radiusMedium)
                     }
                     .buttonStyle(DSButtonStyle())
                     .padding(.horizontal, DS.horizontalPadding)
@@ -696,17 +697,18 @@ struct ShopView: View {
                         Group {
                             if isCategoryLoadingMore {
                                 ProgressView()
-                                    .tint(.white)
+                                    .tint(DS.brandBlue)
                             } else {
                                 Text("Load More")
                                     .font(.system(size: 16, weight: .semibold))
                             }
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(DS.brandBlue)
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
-                        .background(DS.brandGradient)
+                        .background(Color.white)
                         .cornerRadius(DS.radiusMedium)
+                        .dsCardShadow(cornerRadius: DS.radiusMedium)
                     }
                     .buttonStyle(DSButtonStyle())
                     .disabled(isCategoryLoadingMore)

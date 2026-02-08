@@ -72,11 +72,12 @@ struct AllFeaturedProductsView: View {
                         Button(action: loadMore) {
                             Text("Load More")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(DS.brandBlue)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 48)
-                                .background(DS.brandGradient)
+                                .background(Color.white)
                                 .cornerRadius(DS.radiusMedium)
+                                .dsCardShadow(cornerRadius: DS.radiusMedium)
                         }
                         .buttonStyle(.plain)
                         .padding(.horizontal, DS.horizontalPadding)
