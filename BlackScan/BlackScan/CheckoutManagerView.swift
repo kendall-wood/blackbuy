@@ -8,6 +8,7 @@ struct CheckoutManagerView: View {
     @EnvironmentObject var cartManager: CartManager
     
     @State private var showingMenu = false
+    @State private var selectedDetailProduct: Product? = nil
     
     var body: some View {
         VStack(spacing: 0) {
@@ -43,7 +44,12 @@ struct CheckoutManagerView: View {
                     } else {
                         VStack(spacing: 12) {
                             ForEach(cartManager.groupedByCompany()) { group in
-                                CompanyCartGroup(group: group)
+                                CompanyCartGroup(
+                                    group: group,
+                                    onProductTapped: { product in
+                                        selectedDetailProduct = product
+                                    }
+                                )
                             }
                         }
                         .padding(.bottom, 100)
@@ -58,6 +64,10 @@ struct CheckoutManagerView: View {
             }
         }
         .background(DS.cardBackground)
+        .fullScreenCover(item: $selectedDetailProduct) { product in
+            ProductDetailView(product: product)
+                .environmentObject(TypesenseClient())
+        }
     }
     
     private func openProductURL(_ urlString: String) {
@@ -126,12 +136,8 @@ struct CheckoutManagerView: View {
 struct CompanyCartGroup: View {
     
     let group: CartItemGroup
+    var onProductTapped: ((Product) -> Void)? = nil
     @EnvironmentObject var cartManager: CartManager
-    @EnvironmentObject var savedProductsManager: SavedProductsManager
-    @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
-    @EnvironmentObject var toastManager: ToastManager
-    @StateObject private var typesenseClient = TypesenseClient()
-    @State private var selectedProduct: Product? = nil
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -167,7 +173,7 @@ struct CompanyCartGroup: View {
                             openProductURL(entry.item.product.productUrl)
                         },
                         onProductTapped: {
-                            selectedProduct = entry.item.product
+                            onProductTapped?(entry.item.product)
                         }
                     )
                 }
@@ -179,14 +185,6 @@ struct CompanyCartGroup: View {
         .cornerRadius(DS.radiusLarge)
         .dsCardShadow(cornerRadius: DS.radiusLarge)
         .padding(.horizontal, DS.horizontalPadding)
-        .fullScreenCover(item: $selectedProduct) { product in
-            ProductDetailView(product: product)
-                .environmentObject(savedProductsManager)
-                .environmentObject(savedCompaniesManager)
-                .environmentObject(cartManager)
-                .environmentObject(typesenseClient)
-                .environmentObject(toastManager)
-        }
     }
     
     private func openProductURL(_ urlString: String) {
@@ -342,11 +340,15 @@ struct CartProductRow: View {
                     }) {
                         ZStack {
                             Circle()
-                                .fill(DS.brandBlue)
+                                .fill(Color.white)
                                 .frame(width: 22, height: 22)
+                                .overlay(
+                                    Circle()
+                                        .stroke(DS.strokeColor, lineWidth: 1)
+                                )
                             Image(systemName: "minus")
                                 .font(.system(size: 9, weight: .medium))
-                                .foregroundColor(.white)
+                                .foregroundColor(DS.brandBlue)
                         }
                     }
                     .buttonStyle(.plain)
@@ -359,11 +361,15 @@ struct CartProductRow: View {
                     Button(action: { onQuantityChange(item.quantity + 1) }) {
                         ZStack {
                             Circle()
-                                .fill(DS.brandBlue)
+                                .fill(Color.white)
                                 .frame(width: 22, height: 22)
+                                .overlay(
+                                    Circle()
+                                        .stroke(DS.strokeColor, lineWidth: 1)
+                                )
                             Image(systemName: "plus")
                                 .font(.system(size: 9, weight: .medium))
-                                .foregroundColor(.white)
+                                .foregroundColor(DS.brandBlue)
                         }
                     }
                     .buttonStyle(.plain)
