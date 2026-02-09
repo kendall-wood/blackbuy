@@ -808,7 +808,8 @@ struct ScanView: View {
                                           "mask", "scrub", "toner", "primer", "foundation", "concealer",
                                           "powder", "spray", "foam", "bar", "wipe", "towelette", "treatment",
                                           "moisturizer", "exfoliant", "mist", "gloss", "lipstick", "mascara",
-                                          "eyeliner", "bronzer", "highlighter", "blush", "deodorant"]
+                                          "eyeliner", "bronzer", "highlighter", "blush", "deodorant",
+                                          "contour", "liner", "hairspray", "lash", "pencil", "tinted"]
                 
                 // Find specific descriptors in target and product (check if word STARTS WITH descriptor)
                 func findDescriptors(in words: Set<String>) -> Set<String> {
@@ -837,6 +838,10 @@ struct ScanView: View {
                     ["wipe", "towelette"],
                     ["scrub", "exfoliant"],
                     ["serum", "oil"],
+                    ["liner", "pencil"],
+                    ["gloss", "lipstick"],
+                    ["bronzer", "contour"],
+                    ["hairspray", "spray"],
                 ]
                 
                 // Expand overlap: check if target and product descriptors belong to the same synonym group

@@ -116,11 +116,11 @@ class GPT4TextService {
         }
         
         VALID PRODUCT TYPES — you MUST pick the closest match from this list:
-        • Hair: Shampoo, Conditioner, Leave-In Conditioner, Co-Wash, Deep Conditioner, Protein Treatment, Detangler, Hair Rinse, Hair Oil, Castor Oil, Hair Mask, Hair Cream, Hair Gel, Hair Butter, Edge Control, Hair Serum, Curl Cream, Styling Gel, Hair Balm
+        • Hair: Shampoo, Conditioner, Leave-In Conditioner, Co-Wash, Deep Conditioner, Protein Treatment, Detangler, Hair Rinse, Hair Oil, Castor Oil, Hair Mask, Hair Cream, Hair Gel, Hair Butter, Edge Control, Hair Serum, Curl Cream, Styling Gel, Hair Balm, Hair Spray
         • Skin: Facial Cleanser, Micellar Water, Makeup Remover, Face Serum, Face Cream, Face Mask, Face Oil, Toner, Eye Cream, Moisturizer, Facial Mist, Facial Scrub, Sunscreen, Cleansing Wipes
         • Body: Hand Sanitizer, Body Butter, Body Oil, Essential Oil, Body Mist, Body Scrub, Body Wash, Intimate Wash, Body Lotion, Bar Soap, Deodorant, Body Balm, Hand Soap, Liquid Soap, Body Gloss, Sugar Scrub, Body Powder
-        • Lips: Lip Balm, Lip Gloss, Lipstick, Lip Scrub, Liquid Lipstick
-        • Makeup: Foundation, Setting Powder, Face Powder, Concealer, Mascara, Eyeshadow, Eyeshadow Palette, Blush, Highlighter, Bronzer, Primer, Eyeliner, Brow Gel, Nail Polish, Gel Polish, False Eyelashes, Cuticle Oil
+        • Lips: Lip Balm, Lip Gloss, Lipstick, Lip Scrub, Liquid Lipstick, Lip Liner, Lip Oil
+        • Makeup: Foundation, Setting Powder, Face Powder, Concealer, Mascara, Eyeshadow, Eyeshadow Palette, Blush, Highlighter, Bronzer, Primer, Setting Spray, Eyeliner, Brow Gel, Brow Pencil, Contour, Lash Serum, Tinted Moisturizer, Nail Polish, Gel Polish, False Eyelashes, Cuticle Oil
         • Fragrance: Perfume, Eau de Parfum, Perfume Oil
         • Men: Beard Oil, Beard Balm, Beard Conditioner
         • Home: Multi-Purpose Cleaner, Glass Cleaner, Floor Cleaner, Dish Soap, Laundry Detergent, Fabric Softener, Disinfectant

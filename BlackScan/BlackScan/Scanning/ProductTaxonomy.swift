@@ -783,6 +783,46 @@ class ProductTaxonomy {
             ),
             
             ProductType(
+                canonical: "Brow Pencil",
+                variations: ["brow pencil", "eyebrow pencil", "brow pen", "eyebrow pen", "brow definer"],
+                synonyms: ["Eyebrow Pencil", "Brow Pen", "Brow Definer"],
+                category: "Makeup",
+                subcategory: "Eyes",
+                typicalForms: ["pencil", "stick"],
+                keywords: ["brow", "eyebrow", "pencil", "pen", "definer"]
+            ),
+            
+            ProductType(
+                canonical: "Contour",
+                variations: ["contour", "contour stick", "contour cream", "contour palette", "contour powder", "contour kit"],
+                synonyms: ["Contour Stick", "Face Contour", "Sculpting Stick"],
+                category: "Makeup",
+                subcategory: "Face",
+                typicalForms: ["stick", "cream", "powder"],
+                keywords: ["contour", "sculpt", "sculpting", "define"]
+            ),
+            
+            ProductType(
+                canonical: "Lash Serum",
+                variations: ["lash serum", "eyelash serum", "lash growth serum", "lash enhancer", "lash conditioner"],
+                synonyms: ["Eyelash Serum", "Lash Growth Serum", "Lash Enhancer"],
+                category: "Makeup",
+                subcategory: "Eyes",
+                typicalForms: ["liquid", "serum"],
+                keywords: ["lash", "eyelash", "serum", "growth", "enhancer"]
+            ),
+            
+            ProductType(
+                canonical: "Tinted Moisturizer",
+                variations: ["tinted moisturizer", "tinted moisturiser", "bb cream", "cc cream", "skin tint", "tinted cream"],
+                synonyms: ["BB Cream", "CC Cream", "Skin Tint", "Tinted Cream"],
+                category: "Makeup",
+                subcategory: "Face",
+                typicalForms: ["cream", "liquid"],
+                keywords: ["tinted", "moisturizer", "bb", "cc", "tint", "skin"]
+            ),
+            
+            ProductType(
                 canonical: "Makeup Brush",
                 variations: ["makeup brush", "cosmetic brush", "brush"],
                 synonyms: ["Cosmetic Brush", "Beauty Brush"],
@@ -963,6 +1003,26 @@ class ProductTaxonomy {
             ),
             
             ProductType(
+                canonical: "Lip Liner",
+                variations: ["lip liner", "lip pencil", "lipliner", "lip line"],
+                synonyms: ["Lip Pencil", "Lip Line Pencil"],
+                category: "Makeup",
+                subcategory: "Lips",
+                typicalForms: ["pencil", "stick"],
+                keywords: ["lip", "liner", "pencil", "line"]
+            ),
+            
+            ProductType(
+                canonical: "Lip Oil",
+                variations: ["lip oil", "lip treatment oil", "lip glow oil"],
+                synonyms: ["Lip Treatment Oil", "Lip Glow Oil", "Hydrating Lip Oil"],
+                category: "Lip Care",
+                subcategory: "Treatments",
+                typicalForms: ["oil", "liquid"],
+                keywords: ["lip", "oil", "glow", "hydrating"]
+            ),
+            
+            ProductType(
                 canonical: "Liquid Lipstick",
                 variations: ["liquid lipstick", "liquid lip", "lip liquid"],
                 synonyms: ["Liquid Lip", "Matte Liquid Lipstick"],
@@ -1022,6 +1082,16 @@ class ProductTaxonomy {
                 subcategory: "Styling",
                 typicalForms: ["cream"],
                 keywords: ["curl", "cream", "defining", "curling"]
+            ),
+            
+            ProductType(
+                canonical: "Hair Spray",
+                variations: ["hair spray", "hairspray", "finishing spray", "hold spray", "flexible hold spray", "volumizing spray"],
+                synonyms: ["Hairspray", "Finishing Spray", "Hold Spray", "Volumizing Spray"],
+                category: "Hair Care",
+                subcategory: "Styling",
+                typicalForms: ["spray", "aerosol"],
+                keywords: ["hair", "spray", "hairspray", "hold", "finishing", "volumizing"]
             ),
             
             // MARK: - Candles & Home
