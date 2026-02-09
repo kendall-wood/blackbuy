@@ -253,6 +253,7 @@ struct ProductDetailView: View {
                 }
             }
         }
+        .geometryGroup()
         .onAppear {
             loadSimilarProducts()
         }

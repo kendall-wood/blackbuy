@@ -516,7 +516,7 @@ struct RecentScanRow: View {
                         .fill(DS.brandBlue.opacity(0.1))
                         .frame(width: 44, height: 44)
                     
-                    Image(systemName: "barcode.viewfinder")
+                    Image(systemName: "camera.viewfinder")
                         .font(.system(size: 20))
                         .foregroundColor(DS.brandBlue)
                 }

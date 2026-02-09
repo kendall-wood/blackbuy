@@ -598,13 +598,21 @@ struct ScanView: View {
         Log.debug("Scan button tapped, state: \(scanState)", category: .scan)
         
         if scanState == .results {
-            // Reset to scan again
-            withAnimation(.easeInOut(duration: 0.3)) {
-                scanState = .initial
-            }
+            // Reset previous results and immediately start a new scan
             scanResults = []
             lastAnalysis = nil
             capturedImage = nil
+            
+            withAnimation(.easeInOut(duration: 0.25)) {
+                scanState = .capturing
+            }
+            
+            // Provide haptic feedback
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+            
+            // Trigger photo capture
+            shouldCapturePhoto = true
         } else if scanState == .initial {
             // Trigger image capture
             withAnimation(.easeInOut(duration: 0.25)) {
