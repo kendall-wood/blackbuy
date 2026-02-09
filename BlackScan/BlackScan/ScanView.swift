@@ -12,6 +12,8 @@ struct ScanView: View {
     @StateObject private var typesenseClient = TypesenseClient()
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var scanHistoryManager: ScanHistoryManager
+    @EnvironmentObject var savedProductsManager: SavedProductsManager
+    @EnvironmentObject var toastManager: ToastManager
     @State private var isShowingResults = false
     @State private var scanResults: [ScoredProduct] = []
     @State private var lastAnalysis: HybridScanService.ProductAnalysis?
@@ -24,6 +26,16 @@ struct ScanView: View {
     @State private var selectedDetailProduct: Product?
     @State private var showingScanHistory = false
     @State private var cameraAuthStatus: AVAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
+    @State private var showReportConfirmation = false
+    @State private var resultsSortOrder: SortOrder = .relevant
+    @StateObject private var feedbackManager = FeedbackManager()
+    
+    enum SortOrder: String, CaseIterable {
+        case relevant = "Relevant"
+        case priceLowToHigh = "Price: Low to High"
+        case priceHighToLow = "Price: High to Low"
+        case nameAZ = "Name: A-Z"
+    }
     
     // Default initializer for binding
     init(selectedTab: Binding<AppTab> = .constant(.scan), pendingShopSearch: Binding<String?> = .constant(nil)) {
@@ -528,6 +540,23 @@ struct ScanView: View {
                 selectedTab = .shop
             })
         }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToCategory)) { _ in
+            // Dismiss results sheet and switch to shop tab; ShopView handles the category navigation
+            if isShowingResults {
+                isShowingResults = false
+                scanState = .initial
+                selectedTab = .shop
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .searchInShop)) { notification in
+            // Dismiss results sheet and switch to shop tab with search query
+            if isShowingResults, let query = notification.object as? String {
+                isShowingResults = false
+                scanState = .initial
+                pendingShopSearch = query
+                selectedTab = .shop
+            }
+        }
         .onChange(of: capturedImage) { _, newImage in
             if let image = newImage {
                 handleCapturedImage(image)
@@ -757,6 +786,7 @@ struct ScanView: View {
                         "powder": ["liquid", "cream", "gel", "lotion"],
                         "bar": ["liquid", "gel", "cream", "lotion"],
                         "spray": ["cream", "lotion", "gel", "bar"],
+                        "mist": ["cream", "lotion", "gel", "bar", "powder"],
                         "foam": ["cream", "lotion", "gel", "bar"]
                     ]
                     
@@ -1050,6 +1080,19 @@ struct ScanView: View {
     
     // MARK: - Results Sheet
     
+    private var sortedScanResults: [ScoredProduct] {
+        switch resultsSortOrder {
+        case .relevant:
+            return scanResults
+        case .priceLowToHigh:
+            return scanResults.sorted { $0.product.price < $1.product.price }
+        case .priceHighToLow:
+            return scanResults.sorted { $0.product.price > $1.product.price }
+        case .nameAZ:
+            return scanResults.sorted { $0.product.name < $1.product.name }
+        }
+    }
+    
     private var resultsSheet: some View {
         NavigationView {
             VStack(spacing: 0) {
@@ -1080,10 +1123,15 @@ struct ScanView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                                 .padding(.top, 2)
                             
-                            Text("Not what you were looking for?")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.orange)
-                                .padding(.top, 1)
+                            Button(action: {
+                                showReportConfirmation = true
+                            }) {
+                                Text("Not what you were looking for?")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.orange)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.top, 1)
                         } else {
                             Text("Search Results")
                                 .font(.system(size: 22, weight: .regular))
@@ -1123,7 +1171,23 @@ struct ScanView: View {
                         Text("Showing \(scanResults.count) products")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(Color(.systemGray))
+                        
                         Spacer()
+                        
+                        DSSortButton(label: "Sort") {
+                            ForEach(SortOrder.allCases, id: \.self) { order in
+                                Button(action: {
+                                    resultsSortOrder = order
+                                }) {
+                                    HStack {
+                                        Text(order.rawValue)
+                                        if resultsSortOrder == order {
+                                            Image(systemName: "checkmark")
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     .padding(.horizontal, DS.horizontalPadding)
                     .padding(.top, 12)
@@ -1133,11 +1197,33 @@ struct ScanView: View {
                 // Product grid
                 ScrollView(.vertical, showsIndicators: false) {
                     LazyVGrid(columns: UnifiedProductCard.gridColumns, spacing: DS.gridSpacing) {
-                        ForEach(scanResults) { scoredProduct in
+                        ForEach(sortedScanResults) { scoredProduct in
                             UnifiedProductCard(
                                 product: scoredProduct.product,
-                                showHeart: false,
+                                isSaved: savedProductsManager.isProductSaved(scoredProduct.product),
+                                isInCart: cartManager.isInCart(scoredProduct.product),
                                 onCardTapped: {
+                                    selectedDetailProduct = scoredProduct.product
+                                },
+                                onSaveTapped: {
+                                    if savedProductsManager.isProductSaved(scoredProduct.product) {
+                                        savedProductsManager.removeSavedProduct(scoredProduct.product)
+                                        toastManager.show(.unsaved)
+                                    } else {
+                                        savedProductsManager.saveProduct(scoredProduct.product)
+                                        toastManager.show(.saved)
+                                    }
+                                },
+                                onAddToCart: {
+                                    if cartManager.isInCart(scoredProduct.product) {
+                                        cartManager.removeFromCart(scoredProduct.product)
+                                        toastManager.show(.removedFromCheckout)
+                                    } else {
+                                        cartManager.addToCart(scoredProduct.product)
+                                        toastManager.show(.addedToCheckout)
+                                    }
+                                },
+                                onCompanyTapped: {
                                     selectedDetailProduct = scoredProduct.product
                                 }
                             )
@@ -1172,6 +1258,25 @@ struct ScanView: View {
                         .buttonStyle(.plain)
                         .padding(.horizontal, DS.horizontalPadding)
                         .padding(.top, 20)
+                        
+                        // Search our shop link
+                        Button(action: {
+                            isShowingResults = false
+                            scanState = .initial
+                            selectedTab = .shop
+                        }) {
+                            HStack(spacing: 4) {
+                                Text("Not quite it? Search our shop")
+                                    .font(.system(size: 13, weight: .light))
+                                    .foregroundColor(DS.brandBlue)
+                                
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 11, weight: .light))
+                                    .foregroundColor(DS.brandBlue)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 12)
                     }
                     
                     Spacer().frame(height: 80)
@@ -1185,6 +1290,35 @@ struct ScanView: View {
         .sheet(item: $selectedDetailProduct) { product in
             ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
+        }
+        .alert("Report this scan?", isPresented: $showReportConfirmation) {
+            Button("Report & Search Shop", role: .none) {
+                // Submit lightweight feedback report
+                let context = FeedbackManager.FeedbackContext(
+                    scanText: lastAnalysis?.productType,
+                    detectedProduct: lastAnalysis?.productType,
+                    searchQuery: lastAnalysis?.productType,
+                    resultsCount: scanResults.count,
+                    confidence: scanResults.first.map { Float($0.confidenceScore) }
+                )
+                let data = FeedbackManager.FeedbackData(
+                    userId: "anonymous",
+                    timestamp: Date(),
+                    issueType: .wrongProduct,
+                    context: context,
+                    userNotes: "User reported scan results were not what they were looking for"
+                )
+                Task {
+                    try? await feedbackManager.submitFeedback(data)
+                }
+                // Navigate to shop
+                isShowingResults = false
+                scanState = .initial
+                selectedTab = .shop
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("We'll report this to help improve our scanning. You'll be redirected to the shop to search manually.")
         }
     }
     

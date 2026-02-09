@@ -222,7 +222,7 @@ struct CartProductRow: View {
                         Image(systemName: "checkmark")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 72, height: 96)
+                            .frame(width: 72, height: 104)
                             .background(
                                 UnevenRoundedRectangle(cornerRadii: .init(
                                     topLeading: DS.radiusMedium,
@@ -247,7 +247,7 @@ struct CartProductRow: View {
                         Image(systemName: "trash")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
-                            .frame(width: 72, height: 96)
+                            .frame(width: 72, height: 104)
                             .background(
                                 UnevenRoundedRectangle(cornerRadii: .init(
                                     topLeading: 0,
@@ -292,9 +292,9 @@ struct CartProductRow: View {
                             }
                     )
             }
-            .frame(height: 96)
+            .frame(height: 104)
         }
-        .frame(height: 96)
+        .frame(height: 104)
     }
     
     private var cardContent: some View {
@@ -342,7 +342,7 @@ struct CartProductRow: View {
                     }) {
                         ZStack {
                             Circle()
-                                .fill(Color(.systemGray4))
+                                .fill(DS.brandBlue)
                                 .frame(width: 22, height: 22)
                             Image(systemName: "minus")
                                 .font(.system(size: 9, weight: .medium))
@@ -398,8 +398,8 @@ struct CartProductRow: View {
             }
         }
         .padding(.horizontal, 10)
-        .padding(.vertical, 10)
-        .frame(height: 96)
+        .padding(.vertical, 12)
+        .frame(height: 104)
         .background(DS.cardBackground)
         .cornerRadius(DS.radiusMedium)
         .overlay(

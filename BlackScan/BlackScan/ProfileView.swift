@@ -92,16 +92,29 @@ struct ProfileView: View {
                             .stroke(DS.strokeColor, lineWidth: 1)
                     )
                 
-                Image(systemName: "person.fill")
-                    .font(.system(size: 36, weight: .light))
-                    .foregroundColor(DS.brandBlue)
+                if authManager.isSignedIn {
+                    // Show user initials when signed in
+                    Text(authManager.getUserInitials())
+                        .font(.system(size: 32, weight: .semibold))
+                        .foregroundColor(DS.brandBlue)
+                } else {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 36, weight: .light))
+                        .foregroundColor(DS.brandBlue)
+                }
             }
             
             // Welcome Text
             VStack(spacing: 4) {
-                Text("Welcome")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.black)
+                if authManager.isSignedIn, let name = authManager.userName, !name.isEmpty {
+                    Text("Welcome, \(name)")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.black)
+                } else {
+                    Text("Welcome")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.black)
+                }
                 
                 Text(authManager.isSignedIn ? "Manage your account" : "Sign in to save your favorites")
                     .font(.system(size: 15))

@@ -234,10 +234,18 @@ class FormTaxonomy {
             
             FormType(
                 canonical: "spray",
-                variations: ["spray", "mist", "spritz", "pump spray"],
-                compatibleForms: ["liquid"],
+                variations: ["spray", "spritz", "pump spray"],
+                compatibleForms: ["liquid", "mist"],
                 incompatibleForms: ["cream", "bar", "powder", "stick"],
-                keywords: ["spray", "mist", "spritz", "pump"]
+                keywords: ["spray", "spritz", "pump"]
+            ),
+            
+            FormType(
+                canonical: "mist",
+                variations: ["mist", "face mist", "facial mist", "hydrating mist", "toning mist"],
+                compatibleForms: ["spray", "liquid"],
+                incompatibleForms: ["cream", "bar", "powder", "stick"],
+                keywords: ["mist", "facial mist", "hydrating"]
             ),
             
             FormType(

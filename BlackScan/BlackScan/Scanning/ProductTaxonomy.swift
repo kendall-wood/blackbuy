@@ -743,6 +743,16 @@ class ProductTaxonomy {
             ),
             
             ProductType(
+                canonical: "Setting Spray",
+                variations: ["setting spray", "makeup setting spray", "finishing spray", "makeup fixer", "setting mist", "fixing spray"],
+                synonyms: ["Makeup Setting Spray", "Finishing Spray", "Makeup Fixer"],
+                category: "Makeup",
+                subcategory: "Face",
+                typicalForms: ["spray", "mist"],
+                keywords: ["setting", "finishing", "fixer", "fix", "set"]
+            ),
+            
+            ProductType(
                 canonical: "Eyeliner",
                 variations: ["eyeliner", "eye liner", "liquid eyeliner"],
                 synonyms: ["Eye Liner", "Liquid Liner", "Pencil Liner"],
@@ -1197,13 +1207,43 @@ class ProductTaxonomy {
             ),
             
             ProductType(
+                canonical: "Baby Lotion",
+                variations: ["baby lotion", "baby moisturizer", "baby cream", "baby balm", "infant lotion"],
+                synonyms: ["Infant Lotion", "Baby Moisturizer", "Baby Cream"],
+                category: "Baby & Kids",
+                subcategory: "Skincare",
+                typicalForms: ["cream", "lotion"],
+                keywords: ["baby", "infant", "lotion", "moisturizer", "cream", "balm"]
+            ),
+            
+            ProductType(
+                canonical: "Baby Wash",
+                variations: ["baby wash", "baby shampoo", "baby soap", "baby body wash", "infant wash", "baby bath"],
+                synonyms: ["Infant Wash", "Baby Shampoo", "Baby Soap", "Baby Bath"],
+                category: "Baby & Kids",
+                subcategory: "Skincare",
+                typicalForms: ["liquid", "gel"],
+                keywords: ["baby", "infant", "wash", "shampoo", "soap", "bath"]
+            ),
+            
+            ProductType(
+                canonical: "Baby Oil",
+                variations: ["baby oil", "infant oil", "baby massage oil"],
+                synonyms: ["Infant Oil", "Baby Massage Oil"],
+                category: "Baby & Kids",
+                subcategory: "Skincare",
+                typicalForms: ["oil"],
+                keywords: ["baby", "infant", "oil", "massage"]
+            ),
+            
+            ProductType(
                 canonical: "Baby Skincare",
-                variations: ["baby lotion", "baby oil", "baby cream", "baby balm", "baby wash", "baby shampoo"],
+                variations: ["baby skincare", "baby skin care", "baby sunscreen", "baby diaper cream"],
                 synonyms: ["Infant Care", "Baby Care"],
                 category: "Baby & Kids",
                 subcategory: "Skincare",
                 typicalForms: ["cream", "oil", "liquid"],
-                keywords: ["baby", "infant", "lotion", "cream", "wash"]
+                keywords: ["baby", "infant", "care", "skincare"]
             ),
             
             // MARK: - Pet Products
