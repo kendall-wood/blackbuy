@@ -9,7 +9,7 @@ struct Env {
     
     /// Whether all required configuration values are present
     static let isConfigured: Bool = {
-        let keys = ["TYPESENSE_HOST", "TYPESENSE_API_KEY", "OPENAI_API_KEY", "BACKEND_URL"]
+        let keys = ["TYPESENSE_HOST", "TYPESENSE_API_KEY", "OPENAI_API_KEY", "BACKEND_URL", "SUPABASE_ANON_KEY"]
         return keys.allSatisfy { key in
             if let v = Bundle.main.infoDictionary?[key] as? String, !v.isEmpty, !v.hasPrefix("$(") { return true }
             if let v = ProcessInfo.processInfo.environment[key], !v.isEmpty { return true }
@@ -73,6 +73,13 @@ struct Env {
         } else {
             return "https://\(url)"
         }
+    }()
+    
+    // MARK: - Supabase Configuration
+    
+    /// Supabase anon/public key for REST API access
+    static let supabaseAnonKey: String = {
+        return requiredValue(for: "SUPABASE_ANON_KEY")
     }()
     
     // MARK: - OpenAI Configuration
@@ -153,6 +160,7 @@ struct Env {
             _ = typesenseHost
             _ = typesenseApiKey
             _ = backendURL
+            _ = supabaseAnonKey
             _ = openAIAPIKey
             return true
         } catch {
@@ -179,6 +187,7 @@ struct Env {
         - Typesense API Key: [SET] (\(typesenseApiKey.count) chars)
         - Collection: \(typesenseCollection)
         - Backend URL: [SET]
+        - Supabase Anon Key: [SET] (\(supabaseAnonKey.count) chars)
         - OpenAI API Key: [SET] (\(openAIAPIKey.count) chars)
         - OpenAI Model: \(openAIVisionModel)
         - Debug Mode: \(isDebugMode)

@@ -331,7 +331,7 @@ class FeedbackManager: ObservableObject {
         }
     }
     
-    /// Submit a hierarchical report from the shake-to-report system.
+    /// Submit a hierarchical report to Supabase via REST API.
     func submitReport(_ data: ReportData) async throws {
         isSubmitting = true
         lastError = nil
@@ -340,22 +340,51 @@ class FeedbackManager: ObservableObject {
             isSubmitting = false
         }
         
-        guard let url = URL(string: "\(Env.backendURL)/api/reports") else {
+        // Supabase PostgREST endpoint for the reports table
+        let baseURL = Env.backendURL.hasSuffix("/") ? String(Env.backendURL.dropLast()) : Env.backendURL
+        guard let url = URL(string: "\(baseURL)/rest/v1/reports") else {
             throw FeedbackError.invalidURL
         }
         
-        var sanitizedPayload = data.jsonPayload
-        if let notes = sanitizedPayload["user_notes"] as? String {
-            sanitizedPayload["user_notes"] = InputValidator.sanitizeFeedbackText(notes)
+        // Build payload matching the reports table columns exactly
+        var payload: [String: Any] = [
+            "user_id": data.userId,
+            "page": data.page.rawValue,
+            "category": data.category.rawValue
+        ]
+        
+        if let subCategory = data.subCategory {
+            payload["sub_category"] = subCategory.rawValue
+        }
+        if let detail = data.detail {
+            payload["detail"] = detail.rawValue
+        }
+        if let notes = data.userNotes, !notes.isEmpty {
+            payload["user_notes"] = InputValidator.sanitizeFeedbackText(notes)
+        }
+        if let productName = data.productName {
+            payload["product_name"] = productName
+        }
+        if let productCompany = data.productCompany {
+            payload["product_company"] = productCompany
+        }
+        if let productId = data.productId {
+            payload["product_id"] = productId
+        }
+        if let reportedCategory = data.reportedCategory {
+            payload["reported_category"] = reportedCategory
         }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(Env.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Env.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("return=minimal", forHTTPHeaderField: "Prefer")
         request.timeoutInterval = Env.requestTimeout
         
         do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: sanitizedPayload)
+            request.httpBody = try JSONSerialization.data(withJSONObject: payload)
             
             let (_, response) = try await NetworkSecurity.withRetry(maxAttempts: 2) {
                 try await URLSession.shared.data(for: request)
@@ -365,7 +394,8 @@ class FeedbackManager: ObservableObject {
                 throw FeedbackError.invalidResponse
             }
             
-            if httpResponse.statusCode != 200 {
+            // Supabase returns 201 on successful insert
+            if httpResponse.statusCode != 201 {
                 Log.error("Report submission failed with status \(httpResponse.statusCode)", category: .network)
                 throw FeedbackError.submissionFailed
             }
