@@ -10,7 +10,7 @@ plugins:
 
 # Site settings
 url: "https://kendall-wood.github.io"
-baseurl: "/blackscan"
+baseurl: "/blackbuy"
 
 # Build settings
 exclude:

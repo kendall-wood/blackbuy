@@ -15,7 +15,7 @@ You need to reimport the fixed data to Typesense using your ADMIN API key.
 cd /Users/kendallwood/Desktop/byme/blackscan/data-normalizer
 
 # Set your Typesense credentials (use ADMIN key, not search key)
-export TYPESENSE_HOST='https://mr4ntdeul9hf06k5p-1.a1.typesense.net'
+export TYPESENSE_HOST='https://your-cluster.a1.typesense.net'
 export TYPESENSE_API_KEY='your-admin-api-key-here'
 
 # Install requests if needed

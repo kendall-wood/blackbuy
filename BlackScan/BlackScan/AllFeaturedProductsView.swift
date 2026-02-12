@@ -164,12 +164,11 @@ struct AllFeaturedProductsView: View {
                     
                     var companyGroups: [String: [Product]] = [:]
                     for product in filtered {
-                        if companyGroups[product.company] == nil {
-                            companyGroups[product.company] = []
+                        var group = companyGroups[product.company, default: []]
+                        if group.count < maxProductsPerCompany {
+                            group.append(product)
                         }
-                        if companyGroups[product.company]!.count < maxProductsPerCompany {
-                            companyGroups[product.company]!.append(product)
-                        }
+                        companyGroups[product.company] = group
                     }
                     
                     var result: [Product] = []

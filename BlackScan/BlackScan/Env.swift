@@ -45,9 +45,11 @@ struct Env {
     static let typesenseHost: String = {
         let host = requiredValue(for: "TYPESENSE_HOST")
         
-        // Ensure host starts with https://
-        if host.hasPrefix("http://") || host.hasPrefix("https://") {
+        // Enforce HTTPS — never allow plain HTTP
+        if host.hasPrefix("https://") {
             return host
+        } else if host.hasPrefix("http://") {
+            return "https://" + String(host.dropFirst(7))
         } else {
             return "https://\(host)"
         }
@@ -67,9 +69,11 @@ struct Env {
     static let backendURL: String = {
         let url = requiredValue(for: "BACKEND_URL")
         
-        // Ensure URL starts with https://
-        if url.hasPrefix("http://") || url.hasPrefix("https://") {
+        // Enforce HTTPS — never allow plain HTTP
+        if url.hasPrefix("https://") {
             return url
+        } else if url.hasPrefix("http://") {
+            return "https://" + String(url.dropFirst(7))
         } else {
             return "https://\(url)"
         }
@@ -85,15 +89,40 @@ struct Env {
     // MARK: - OpenAI Configuration
     
     /// OpenAI API key for GPT-4 Vision
+    /// ⚠️ SECURITY: This key is only used for LOCAL DEVELOPMENT.
+    /// In production, all OpenAI requests go through the scan-proxy edge function
+    /// which holds the key server-side. See `scanProxyEnabled`.
     static let openAIAPIKey: String = {
         return requiredValue(for: "OPENAI_API_KEY")
     }()
     
-    /// OpenAI Vision API endpoint
+    /// OpenAI Vision API endpoint (direct — used only when proxy is disabled)
     static let openAIVisionEndpoint = "https://api.openai.com/v1/chat/completions"
     
     /// OpenAI Vision model to use
     static let openAIVisionModel = "gpt-4o" // Latest GPT-4 with vision (cheaper + faster than gpt-4-vision-preview)
+    
+    // MARK: - Scan Proxy Configuration
+    
+    /// Whether to route OpenAI requests through the backend proxy.
+    /// MUST be true for App Store / production builds to keep the OpenAI key server-side.
+    /// Set to false only for local development when the edge function isn't deployed yet.
+    static let scanProxyEnabled: Bool = {
+        #if DEBUG
+        // In debug, allow direct OpenAI calls for convenience unless proxy is deployed
+        return ProcessInfo.processInfo.environment["USE_SCAN_PROXY"] == "1"
+        #else
+        // In release, ALWAYS use the proxy — never ship the OpenAI key in the binary
+        return true
+        #endif
+    }()
+    
+    /// Backend scan proxy URL (Supabase Edge Function)
+    /// Deployed at: {BACKEND_URL}/functions/v1/scan-proxy
+    static let scanProxyURL: String = {
+        let base = backendURL.hasSuffix("/") ? String(backendURL.dropLast()) : backendURL
+        return "\(base)/functions/v1/scan-proxy"
+    }()
     
     // MARK: - API Configuration
     
@@ -181,17 +210,20 @@ struct Env {
     
     /// Debug description of current environment (redacted for security)
     static var debugDescription: String {
+        #if DEBUG
         return """
         BlackScan Environment Configuration:
-        - Typesense Host: [SET]
-        - Typesense API Key: [SET] (\(typesenseApiKey.count) chars)
+        - Typesense Host: [CONFIGURED]
+        - Typesense API Key: [SET]
         - Collection: \(typesenseCollection)
-        - Backend URL: [SET]
-        - Supabase Anon Key: [SET] (\(supabaseAnonKey.count) chars)
-        - OpenAI API Key: [SET] (\(openAIAPIKey.count) chars)
+        - Backend URL: [CONFIGURED]
+        - Supabase Key: [SET]
+        - OpenAI Key: [SET]
         - OpenAI Model: \(openAIVisionModel)
         - Debug Mode: \(isDebugMode)
-        - Network Logging: \(shouldLogNetworkRequests)
         """
+        #else
+        return "BlackScan [Release]"
+        #endif
     }
 }

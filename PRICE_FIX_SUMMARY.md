@@ -45,7 +45,7 @@ Your fixed data is ready in `data-normalizer/normalized_products.json`
 cd /Users/kendallwood/Desktop/byme/blackscan/data-normalizer
 
 # Set your Typesense ADMIN API key (not the search key)
-export TYPESENSE_HOST='https://mr4ntdeul9hf06k5p-1.a1.typesense.net'
+export TYPESENSE_HOST='https://your-cluster.a1.typesense.net'
 export TYPESENSE_API_KEY='your-admin-api-key-here'
 
 # Run the import script
@@ -54,7 +54,7 @@ python3 import_to_typesense.py
 
 **Where to find your admin API key:**
 1. Go to Typesense Cloud dashboard
-2. Navigate to your cluster: mr4ntdeul9hf06k5p
+2. Navigate to your cluster in the Typesense Cloud dashboard
 3. Go to "API Keys" section
 4. Copy the ADMIN key (not the search-only key you're using in the iOS app)
 

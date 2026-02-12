@@ -302,6 +302,9 @@ class FeedbackManager: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        // Authenticate with Supabase anon key (prevents unauthenticated spam)
+        request.setValue(Env.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Env.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
         request.timeoutInterval = Env.requestTimeout
         
         do {
@@ -315,7 +318,7 @@ class FeedbackManager: ObservableObject {
                 throw FeedbackError.invalidResponse
             }
             
-            if httpResponse.statusCode != 200 {
+            if httpResponse.statusCode != 200 && httpResponse.statusCode != 201 {
                 Log.error("Feedback submission failed with status \(httpResponse.statusCode)", category: .network)
                 throw FeedbackError.submissionFailed
             }
@@ -363,16 +366,18 @@ class FeedbackManager: ObservableObject {
             payload["user_notes"] = InputValidator.sanitizeFeedbackText(notes)
         }
         if let productName = data.productName {
-            payload["product_name"] = productName
+            payload["product_name"] = InputValidator.sanitizeSearchQuery(productName)
         }
         if let productCompany = data.productCompany {
-            payload["product_company"] = productCompany
+            payload["product_company"] = InputValidator.sanitizeSearchQuery(productCompany)
         }
         if let productId = data.productId {
-            payload["product_id"] = productId
+            // Product IDs are alphanumeric — strip anything unexpected
+            let sanitizedId = productId.filter { $0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" }
+            payload["product_id"] = String(sanitizedId.prefix(100))
         }
         if let reportedCategory = data.reportedCategory {
-            payload["reported_category"] = reportedCategory
+            payload["reported_category"] = InputValidator.sanitizeSearchQuery(reportedCategory)
         }
         
         var request = URLRequest(url: url)

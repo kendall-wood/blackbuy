@@ -386,12 +386,15 @@ class TypesenseClient: ObservableObject {
         // Use product_type as the PRIMARY search field
         let queryBy = "name,tags,product_type,form"
         
+        // Sanitize AI-generated inputs before query construction
+        let sanitizedProductType = InputValidator.sanitizeSearchQuery(productType)
+        
         var queryItems: [URLQueryItem] = [
             // Search with product type ONLY (form used for local boosting)
-            URLQueryItem(name: "q", value: productType),
+            URLQueryItem(name: "q", value: sanitizedProductType.isEmpty ? "*" : sanitizedProductType),
             URLQueryItem(name: "query_by", value: queryBy),
             URLQueryItem(name: "page", value: "1"),
-            URLQueryItem(name: "per_page", value: String(min(candidateCount, 250))),  // Increased limit!
+            URLQueryItem(name: "per_page", value: String(min(candidateCount, 250))),  // Internal call — Typesense max is 250
             // Sort by relevance (Typesense default text match score)
             URLQueryItem(name: "sort_by", value: "_text_match:desc"),
             // Enable prefix matching for all fields
@@ -422,30 +425,44 @@ class TypesenseClient: ObservableObject {
             throw TypesenseError.invalidURL
         }
         
+        // Sanitize query input and enforce pagination limits
+        let sanitizedQuery = InputValidator.sanitizeSearchQuery(parameters.query)
+        let safePage = max(1, parameters.page)
+        let safePerPage = min(max(1, parameters.perPage), Env.maxResultsPerPage)
+        
         var queryItems: [URLQueryItem] = [
-            URLQueryItem(name: "q", value: parameters.query),
+            URLQueryItem(name: "q", value: sanitizedQuery.isEmpty ? "*" : sanitizedQuery),
             URLQueryItem(name: "query_by", value: Env.searchFields.joined(separator: ",")),
-            URLQueryItem(name: "page", value: String(parameters.page)),
-            URLQueryItem(name: "per_page", value: String(parameters.perPage)),
+            URLQueryItem(name: "page", value: String(safePage)),
+            URLQueryItem(name: "per_page", value: String(safePerPage)),
             URLQueryItem(name: "facet_by", value: Env.facetFields.joined(separator: ","))
         ]
         
-        // Add filters
+        // Add filters (all values sanitized to prevent filter injection)
         var filters: [String] = []
         
         if let productType = parameters.productType {
-            filters.append("product_type:=`\(productType)`")
+            let sanitized = InputValidator.sanitizeSearchQuery(productType)
+            if !sanitized.isEmpty {
+                filters.append("product_type:=`\(sanitized)`")
+            }
         }
         
         if let mainCategory = parameters.mainCategory {
-            filters.append("main_category:=`\(mainCategory)`")
+            let sanitized = InputValidator.sanitizeSearchQuery(mainCategory)
+            if !sanitized.isEmpty {
+                filters.append("main_category:=`\(sanitized)`")
+            }
         }
         
         if let company = parameters.company {
-            filters.append("company:=`\(company)`")
+            let sanitized = InputValidator.sanitizeSearchQuery(company)
+            if !sanitized.isEmpty {
+                filters.append("company:=`\(sanitized)`")
+            }
         }
         
-        // Add price range filter
+        // Add price range filter (numeric values only — safe from injection)
         if let priceMin = parameters.priceMin, let priceMax = parameters.priceMax {
             filters.append("price:[\(priceMin)..\(priceMax)]")
         } else if let priceMin = parameters.priceMin {

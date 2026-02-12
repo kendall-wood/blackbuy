@@ -3,246 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlackBuy - Privacy Policy</title>
+    <title>BlackScan - Privacy Policy</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
             color: #333;
-            background: #fff;
+            background-color: #f8f9fa;
         }
-        
-        h1 {
+
+        .header {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
             color: #00c48c;
-            border-bottom: 2px solid #00c48c;
-            padding-bottom: 10px;
         }
-        
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+
         h2 {
-            color: #333;
-            margin-top: 30px;
+            color: #000;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            border-bottom: 3px solid #00c48c;
+            padding-bottom: 0.5rem;
         }
-        
+
         h3 {
-            color: #555;
+            color: #1a1a1a;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.3rem;
         }
-        
-        .highlight {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #00c48c;
-            margin: 15px 0;
+
+        p {
+            margin-bottom: 1rem;
+            text-align: justify;
         }
-        
-        .no-collect {
-            background: #fff3cd;
-            padding: 10px;
-            border-radius: 5px;
-            border-left: 4px solid #ffc107;
-        }
-        
-        .security {
-            background: #d1ecf1;
-            padding: 10px;
-            border-radius: 5px;
-            border-left: 4px solid #17a2b8;
-        }
-        
+
         ul {
-            padding-left: 20px;
+            margin-bottom: 1rem;
+            margin-left: 2rem;
         }
-        
+
         li {
-            margin-bottom: 5px;
+            margin-bottom: 0.5rem;
         }
-        
-        .contact {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 30px;
+
+        .last-updated {
+            background: #f0f0f0;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            font-style: italic;
+            color: #666;
         }
-        
+
+        .contact-box {
+            background: #f8f9fa;
+            border-left: 4px solid #00c48c;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-radius: 4px;
+        }
+
+        .contact-box h3 {
+            margin-top: 0;
+            color: #00c48c;
+        }
+
         .footer {
             text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+            padding: 2rem;
             color: #666;
+            font-size: 0.9rem;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 1rem;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 1.5rem 0;
+        }
+
+        a {
+            color: #00c48c;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>BlackBuy Privacy Policy</h1>
-    
-    <p><strong>Last Updated:</strong> December 21, 2024<br>
-    <strong>Effective Date:</strong> December 21, 2024</p>
-    
-    <h2>Overview</h2>
-    <p>BlackBuy is committed to protecting your privacy. This policy explains what information we collect, how we use it, and your rights regarding your data.</p>
-    
-    <h2>Information We Collect</h2>
-    
-    <h3>Anonymous Usage Data</h3>
-    <div class="highlight">
-        <ul>
-            <li><strong>What:</strong> Daily scan count (number only)</li>
-            <li><strong>Purpose:</strong> Enforce fair usage limits (10 scans per day)</li>
-            <li><strong>Storage:</strong> Local device only, automatically deleted after 24 hours</li>
-            <li><strong>Sharing:</strong> Never shared with third parties</li>
-        </ul>
+    <div class="header">
+        <h1>BlackScan</h1>
+        <p class="tagline">Privacy Policy</p>
     </div>
-    
-    <h3>Anonymous User Identifier</h3>
-    <div class="highlight">
+
+    <div class="container">
+        <div class="last-updated">
+            <strong>Last Updated:</strong> February 12, 2026
+        </div>
+
+        <p>
+            Welcome to BlackScan! We are committed to protecting your privacy and ensuring you have a positive experience when using our application. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application.
+        </p>
+
+        <div class="highlight">
+            <strong>Quick Summary:</strong> BlackScan helps you discover Black-owned businesses and products by scanning items with your camera. We collect minimal information necessary to provide our service and never sell your personal data.
+        </div>
+
+        <h2>1. Information We Collect</h2>
+
+        <h3>1.1 Information You Provide</h3>
         <ul>
-            <li><strong>What:</strong> Cryptographically hashed anonymous ID</li>
-            <li><strong>Purpose:</strong> Associate usage limits with your app installation</li>
-            <li><strong>Storage:</strong> Encrypted in device keychain</li>
-            <li><strong>Sharing:</strong> Never shared with third parties</li>
+            <li><strong>Account Information:</strong> When you sign in with Apple ID, we receive basic profile information such as your name and email address (if you choose to share it).</li>
+            <li><strong>Profile Data:</strong> Any additional information you choose to add to your profile.</li>
+            <li><strong>Saved Items:</strong> Products and companies you save or add to your cart.</li>
+            <li><strong>Feedback:</strong> Any feedback, ratings, or reviews you submit through the app.</li>
         </ul>
-    </div>
-    
-    <h3>Camera Text Recognition</h3>
-    <div class="highlight">
+
+        <h3>1.2 Information Collected Automatically</h3>
         <ul>
-            <li><strong>What:</strong> Text recognized from camera when scanning products</li>
-            <li><strong>Purpose:</strong> Identify products and find Black-owned alternatives</li>
-            <li><strong>Storage:</strong> Processed in memory only, never stored</li>
-            <li><strong>Sharing:</strong> Never shared with third parties</li>
+            <li><strong>Camera Data:</strong> When you scan products, we process images locally on your device to identify products. These images are not stored on our servers unless you explicitly choose to save them.</li>
+            <li><strong>Scan History:</strong> Records of products you've scanned (stored locally on your device).</li>
+            <li><strong>Usage Data:</strong> Information about how you interact with the app, such as features used, search queries, and pages visited.</li>
+            <li><strong>Device Information:</strong> Device type, operating system version, unique device identifiers, and mobile network information.</li>
+            <li><strong>Analytics Data:</strong> App performance metrics, crash reports, and usage statistics to improve the app experience.</li>
         </ul>
-    </div>
-    
-    <h2>Information We Don't Collect</h2>
-    <div class="no-collect">
-        <p>We do <strong>NOT</strong> collect:</p>
+
+        <h2>2. How We Use Your Information</h2>
+
+        <p>We use the information we collect to:</p>
         <ul>
-            <li>❌ Personal information (name, email, phone number)</li>
-            <li>❌ Location data or GPS coordinates</li>
-            <li>❌ Device identifiers or advertising IDs</li>
-            <li>❌ Biometric data or stored camera images</li>
-            <li>❌ Social media or contact information</li>
-            <li>❌ Cross-app usage or behavioral tracking</li>
-            <li>❌ Analytics or crash reporting data</li>
-            <li>❌ Search history or browsing patterns</li>
+            <li>Provide, maintain, and improve our services</li>
+            <li>Process your product scans and deliver search results</li>
+            <li>Personalize your experience and show relevant product recommendations</li>
+            <li>Save your preferences, favorites, and shopping cart</li>
+            <li>Send you important updates about the app (with your permission)</li>
+            <li>Respond to your comments, questions, and customer support requests</li>
+            <li>Analyze usage patterns to improve app functionality and user experience</li>
+            <li>Detect, prevent, and address technical issues or security concerns</li>
+            <li>Comply with legal obligations</li>
         </ul>
-    </div>
-    
-    <h2>How We Use Information</h2>
-    <ol>
-        <li><strong>Rate Limiting:</strong> Anonymous usage counting to ensure fair access (10 scans per day)</li>
-        <li><strong>Product Search:</strong> OCR text processing to find product alternatives</li>
-        <li><strong>App Functionality:</strong> Basic app preferences and settings</li>
-    </ol>
-    
-    <h2>Data Sharing and Third Parties</h2>
-    <p><strong>We do NOT share any data with:</strong></p>
-    <ul>
-        <li>Third-party companies</li>
-        <li>Advertising networks</li>
-        <li>Analytics services</li>
-        <li>Social media platforms</li>
-        <li>Government agencies (except as required by law)</li>
-    </ul>
-    
-    <h2>Data Security</h2>
-    <div class="security">
+
+        <h2>3. Data Storage and Security</h2>
+
+        <p>
+            We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. Your data is:
+        </p>
         <ul>
-            <li>All data stored using iOS Keychain encryption</li>
-            <li>Network communications use HTTPS encryption</li>
-            <li>Automatic data cleanup and deletion</li>
-            <li>No cloud storage or external databases</li>
-            <li>Hardware-backed security on supported devices</li>
+            <li>Encrypted in transit using industry-standard SSL/TLS protocols</li>
+            <li>Stored securely using enterprise-grade cloud infrastructure</li>
+            <li>Access-controlled with strict authentication requirements</li>
+            <li>Regularly backed up to prevent data loss</li>
         </ul>
-    </div>
-    
-    <h2>Your Privacy Rights</h2>
-    
-    <h3>Data Access</h3>
-    <p>You can view all data we have about you (very minimal) through the app's Privacy Settings.</p>
-    
-    <h3>Data Deletion</h3>
-    <p>You can delete all your data at any time through:</p>
-    <ul>
-        <li>App Settings > Privacy > Reset All Data</li>
-        <li>Deleting the app (removes all data)</li>
-    </ul>
-    
-    <h3>Data Portability</h3>
-    <p>You can export your data (minimal anonymous usage statistics) through the Privacy Settings.</p>
-    
-    <h2>Children's Privacy (COPPA Compliance)</h2>
-    <p>BlackBuy does not collect personal information from anyone, including children under 13. The app:</p>
-    <ul>
-        <li>Uses only anonymous identifiers</li>
-        <li>Collects no personal information</li>
-        <li>Has no social features or communication</li>
-        <li>Requires no account creation</li>
-    </ul>
-    
-    <h2>International Privacy Laws</h2>
-    
-    <h3>GDPR Compliance (EU)</h3>
-    <ul>
-        <li><strong>Lawful Basis:</strong> Legitimate interest for app functionality</li>
-        <li><strong>Data Minimization:</strong> Only essential data collected</li>
-        <li><strong>Right to Access:</strong> Available through Privacy Settings</li>
-        <li><strong>Right to Deletion:</strong> Available through Privacy Settings</li>
-        <li><strong>Right to Portability:</strong> Available through Privacy Settings</li>
-    </ul>
-    
-    <h3>CCPA Compliance (California)</h3>
-    <ul>
-        <li><strong>Personal Information:</strong> We collect no personal information as defined by CCPA</li>
-        <li><strong>Sale of Data:</strong> We do not sell any data</li>
-        <li><strong>Right to Know:</strong> Fully disclosed in this policy</li>
-        <li><strong>Right to Delete:</strong> Available through Privacy Settings</li>
-    </ul>
-    
-    <h2>Data Retention</h2>
-    <ul>
-        <li><strong>Scan Counts:</strong> Automatically deleted after 24 hours</li>
-        <li><strong>User ID:</strong> Retained until app deletion</li>
-        <li><strong>App Preferences:</strong> Retained until app deletion</li>
-        <li><strong>OCR Text:</strong> Immediately deleted after processing</li>
-        <li><strong>Search Queries:</strong> Immediately deleted after processing</li>
-    </ul>
-    
-    <h2>Changes to This Policy</h2>
-    <p>We will notify users of any material changes to this privacy policy through:</p>
-    <ul>
-        <li>App Store update notes</li>
-        <li>In-app notification</li>
-        <li>Updated policy date</li>
-    </ul>
-    
-    <div class="contact">
-        <h2>Contact Information</h2>
-        <p>For privacy questions or concerns:</p>
+
+        <p>
+            <strong>Local Storage:</strong> Some data (such as scan history and saved items) is stored locally on your device and can be deleted by uninstalling the app or clearing app data.
+        </p>
+
+        <h2>4. Third-Party Services</h2>
+
+        <p>We use the following third-party services to operate our app:</p>
+
+        <h3>4.1 Authentication</h3>
         <ul>
-            <li><strong>Email:</strong> privacy@blackscan.app</li>
-            <li><strong>Subject Line:</strong> "Privacy Policy Question"</li>
-            <li><strong>Response Time:</strong> Within 7 business days</li>
+            <li><strong>Sign in with Apple:</strong> For secure user authentication. Apple's Privacy Policy applies.</li>
         </ul>
+
+        <h3>4.2 Data Storage and Search</h3>
+        <ul>
+            <li><strong>Typesense:</strong> For fast product search functionality</li>
+            <li><strong>Supabase:</strong> For secure data storage and backend services</li>
+        </ul>
+
+        <h3>4.3 Analytics</h3>
+        <ul>
+            <li><strong>Analytics Services:</strong> We may use analytics services to understand app usage and improve performance. These services collect anonymous usage data.</li>
+        </ul>
+
+        <p>
+            These third-party services have their own privacy policies governing the use of your information. We recommend reviewing their policies.
+        </p>
+
+        <h2>5. Camera and Photo Library Access</h2>
+
+        <p>
+            BlackScan requires camera access to scan products. We use a combination of on-device and cloud-based processing to identify products:
+        </p>
+
+        <h3>5.1 On-Device Processing</h3>
+        <ul>
+            <li>Initial text recognition (OCR) is performed locally on your device</li>
+            <li>When on-device analysis produces high-quality results, no images leave your device</li>
+        </ul>
+
+        <h3>5.2 Cloud-Based Analysis</h3>
+        <ul>
+            <li>When on-device OCR quality is insufficient, product images may be sent to OpenAI's API for advanced analysis using their GPT-4 Vision technology</li>
+            <li>Images are transmitted securely over HTTPS and are processed by OpenAI in accordance with their <a href="https://openai.com/policies/api-data-usage-policies">API data usage policy</a></li>
+            <li>OpenAI does not use API inputs to train their models</li>
+            <li>Images are not stored permanently by BlackScan or OpenAI after processing</li>
+        </ul>
+
+        <h3>5.3 Your Controls</h3>
+        <ul>
+            <li>You can revoke camera access at any time through your device settings, though this will limit core scanning functionality</li>
+            <li>No images are saved to your device or our servers after scanning is complete</li>
+        </ul>
+
+        <h2>6. Data Sharing and Disclosure</h2>
+
+        <p>We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:</p>
+
+        <ul>
+            <li><strong>With Your Consent:</strong> When you explicitly agree to share information</li>
+            <li><strong>Service Providers:</strong> With trusted third-party service providers who assist in operating our app (under strict confidentiality agreements)</li>
+            <li><strong>Business Transfers:</strong> If BlackScan is involved in a merger, acquisition, or sale of assets, your information may be transferred</li>
+            <li><strong>Legal Requirements:</strong> When required by law, court order, or to protect our rights and safety</li>
+            <li><strong>Aggregated Data:</strong> We may share anonymized, aggregated data that cannot identify you personally</li>
+        </ul>
+
+        <h2>7. Your Privacy Rights</h2>
+
+        <p>You have the following rights regarding your personal information:</p>
+
+        <ul>
+            <li><strong>Access:</strong> Request a copy of the personal data we hold about you</li>
+            <li><strong>Correction:</strong> Request correction of inaccurate or incomplete data</li>
+            <li><strong>Deletion:</strong> Request deletion of your personal data ("right to be forgotten")</li>
+            <li><strong>Portability:</strong> Request a copy of your data in a machine-readable format</li>
+            <li><strong>Opt-Out:</strong> Opt out of marketing communications</li>
+            <li><strong>Restrict Processing:</strong> Request limitation of how we process your data</li>
+        </ul>
+
+        <p>
+            To exercise these rights, please contact us using the information provided below.
+        </p>
+
+        <h2>8. Children's Privacy</h2>
+
+        <p>
+            BlackScan is not intended for children under the age of 13. We do not knowingly collect personal information from children under 13. If we discover that we have collected information from a child under 13, we will promptly delete it. If you believe we have collected information from a child under 13, please contact us immediately.
+        </p>
+
+        <h2>9. Data Retention</h2>
+
+        <p>
+            We retain your personal information only for as long as necessary to fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required by law. When you delete your account, we will delete or anonymize your personal information within 30 days, except where we are legally required to retain it.
+        </p>
+
+        <h2>10. International Data Transfers</h2>
+
+        <p>
+            Your information may be transferred to and processed in countries other than your country of residence. These countries may have different data protection laws. We ensure appropriate safeguards are in place to protect your information in accordance with this Privacy Policy.
+        </p>
+
+        <h2>11. California Privacy Rights (CCPA)</h2>
+
+        <p>
+            If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA):
+        </p>
+        <ul>
+            <li>Right to know what personal information is collected, used, shared, or sold</li>
+            <li>Right to delete personal information</li>
+            <li>Right to opt-out of the sale of personal information (we do not sell personal information)</li>
+            <li>Right to non-discrimination for exercising your CCPA rights</li>
+        </ul>
+
+        <h2>12. European Privacy Rights (GDPR)</h2>
+
+        <p>
+            If you are in the European Economic Area (EEA), you have rights under the General Data Protection Regulation (GDPR), including the rights mentioned in Section 7. Our legal basis for processing your data includes:
+        </p>
+        <ul>
+            <li><strong>Consent:</strong> You have given clear consent for specific processing purposes</li>
+            <li><strong>Contract:</strong> Processing is necessary to perform our services</li>
+            <li><strong>Legal Obligation:</strong> Processing is required by law</li>
+            <li><strong>Legitimate Interests:</strong> Processing is in our legitimate interests and doesn't override your rights</li>
+        </ul>
+
+        <h2>13. Changes to This Privacy Policy</h2>
+
+        <p>
+            We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. We will notify you of any material changes by:
+        </p>
+        <ul>
+            <li>Posting the updated policy in the app</li>
+            <li>Updating the "Last Updated" date at the top of this policy</li>
+            <li>Sending you a notification (for significant changes)</li>
+        </ul>
+
+        <p>
+            Your continued use of BlackScan after such changes constitutes your acceptance of the updated Privacy Policy.
+        </p>
+
+        <h2>14. Do Not Track Signals</h2>
+
+        <p>
+            Some browsers support "Do Not Track" (DNT) signals. Currently, there is no industry standard for how to respond to DNT signals. We do not currently respond to DNT signals, but we do not track users across third-party websites.
+        </p>
+
+        <div class="contact-box">
+            <h3>15. Contact Us</h3>
+            <p>
+                If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:
+            </p>
+            <p>
+                <strong>Email:</strong> <a href="mailto:privacy@blackscan.app">privacy@blackscan.app</a><br>
+                <strong>Support:</strong> <a href="mailto:support@blackscan.app">support@blackscan.app</a>
+            </p>
+            <p>
+                We will respond to your inquiry within 30 days.
+            </p>
+        </div>
+
+        <h2>16. Your Consent</h2>
+
+        <p>
+            By using BlackScan, you consent to this Privacy Policy and agree to its terms. If you do not agree with this policy, please do not use our app.
+        </p>
+
+        <p style="margin-top: 2rem; text-align: center; color: #666;">
+            Also see our <a href="terms.html">Terms of Service</a>.
+        </p>
     </div>
-    
-    <h2>Verification</h2>
-    <p>This privacy policy has been reviewed for compliance with:</p>
-    <ul>
-        <li>✅ Apple App Store Review Guidelines</li>
-        <li>✅ GDPR (General Data Protection Regulation)</li>
-        <li>✅ CCPA (California Consumer Privacy Act)</li>
-        <li>✅ COPPA (Children's Online Privacy Protection Act)</li>
-        <li>✅ Privacy by Design principles</li>
-    </ul>
-    
+
     <div class="footer">
-        <p><strong>BlackBuy</strong> - Discover Black-owned alternatives to everyday products.</p>
-        <p>Privacy Policy hosted on GitHub Pages</p>
+        <p>&copy; 2026 BlackScan. All rights reserved.</p>
+        <p>Empowering consumers to support Black-owned businesses.</p>
     </div>
 </body>
 </html>

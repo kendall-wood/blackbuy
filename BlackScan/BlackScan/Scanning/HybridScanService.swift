@@ -194,7 +194,9 @@ class HybridScanService {
         Log.debug("Using Vision API fallback", category: .scan)
         
         // Use the first/best image for Vision API
-        let bestImage = images.first!
+        guard let bestImage = images.first else {
+            throw ScanError.noImages
+        }
         let visionAnalysis = try await OpenAIVisionService.shared.analyzeProduct(image: bestImage)
         
         let processingTime = Date().timeIntervalSince(startTime)

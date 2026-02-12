@@ -75,10 +75,10 @@ BlackScan now requires **4 environment variables**:
 
 | Variable | Purpose | Example |
 |----------|---------|---------|
-| `TYPESENSE_HOST` | Typesense search server | `https://xyz.a1.typesense.net` |
-| `TYPESENSE_API_KEY` | Typesense search key | `sBkAZ5pPrAhIizy...` |
-| `BACKEND_URL` | Supabase backend | `https://xyz.supabase.co/` |
-| `OPENAI_API_KEY` | OpenAI GPT-4 Vision | `sk-proj-Llo2G6M1...` |
+| `TYPESENSE_HOST` | Typesense search server | `https://your-cluster.a1.typesense.net` |
+| `TYPESENSE_API_KEY` | Typesense search key | `your-search-only-key` |
+| `BACKEND_URL` | Supabase backend | `https://your-project.supabase.co/` |
+| `OPENAI_API_KEY` | OpenAI GPT-4 Vision | `sk-proj-your-key-here` |
 
 All must be set in **Xcode → Product → Scheme → Edit Scheme → Run → Arguments → Environment Variables**.
 

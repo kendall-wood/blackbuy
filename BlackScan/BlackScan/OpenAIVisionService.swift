@@ -107,13 +107,30 @@ class OpenAIVisionService {
     // MARK: - Private Helpers
     
     private func buildVisionRequest(base64Image: String) throws -> URLRequest {
-        guard let url = URL(string: Env.openAIVisionEndpoint) else {
+        // Route through backend proxy to keep OpenAI key server-side
+        let endpoint = Env.scanProxyEnabled
+            ? "\(Env.scanProxyURL)/analyze-image"
+            : Env.openAIVisionEndpoint
+        
+        guard let url = URL(string: endpoint) else {
             throw VisionError.invalidURL
         }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(Env.openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        
+        if Env.scanProxyEnabled {
+            // Authenticate with backend using Supabase anon key
+            request.setValue(Env.supabaseAnonKey, forHTTPHeaderField: "apikey")
+            request.setValue("Bearer \(Env.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        } else {
+            // Direct OpenAI access — only for development
+            #if !DEBUG
+            Log.error("Direct OpenAI access used in release build — deploy scan-proxy edge function", category: .scan)
+            #endif
+            request.setValue("Bearer \(Env.openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        }
+        
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 30.0
         

@@ -296,6 +296,21 @@ struct ProfileView: View {
                         }
                     }
                 )
+                
+                Divider()
+                    .padding(.leading, 56)
+                
+                settingsRow(
+                    icon: "doc.text.fill",
+                    iconColor: DS.brandBlue,
+                    title: "Terms of Service",
+                    showChevron: true,
+                    action: {
+                        if let url = URL(string: "https://kendall-wood.github.io/blackbuy-privacy/terms.html") {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                )
             }
             .background(
                 RoundedRectangle(cornerRadius: DS.radiusLarge)

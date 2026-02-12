@@ -7,10 +7,17 @@ import requests
 
 def test_lip_balm_search():
     """Test search for lip balm products"""
+    import os
     
-    # Test search for lip balm products
-    url = 'https://yid2rj63a7bp4c0vp-1.a1.typesense.net/collections/products/documents/search'
-    headers = {'X-TYPESENSE-API-KEY': 'BKdPd9GmwboK3SGchkcvlcuNZTPhxdiZ'}
+    # Read credentials from environment variables — never hardcode keys
+    typesense_host = os.getenv('TYPESENSE_HOST', 'https://your-cluster.a1.typesense.net')
+    typesense_key = os.getenv('TYPESENSE_API_KEY', '')
+    if not typesense_key:
+        print("Error: Set TYPESENSE_API_KEY environment variable")
+        return
+    
+    url = f'https://{typesense_host}/collections/products/documents/search'
+    headers = {'X-TYPESENSE-API-KEY': typesense_key}
     params = {
         'q': 'Lip Balm',
         'query_by': 'name,company,product_type,tags',
