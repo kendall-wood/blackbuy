@@ -92,10 +92,6 @@ struct CameraScanView: View {
                             )
                         }
                         
-                        Text("Shake to report issue")
-                            .font(.system(size: 13, weight: .regular))
-                            .foregroundColor(.white.opacity(0.7))
-                        
                         Button(action: { isShowingResults = true }) {
                             HStack(spacing: 16) {
                                 Image(systemName: "list.bullet")

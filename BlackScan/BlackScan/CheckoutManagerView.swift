@@ -9,11 +9,18 @@ struct CheckoutManagerView: View {
     
     @State private var showingMenu = false
     @State private var selectedDetailProduct: Product? = nil
+    @State private var showReportSheet = false
     
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            AppHeader(centerContent: .logo, onBack: onBack)
+            AppHeader(
+                centerContent: .logo,
+                onBack: onBack,
+                trailingContent: AnyView(
+                    ReportMenuButton { showReportSheet = true }
+                )
+            )
             
             // Checkout Manager Title
             Text("Checkout Manager")
@@ -67,6 +74,9 @@ struct CheckoutManagerView: View {
         .fullScreenCover(item: $selectedDetailProduct) { product in
             ProductDetailView(product: product)
                 .environmentObject(TypesenseClient())
+        }
+        .sheet(isPresented: $showReportSheet) {
+            ReportIssueView(currentTab: .checkout)
         }
     }
     
@@ -425,6 +435,7 @@ struct RecentScansView: View {
     
     @EnvironmentObject var scanHistoryManager: ScanHistoryManager
     @Environment(\.dismiss) var dismiss
+    @State private var showReportSheet = false
     
     private let dateFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -441,7 +452,13 @@ struct RecentScansView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header with logo
-            AppHeader(centerContent: .logo, onBack: { dismiss() })
+            AppHeader(
+                centerContent: .logo,
+                onBack: { dismiss() },
+                trailingContent: AnyView(
+                    ReportMenuButton { showReportSheet = true }
+                )
+            )
             
             // Page title
             Text("Recent Scans")
@@ -497,6 +514,9 @@ struct RecentScansView: View {
             }
         }
         .background(DS.cardBackground)
+        .sheet(isPresented: $showReportSheet) {
+            ReportIssueView(currentTab: .scan)
+        }
     }
 }
 

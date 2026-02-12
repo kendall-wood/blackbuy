@@ -16,6 +16,7 @@ struct AllFeaturedProductsView: View {
     @State private var currentPage = 0
     @State private var selectedProduct: Product?
     @State private var sortOrder: SortOrder = .random
+    @State private var showReportSheet = false
     
     @Environment(\.dismiss) var dismiss
     
@@ -96,13 +97,22 @@ struct AllFeaturedProductsView: View {
             ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
         }
+        .sheet(isPresented: $showReportSheet) {
+            ReportIssueView(currentTab: .shop)
+        }
     }
     
     // MARK: - Header
     
     private var header: some View {
         VStack(alignment: .leading, spacing: 0) {
-            AppHeader(centerContent: .logo, onBack: { dismiss() })
+            AppHeader(
+                centerContent: .logo,
+                onBack: { dismiss() },
+                trailingContent: AnyView(
+                    ReportMenuButton { showReportSheet = true }
+                )
+            )
             
             Text("Featured Products")
                 .font(DS.pageTitle)

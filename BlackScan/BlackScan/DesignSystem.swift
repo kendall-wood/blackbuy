@@ -163,6 +163,9 @@ extension Notification.Name {
     /// Posted when a view wants to navigate to the Shop and select a category row.
     /// The `object` should be a `String` containing the category name (e.g., "Hair Care").
     static let navigateToCategory = Notification.Name("navigateToCategory")
+    
+    /// Posted when the user shakes the device to report an issue.
+    static let shakeToReport = Notification.Name("shakeToReport")
 }
 
 // MARK: - App Tab Enum
@@ -191,6 +194,58 @@ struct AppBackButton: View {
                     .dsCircleShadow()
                 
                 Image(systemName: "chevron.left")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(DS.brandBlue)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Shake Detection
+
+/// A hidden view that detects device shakes and posts `.shakeToReport` notification.
+/// Place as a `.background()` on the root view (MainTabView).
+struct ShakeDetector: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> ShakeDetectorViewController {
+        ShakeDetectorViewController()
+    }
+    
+    func updateUIViewController(_ uiViewController: ShakeDetectorViewController, context: Context) {}
+}
+
+class ShakeDetectorViewController: UIViewController {
+    override var canBecomeFirstResponder: Bool { true }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        becomeFirstResponder()
+    }
+    
+    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
+        super.motionEnded(motion, with: event)
+        if motion == .motionShake {
+            NotificationCenter.default.post(name: .shakeToReport, object: nil)
+        }
+    }
+}
+
+// MARK: - Report Menu Button
+
+/// Reusable three-dot menu button for the header trailing slot.
+/// Opens a menu with "Report Issue" option. Matches AppBackButton style (44pt white circle).
+struct ReportMenuButton: View {
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(DS.cardBackground)
+                    .frame(width: 44, height: 44)
+                    .dsCircleShadow()
+                
+                Image(systemName: "ellipsis")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(DS.brandBlue)
             }

@@ -68,6 +68,7 @@ struct ProductDetailView: View {
     @State private var isLoadingSimilar = false
     @State private var selectedSimilarProduct: Product?
     @State private var showingCompany = false
+    @State private var showReportSheet = false
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -216,7 +217,13 @@ struct ProductDetailView: View {
             
             // Fixed Header (pinned at top, background extends into safe area)
             VStack(spacing: 0) {
-                AppHeader(centerContent: .logo, onBack: { dismiss() })
+                AppHeader(
+                    centerContent: .logo,
+                    onBack: { dismiss() },
+                    trailingContent: AnyView(
+                        ReportMenuButton { showReportSheet = true }
+                    )
+                )
                     .background(DS.cardBackground.ignoresSafeArea(edges: .top))
                 Spacer()
             }
@@ -269,6 +276,9 @@ struct ProductDetailView: View {
                 .environmentObject(savedProductsManager)
                 .environmentObject(savedCompaniesManager)
                 .environmentObject(cartManager)
+        }
+        .sheet(isPresented: $showReportSheet) {
+            ReportIssueView(currentTab: .shop, product: product)
         }
     }
     

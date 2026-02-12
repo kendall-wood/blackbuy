@@ -5,6 +5,7 @@ struct MainTabView: View {
     @State private var selectedTab: AppTab = .scan
     @State private var tabHistory: [AppTab] = [.scan]
     @State private var pendingShopSearch: String? = nil
+    @State private var showReportSheet = false
     @EnvironmentObject var savedProductsManager: SavedProductsManager
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
     @EnvironmentObject var cartManager: CartManager
@@ -37,7 +38,17 @@ struct MainTabView: View {
                 CheckoutManagerView(selectedTab: $selectedTab, onBack: goBack)
             }
         }
+        .background(ShakeDetector())
         .ignoresSafeArea(.all, edges: .bottom)
+        .onReceive(NotificationCenter.default.publisher(for: .shakeToReport)) { _ in
+            // Only show if not already showing
+            if !showReportSheet {
+                showReportSheet = true
+            }
+        }
+        .sheet(isPresented: $showReportSheet) {
+            ReportIssueView(currentTab: selectedTab)
+        }
         .onAppear {
             ToastWindowManager.shared.setup(toastManager: toastManager, networkMonitor: networkMonitor) { tab in
                 selectedTab = tab

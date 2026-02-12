@@ -15,11 +15,18 @@ struct ProfileView: View {
     @State private var showDeleteConfirmation = false
     @State private var showExportSheet = false
     @State private var exportData: String = ""
+    @State private var showReportSheet = false
     
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            AppHeader(centerContent: .logo, onBack: onBack)
+            AppHeader(
+                centerContent: .logo,
+                onBack: onBack,
+                trailingContent: AnyView(
+                    ReportMenuButton { showReportSheet = true }
+                )
+            )
             
             // Content
             ScrollView(.vertical, showsIndicators: false) {
@@ -46,6 +53,9 @@ struct ProfileView: View {
             }
         }
         .background(DS.cardBackground)
+        .sheet(isPresented: $showReportSheet) {
+            ReportIssueView(currentTab: .profile)
+        }
         .alert("Delete All Data", isPresented: $showDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Delete Everything", role: .destructive) {

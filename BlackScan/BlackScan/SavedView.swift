@@ -13,6 +13,7 @@ struct SavedView: View {
     
     @State private var selectedProduct: Product?
     @State private var sortOrder: SortOrder = .recentlySaved
+    @State private var showReportSheet = false
     
     enum SortOrder {
         case recentlySaved
@@ -24,7 +25,13 @@ struct SavedView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            AppHeader(centerContent: .logo, onBack: onBack)
+            AppHeader(
+                centerContent: .logo,
+                onBack: onBack,
+                trailingContent: AnyView(
+                    ReportMenuButton { showReportSheet = true }
+                )
+            )
             
             // Content
             ScrollView(.vertical, showsIndicators: false) {
@@ -46,6 +53,9 @@ struct SavedView: View {
         .sheet(item: $selectedProduct) { product in
             ProductDetailView(product: product)
                 .environmentObject(typesenseClient)
+        }
+        .sheet(isPresented: $showReportSheet) {
+            ReportIssueView(currentTab: .saved)
         }
     }
     
