@@ -107,12 +107,14 @@ class TypesenseClient: ObservableObject {
     func searchProducts(
         query: String,
         page: Int = 1,
-        perPage: Int = Env.defaultResultsPerPage
+        perPage: Int = Env.defaultResultsPerPage,
+        sortBy: String? = nil
     ) async throws -> [Product] {
         let parameters = SearchParameters(
             query: query,
             page: page,
-            perPage: perPage
+            perPage: perPage,
+            sortBy: sortBy
         )
         
         let response = try await search(parameters: parameters)

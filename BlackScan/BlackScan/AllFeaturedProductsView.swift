@@ -153,14 +153,39 @@ struct AllFeaturedProductsView: View {
         
         Task {
             do {
-                let products = try await typesenseClient.searchProducts(
-                    query: "*",
-                    page: 1,
-                    perPage: 200
-                )
+                let perPage = Env.maxResultsPerPage // 50
+                
+                // Get total product count to sample from the full catalog
+                let countResponse = try await typesenseClient.search(parameters: SearchParameters(
+                    query: "*", page: 1, perPage: 1
+                ))
+                let totalPages = max(1, countResponse.found / perPage)
+                
+                // Pick 4 random pages from the full range, alternating price sort direction
+                let p1 = Int.random(in: 1...totalPages)
+                let p2 = Int.random(in: 1...totalPages)
+                let p3 = Int.random(in: 1...totalPages)
+                let p4 = Int.random(in: 1...totalPages)
+                
+                // Fetch concurrently — alternate price:asc/desc (the only sortable field)
+                async let f1 = typesenseClient.searchProducts(query: "*", page: p1, perPage: perPage, sortBy: "price:asc")
+                async let f2 = typesenseClient.searchProducts(query: "*", page: p2, perPage: perPage, sortBy: "price:desc")
+                async let f3 = typesenseClient.searchProducts(query: "*", page: p3, perPage: perPage, sortBy: "price:asc")
+                async let f4 = typesenseClient.searchProducts(query: "*", page: p4, perPage: perPage, sortBy: "price:desc")
+                
+                let (r1, r2, r3, r4) = try await (f1, f2, f3, f4)
+                
+                // Deduplicate
+                var seen = Set<String>()
+                var uniqueProducts: [Product] = []
+                for product in (r1 + r2 + r3 + r4).shuffled() {
+                    if seen.insert(product.id).inserted {
+                        uniqueProducts.append(product)
+                    }
+                }
                 
                 await MainActor.run {
-                    let filtered = products.filter { !excludedProductIds.contains($0.id) }
+                    let filtered = uniqueProducts.filter { !excludedProductIds.contains($0.id) }
                     
                     var companyGroups: [String: [Product]] = [:]
                     for product in filtered {

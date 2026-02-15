@@ -47,42 +47,58 @@ class ProductCacheManager: ObservableObject {
         loadError = nil
         
         do {
-            // Fetch from 3 random non-overlapping pages for a diverse product pool
             let perPage = Env.maxResultsPerPage
-            var pages: Set<Int> = []
-            while pages.count < 3 {
-                pages.insert(Int.random(in: 1...15))
-            }
-            let pageList = Array(pages)
             
+            // Step 1: Lightweight query to discover total product count
+            let countResponse = try await typesenseClient.search(parameters: SearchParameters(
+                query: "*", page: 1, perPage: 1
+            ))
+            let totalProducts = max(countResponse.found, 1)
+            let totalPages = max(1, totalProducts / perPage)
+            
+            // Step 2: Alternate between price:asc and price:desc — the only sortable field
+            // in the Typesense schema. Different sort directions surface completely different
+            // products on the same page number, and random pages across the full range
+            // ensure broad catalog coverage.
+            let p1 = Int.random(in: 1...totalPages)
+            let p2 = Int.random(in: 1...totalPages)
+            let p3 = Int.random(in: 1...totalPages)
+            let p4 = Int.random(in: 1...totalPages)
+            let p5 = Int.random(in: 1...totalPages)
+            
+            // Step 3: Fetch all 5 concurrently, alternating sort direction
             async let fetch1 = NetworkSecurity.withRetry(maxAttempts: 2) {
                 try await self.typesenseClient.searchProducts(
-                    query: "*",
-                    page: pageList[0],
-                    perPage: perPage
+                    query: "*", page: p1, perPage: perPage, sortBy: "price:asc"
                 )
             }
             async let fetch2 = NetworkSecurity.withRetry(maxAttempts: 2) {
                 try await self.typesenseClient.searchProducts(
-                    query: "*",
-                    page: pageList[1],
-                    perPage: perPage
+                    query: "*", page: p2, perPage: perPage, sortBy: "price:desc"
                 )
             }
             async let fetch3 = NetworkSecurity.withRetry(maxAttempts: 2) {
                 try await self.typesenseClient.searchProducts(
-                    query: "*",
-                    page: pageList[2],
-                    perPage: perPage
+                    query: "*", page: p3, perPage: perPage, sortBy: "price:asc"
+                )
+            }
+            async let fetch4 = NetworkSecurity.withRetry(maxAttempts: 2) {
+                try await self.typesenseClient.searchProducts(
+                    query: "*", page: p4, perPage: perPage, sortBy: "price:desc"
+                )
+            }
+            async let fetch5 = NetworkSecurity.withRetry(maxAttempts: 2) {
+                try await self.typesenseClient.searchProducts(
+                    query: "*", page: p5, perPage: perPage, sortBy: "price:asc"
                 )
             }
             
-            let (page1, page2, page3) = try await (fetch1, fetch2, fetch3)
+            let (r1, r2, r3, r4, r5) = try await (fetch1, fetch2, fetch3, fetch4, fetch5)
             
-            // Combine, shuffle, and deduplicate
+            // Step 5: Combine, shuffle, and deduplicate
             var seen = Set<String>()
             var allProducts: [Product] = []
-            for product in (page1 + page2 + page3).shuffled() {
+            for product in (r1 + r2 + r3 + r4 + r5).shuffled() {
                 if seen.insert(product.id).inserted {
                     allProducts.append(product)
                 }
@@ -121,7 +137,7 @@ class ProductCacheManager: ObservableObject {
             isLoading = false
             lastLoadTime = Date()
             
-            Log.debug("ProductCacheManager: Loaded \(carouselProducts.count) carousel + \(gridProducts.count) grid from pages \(pageList)", category: .network)
+            Log.debug("ProductCacheManager: Loaded \(carouselProducts.count) carousel + \(gridProducts.count) grid from \(allProducts.count) unique products (pages [\(p1),\(p2),\(p3),\(p4),\(p5)] of \(totalPages))", category: .network)
         } catch {
             isLoading = false
             loadError = "Unable to load products. Please try again."
