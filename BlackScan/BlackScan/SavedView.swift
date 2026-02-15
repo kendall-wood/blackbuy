@@ -12,6 +12,7 @@ struct SavedView: View {
     @EnvironmentObject var toastManager: ToastManager
     
     @State private var selectedProduct: Product?
+    @State private var selectedCompanyName: String?
     @State private var sortOrder: SortOrder = .recentlySaved
     @State private var showReportSheet = false
     
@@ -57,6 +58,18 @@ struct SavedView: View {
         .sheet(isPresented: $showReportSheet) {
             ReportIssueView(currentTab: .saved)
         }
+        .fullScreenCover(isPresented: Binding(
+            get: { selectedCompanyName != nil },
+            set: { if !$0 { selectedCompanyName = nil } }
+        )) {
+            if let companyName = selectedCompanyName {
+                CompanyView(companyName: companyName)
+                    .environmentObject(savedProductsManager)
+                    .environmentObject(savedCompaniesManager)
+                    .environmentObject(cartManager)
+                    .environmentObject(toastManager)
+            }
+        }
     }
     
     // MARK: - Saved Companies Section
@@ -83,6 +96,9 @@ struct SavedView: View {
                         CompanyCircleCard(
                             company: company,
                             typesenseClient: typesenseClient,
+                            onTap: {
+                                selectedCompanyName = company.name
+                            },
                             onUnsave: {
                                 savedCompaniesManager.removeSavedCompany(company.name)
                             }
@@ -210,6 +226,7 @@ struct SavedView: View {
 struct CompanyCircleCard: View {
     let company: SavedCompaniesManager.SavedCompany
     let typesenseClient: TypesenseClient
+    var onTap: () -> Void = {}
     let onUnsave: () -> Void
     
     @EnvironmentObject var savedCompaniesManager: SavedCompaniesManager
@@ -218,15 +235,24 @@ struct CompanyCircleCard: View {
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            VStack(spacing: 4) {
-                // Company Logo Circle
-                Group {
-                    if let imageUrl = productImage, let url = URL(string: imageUrl) {
-                        CachedAsyncImage(url: url) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } placeholder: {
+            Button(action: onTap) {
+                VStack(spacing: 4) {
+                    // Company Logo Circle
+                    Group {
+                        if let imageUrl = productImage, let url = URL(string: imageUrl) {
+                            CachedAsyncImage(url: url) { image in
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } placeholder: {
+                                ZStack {
+                                    Circle()
+                                        .fill(DS.circleFallbackBg)
+                                    ProgressView()
+                                        .tint(DS.brandBlue)
+                                }
+                            }
+                        } else {
                             ZStack {
                                 Circle()
                                     .fill(DS.circleFallbackBg)
@@ -234,42 +260,36 @@ struct CompanyCircleCard: View {
                                     .tint(DS.brandBlue)
                             }
                         }
-                    } else {
-                        ZStack {
-                            Circle()
-                                .fill(DS.circleFallbackBg)
-                            ProgressView()
-                                .tint(DS.brandBlue)
-                        }
                     }
+                    .frame(width: 72, height: 72)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(DS.brandBlue.opacity(0.2), lineWidth: 1.5)
+                    )
+                    .padding(.top, 10)
+                    
+                    // Company Name
+                    Text(company.name)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .frame(height: 34, alignment: .top)
+                        .padding(.horizontal, 8)
+                    
+                    // Category
+                    Text(mainCategory.isEmpty ? "Brand" : mainCategory)
+                        .font(.system(size: 11, weight: .regular))
+                        .foregroundColor(Color(.systemGray))
+                        .padding(.bottom, 10)
                 }
-                .frame(width: 72, height: 72)
-                .clipShape(Circle())
-                .overlay(
-                    Circle()
-                        .stroke(DS.brandBlue.opacity(0.2), lineWidth: 1.5)
-                )
-                .padding(.top, 10)
-                
-                // Company Name
-                Text(company.name)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .frame(height: 34, alignment: .top)
-                    .padding(.horizontal, 8)
-                
-                // Category
-                Text(mainCategory.isEmpty ? "Brand" : mainCategory)
-                    .font(.system(size: 11, weight: .regular))
-                    .foregroundColor(Color(.systemGray))
-                    .padding(.bottom, 10)
+                .frame(maxWidth: .infinity, minHeight: 140)
+                .background(DS.cardBackground)
+                .cornerRadius(DS.radiusMedium)
+                .dsCardShadow()
             }
-            .frame(maxWidth: .infinity, minHeight: 140)
-            .background(DS.cardBackground)
-            .cornerRadius(DS.radiusMedium)
-            .dsCardShadow()
+            .buttonStyle(.plain)
             
             // Heart Button
             Button(action: onUnsave) {
