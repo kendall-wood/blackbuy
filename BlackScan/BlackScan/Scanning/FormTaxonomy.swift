@@ -121,10 +121,8 @@ class FormTaxonomy {
                 }
             }
             
-            if bestMatch == nil || score > bestMatch!.score {
-                if score > 0 {
-                    bestMatch = (form, score)
-                }
+            if score > 0, score > (bestMatch?.score ?? 0) {
+                bestMatch = (form, score)
             }
         }
         

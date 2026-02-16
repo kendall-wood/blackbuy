@@ -158,7 +158,10 @@ class UserAuthService: ObservableObject {
     // MARK: - Keychain Management
     
     private func saveUserIDToKeychain(_ userID: String) {
-        let data = userID.data(using: .utf8)!
+        guard let data = userID.data(using: .utf8) else {
+            Log.error("Failed to encode user ID to data")
+            return
+        }
         
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,

@@ -163,10 +163,8 @@ class ProductTaxonomy {
             }
             
             // Update best match
-            if bestMatch == nil || score > bestMatch!.score {
-                if score > 0 {
-                    bestMatch = (type, score)
-                }
+            if score > 0, score > (bestMatch?.score ?? 0) {
+                bestMatch = (type, score)
             }
         }
         

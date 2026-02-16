@@ -170,10 +170,10 @@ extension UnifiedProductCard {
         product: Product.sampleShampoo,
         isSaved: false,
         isInCart: false,
-        onCardTapped: { print("Card tapped") },
-        onSaveTapped: { print("Save tapped") },
-        onAddToCart: { print("Add to cart") },
-        onCompanyTapped: { print("Company tapped") }
+        onCardTapped: { },
+        onSaveTapped: { },
+        onAddToCart: { },
+        onCompanyTapped: { }
     )
     .frame(width: 180)
     .padding()
@@ -185,9 +185,9 @@ extension UnifiedProductCard {
         isSaved: true,
         isInCart: false,
         numberBadge: 1,
-        onCardTapped: { print("Card tapped") },
-        onSaveTapped: { print("Save tapped") },
-        onAddToCart: { print("Add to cart") }
+        onCardTapped: { },
+        onSaveTapped: { },
+        onAddToCart: { }
     )
     .frame(width: 180)
     .padding()
@@ -199,9 +199,9 @@ extension UnifiedProductCard {
             ForEach(Product.sampleProducts) { product in
                 UnifiedProductCard(
                     product: product,
-                    onCardTapped: { print("Tapped \(product.name)") },
-                    onSaveTapped: { print("Save \(product.name)") },
-                    onAddToCart: { print("Cart \(product.name)") }
+                    onCardTapped: { },
+                    onSaveTapped: { },
+                    onAddToCart: { }
                 )
             }
         }
